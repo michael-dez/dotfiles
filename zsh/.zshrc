@@ -1,8 +1,33 @@
+#            _____                    _____                    _____                    _____                    _____          
+#           /\    \                  /\    \                  /\    \                  /\    \                  /\    \         
+#          /::\    \                /::\    \                /::\____\                /::\    \                /::\    \        
+#          \:::\    \              /::::\    \              /:::/    /               /::::\    \              /::::\    \       
+#           \:::\    \            /::::::\    \            /:::/    /               /::::::\    \            /::::::\    \      
+#            \:::\    \          /:::/\:::\    \          /:::/    /               /:::/\:::\    \          /:::/\:::\    \     
+#             \:::\    \        /:::/__\:::\    \        /:::/____/               /:::/__\:::\    \        /:::/  \:::\    \    
+#              \:::\    \       \:::\   \:::\    \      /::::\    \              /::::\   \:::\    \      /:::/    \:::\    \   
+#               \:::\    \    ___\:::\   \:::\    \    /::::::\    \   _____    /::::::\   \:::\    \    /:::/    / \:::\    \  
+#                \:::\    \  /\   \:::\   \:::\    \  /:::/\:::\    \ /\    \  /:::/\:::\   \:::\____\  /:::/    /   \:::\    \ 
+#  _______________\:::\____\/::\   \:::\   \:::\____\/:::/  \:::\    /::\____\/:::/  \:::\   \:::|    |/:::/____/     \:::\____\
+#  \::::::::::::::::::/    /\:::\   \:::\   \::/    /\::/    \:::\  /:::/    /\::/   |::::\  /:::|____|\:::\    \      \::/    /
+#   \::::::::::::::::/____/  \:::\   \:::\   \/____/  \/____/ \:::\/:::/    /  \/____|:::::\/:::/    /  \:::\    \      \/____/ 
+#    \:::\~~~~\~~~~~~         \:::\   \:::\    \               \::::::/    /         |:::::::::/    /    \:::\    \             
+#     \:::\    \               \:::\   \:::\____\               \::::/    /          |::|\::::/    /      \:::\    \            
+#      \:::\    \               \:::\  /:::/    /               /:::/    /           |::| \::/____/        \:::\    \           
+#       \:::\    \               \:::\/:::/    /               /:::/    /            |::|  ~|               \:::\    \          
+#        \:::\    \               \::::::/    /               /:::/    /             |::|   |                \:::\    \         
+#         \:::\____\               \::::/    /               /:::/    /              \::|   |                 \:::\____\        
+#          \::/    /                \::/    /                \::/    /                \:|   |                  \::/    /        
+#           \/____/                  \/____/                  \/____/                  \|___|                   \/____/         
+#                                                                                                                               
+# Me: Mike Mendez
+#
+#
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="/home/mike/.oh-my-zsh"
+export ZSH="/home/$USER/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -70,8 +95,7 @@ ZSH_THEME="robbyrussell"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
-
+plugins=(vi-mode git aws fzf)
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -96,6 +120,15 @@ source $ZSH/oh-my-zsh.sh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
 #
+alias p3="python3"
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+PATH="$HOME/.local/bin:$PATH"
+# temp env vars
+export AWS_REGION=us-east-1
+export AWS_CONNECT_INSTANCEID=arn:aws:connect:us-east-1:828393986024:instance/794790f5-0ae2-4348-806a-f58bf245ab3f
+export AWS_CONNECT_TABLE=AgentData
+export AWS_EXPORT_BUCKET=agent-directory
+# Install Ruby Gems to ~/gems
+export GEM_HOME="$HOME/gems"

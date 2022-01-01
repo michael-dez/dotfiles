@@ -31,15 +31,17 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
-" Plugs
+" set vimspector mappings to F5 (start/continue) F3 (stop) F4 (restart) F6
+" (pause) F9 (breakpoint) F10 (step over) F11 (step into) F12 (step out)
 
+let g:vimspector_enable_mappings = 'HUMAN'
+
+" Plugs
 call plug#begin('~/.vim/plugged')
 
 " Initialize plugin system
 
   Plug 'preservim/nerdtree'
-
-  Plug 'jremmen/vim-ripgrep'
 
   Plug 'tpope/vim-fugitive'
 
@@ -50,6 +52,10 @@ call plug#begin('~/.vim/plugged')
   Plug 'git@github.com:kien/ctrlp.vim.git'
 
   Plug 'git@github.com:Valloric/YouCompleteMe.git'
+
+  Plug 'vim-airline/vim-airline'
+
+  Plug 'puremourning/vimspector'
 
 call plug#end()
 
@@ -66,15 +72,35 @@ set shiftround
 set shiftwidth=4
 set smarttab
 set tabstop=4
-set nowrap
+set wrap
+set linebreak
+
+
+"-----------------------------------------------------------Language Specific----------------------------------------------------------------------------------
+syntax on
+filetype indent on
+filetype on
+
+" YAML
+au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml foldmethod=indent
+autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
+
+" Python
+
+" JSON
+au! BufNewFile,BufReadPost *.json set filetype=json
+autocmd FileType json autocmd BufWritePre <buffer> %!python3 -m json.tool 2>/dev/null || echo <buffer>
+
+" Markdown
+au! BufNewFile,BufReadPost *.{md,MARKDOWN} set filetype=markdown
+autocmd FileType markdown setlocal textwidth=0
 
 "-----------------------------------------------------------Misc----------------------------------------------------------------------------------
 set incsearch
 set undodir=~/.vim/undodir
 set undofile
+set noswapfile
+set background=dark
 
-"-----------------------------------------------------------Language Specific----------------------------------------------------------------------------------
-syntax on
-" YAML
-au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml foldmethod=indent
-autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
+let g:ctrlp_show_hidden = 1
+"-----------------------------------------------------------Remaps----------------------------------------------------------------------------------
