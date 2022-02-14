@@ -41,8 +41,6 @@ call plug#begin('~/.vim/plugged')
 
 " Initialize plugin system
 
-  Plug 'preservim/nerdtree'
-
   Plug 'tpope/vim-fugitive'
 
   Plug 'vim-utils/vim-man'
@@ -57,11 +55,11 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'puremourning/vimspector'
 
+  " colorschemes
+  Plug 'morhetz/gruvbox'
+
 call plug#end()
 
-
-" Start NERDTree and leave the cursor in it.
-"autocmd VimEnter * NERDTree
 
 
 "-----------------------------------------------------------Numbers and Indentation-------------------------------------------------------------
@@ -103,4 +101,18 @@ set noswapfile
 set background=dark
 
 let g:ctrlp_show_hidden = 1
+" colorscheme
+autocmd vimenter * ++nested colorscheme gruvbox
 "-----------------------------------------------------------Remaps----------------------------------------------------------------------------------
+let mapleader = " " " leader = space
+
+nnoremap <leader>u :UndotreeShow<CR> 
+nnoremap <leader>x !chmod :silent !chmod +x %<CR> "borrowed this one and leader<CR> from @ThePrimeagen
+nnoremap <leader><CR> :so ~/.vimrc<CR>
+nnoremap <leader>h :wincmd h<CR> 
+nnoremap <leader>j :wincmd j<CR> 
+nnoremap <leader>k :wincmd k<CR> 
+nnoremap <leader>l :wincmd l<CR> 
+nnoremap <leader>p :wincmd p<CR> 
+nnoremap <leader>nwk :sp<CR> 
+nnoremap <leader>nwl :vsp<CR> 

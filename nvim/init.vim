@@ -32,7 +32,7 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'mbbill/undotree'
 
-  Plug 'L3MON4D3/LuaSnip'" when I get better at lua
+  Plug 'L3MON4D3/LuaSnip' " when I get better at lua
 
   Plug 'vim-airline/vim-airline' " :h airline
 
@@ -116,10 +116,19 @@ autocmd vimenter * ++nested colorscheme gruvbox
 let mapleader = " " " leader = space
 
 nnoremap <leader>u :UndotreeShow<CR> 
-nnoremap <leader>x !chmod :silent !chmod +x %<CR> "borrowed this one and leader<CR> from the @ThePrimeagen
+nnoremap <leader>x !chmod :silent !chmod +x %<CR> "borrowed this one and leader<CR> from @ThePrimeagen
 nnoremap <leader><CR> :so ~/.config/nvim/init.vim<CR>
-nnoremap <leader>p :Telescope<CR> 
-nnoremap <leader>pf :Telescope find_files<CR> 
+nnoremap <leader>t :Telescope<CR> 
+nnoremap <leader>tf :Telescope find_files hidden=true no_ignore=true<CR> 
+nnoremap <leader>th :Telescope find_files search_dir=/home/$USER/<CR> 
+" Window navigation
+nnoremap <leader>h :wincmd h<CR> 
+nnoremap <leader>j :wincmd j<CR> 
+nnoremap <leader>k :wincmd k<CR> 
+nnoremap <leader>l :wincmd l<CR> 
+nnoremap <leader>p :wincmd p<CR> 
+nnoremap <leader>nwk :sp<CR> 
+nnoremap <leader>nwl :vsp<CR> 
 
 " lsp remaps
 nnoremap <leader>gd :lua vim.lsp.buf.definition()<CR>
