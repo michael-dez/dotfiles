@@ -1,0 +1,4 @@
+.vim
+vim/vim/plugged/*
+vim/vim/undodir/*
+zsh/oh-my-zsh
