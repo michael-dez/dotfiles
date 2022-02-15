@@ -108,7 +108,6 @@ let g:go_auto_sameids = 1
 set incsearch
 set undodir=~/.vim/undodir
 set undofile
-set noswapfile
 set background=dark
 " colorscheme
 autocmd vimenter * ++nested colorscheme gruvbox
@@ -127,8 +126,8 @@ nnoremap <leader>j :wincmd j<CR>
 nnoremap <leader>k :wincmd k<CR> 
 nnoremap <leader>l :wincmd l<CR> 
 nnoremap <leader>p :wincmd p<CR> 
-nnoremap <leader>nwk :sp<CR> 
-nnoremap <leader>nwl :vsp<CR> 
+nnoremap <leader>wk :sp<CR> 
+nnoremap <leader>wl :vsp<CR> 
 
 " lsp remaps
 nnoremap <leader>gd :lua vim.lsp.buf.definition()<CR>

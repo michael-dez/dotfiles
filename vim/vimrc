@@ -48,8 +48,8 @@ call plug#begin('~/.vim/plugged')
   Plug 'mbbill/undotree'
 
   Plug 'git@github.com:kien/ctrlp.vim.git'
-
-  Plug 'git@github.com:Valloric/YouCompleteMe.git'
+  "On for personal machines
+  "Plug 'git@github.com:Valloric/YouCompleteMe.git'
 
   Plug 'vim-airline/vim-airline'
 
@@ -114,5 +114,5 @@ nnoremap <leader>j :wincmd j<CR>
 nnoremap <leader>k :wincmd k<CR> 
 nnoremap <leader>l :wincmd l<CR> 
 nnoremap <leader>p :wincmd p<CR> 
-nnoremap <leader>nwk :sp<CR> 
-nnoremap <leader>nwl :vsp<CR> 
+nnoremap <leader>wk :sp<CR> 
+nnoremap <leader>wl :vsp<CR> 
