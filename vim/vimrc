@@ -97,14 +97,17 @@ autocmd FileType markdown setlocal textwidth=0
 set incsearch
 set undodir=~/.vim/undodir
 set undofile
-set noswapfile
-set background=dark
 
 let g:ctrlp_show_hidden = 1
 " colorscheme
+set background=light
+let g:gruvbox_contrast_light="hard"
 autocmd vimenter * ++nested colorscheme gruvbox
+" airline
+let g:airline_powerline_fonts = 1
+
 "-----------------------------------------------------------Remaps----------------------------------------------------------------------------------
-let mapleader = " " " leader = space
+let mapleader = " " " leader = "
 
 nnoremap <leader>u :UndotreeShow<CR> 
 nnoremap <leader>x !chmod :silent !chmod +x %<CR> "borrowed this one and leader<CR> from @ThePrimeagen
