@@ -40,26 +40,30 @@ let g:vimspector_enable_mappings = 'HUMAN'
 call plug#begin('~/.vim/plugged')
 
 " Initialize plugin system
-
+  "git tool haven't used too much
   Plug 'tpope/vim-fugitive'
+
+  "highlights chars for f/t movement
+  Plug 'deris/vim-shot-f' 
 
   Plug 'vim-utils/vim-man'
 
   Plug 'mbbill/undotree'
 
   Plug 'ctrlpvim/ctrlp.vim'
+
   "On for personal machines
   "Plug 'git@github.com:Valloric/YouCompleteMe.git'
 
-  Plug 'vim-airline/vim-airline'
-
+  "debug tool
   Plug 'puremourning/vimspector'
 
-  " colorschemes
+  "colorschemes and fluff
   Plug 'morhetz/gruvbox'
 
   Plug 'wojciechkepka/vim-github-dark'
 
+  Plug 'vim-airline/vim-airline'
 call plug#end()
 
 
@@ -109,7 +113,7 @@ autocmd vimenter * ++nested colorscheme ghdark
 let g:airline_powerline_fonts = 1
 
 "-----------------------------------------------------------Remaps----------------------------------------------------------------------------------
-let mapleader = " " " leader = "
+let mapleader = " " " leader = <space>"
 
 nnoremap <leader>u :UndotreeShow<CR> 
 nnoremap <leader>x !chmod :silent !chmod +x %<CR> "borrowed this one and leader<CR> from @ThePrimeagen
@@ -121,3 +125,4 @@ nnoremap <leader>l :wincmd l<CR>
 nnoremap <leader>p :wincmd p<CR> 
 nnoremap <leader>wk :sp<CR> 
 nnoremap <leader>wl :vsp<CR> 
+nnoremap <leader>t :terminal ++rows=10<CR>
