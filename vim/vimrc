@@ -47,7 +47,7 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'mbbill/undotree'
 
-  Plug 'git@github.com:kien/ctrlp.vim.git'
+  Plug 'ctrlpvim/ctrlp.vim'
   "On for personal machines
   "Plug 'git@github.com:Valloric/YouCompleteMe.git'
 
@@ -58,11 +58,13 @@ call plug#begin('~/.vim/plugged')
   " colorschemes
   Plug 'morhetz/gruvbox'
 
+  Plug 'wojciechkepka/vim-github-dark'
+
 call plug#end()
 
 
 
-"-----------------------------------------------------------Numbers and Indentation-------------------------------------------------------------
+"-----------------------------------------------------------Numbers, Indentation, Scrolling-------------------------------------------------------------
 set relativenumber
 set autoindent
 set expandtab
@@ -70,8 +72,8 @@ set shiftround
 set shiftwidth=4
 set smarttab
 set tabstop=4
-set wrap
 set linebreak
+set scrolloff=10
 
 
 "-----------------------------------------------------------Language Specific----------------------------------------------------------------------------------
@@ -91,7 +93,7 @@ autocmd FileType json autocmd BufWritePre <buffer> %!python3 -m json.tool 2>/dev
 
 " Markdown
 au! BufNewFile,BufReadPost *.{md,MARKDOWN} set filetype=markdown
-autocmd FileType markdown setlocal textwidth=0
+autocmd FileType markdown setlocal textwidth=0 wrap
 
 "-----------------------------------------------------------Misc----------------------------------------------------------------------------------
 set incsearch
@@ -100,9 +102,9 @@ set undofile
 
 let g:ctrlp_show_hidden = 1
 " colorscheme
-set background=light
-let g:gruvbox_contrast_light="hard"
-autocmd vimenter * ++nested colorscheme gruvbox
+" set background=light
+
+autocmd vimenter * ++nested colorscheme ghdark
 " airline
 let g:airline_powerline_fonts = 1
 
