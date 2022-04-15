@@ -38,8 +38,16 @@ call plug#begin('~/.vim/plugged')
   Plug 'mbbill/undotree'
 
 " Plug 'bling/vim-bufferline' " :h bufferline
-"
+
   Plug 'nvim-telescope/telescope.nvim'
+
+  " telescope dependencies
+  Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
+
+  Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+
+  Plug 'nvim-lua/plenary.nvim'
+
 
   Plug 'williamboman/nvim-lsp-installer' " install lsps with :LspInstall
 
@@ -48,11 +56,6 @@ call plug#begin('~/.vim/plugged')
   Plug 'L3MON4D3/LuaSnip' " when I get better at lua
 
   Plug 'kyazdani42/nvim-web-devicons'
-
-  " telescope dependencies
-  Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
-
-  Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 
   " colorschemes and fluff
   Plug 'morhetz/gruvbox'
@@ -121,14 +124,18 @@ autocmd vimenter * ++nested colorscheme gruvbox
  let g:airline_powerline_fonts = 1
 
 "-----------------------------------------------------------Remaps----------------------------------------------------------------------------------
-let mapleader = " " " leader = space
+let mapleader=" " " leader = space
+set timeoutlen=200 " set timeout for leader key sequence, default seemed very slow for <leader>t for some reason
 
 nnoremap <leader>u :UndotreeShow<CR> 
 nnoremap <leader>x !chmod :silent !chmod +x %<CR> "borrowed this one and leader<CR> from @ThePrimeagen
 nnoremap <leader><CR> :so ~/.config/nvim/init.vim<CR>
-nnoremap <leader>t :Telescope<CR> 
-nnoremap <leader>tf :Telescope find_files hidden=true no_ignore=true<CR> 
-nnoremap <leader>th :Telescope find_files search_dir=/home/$USER/<CR> 
+nnoremap <leader>/ :Telescope<CR> 
+nnoremap <leader>/h :Telescope find_files hidden=true no_ignore=true<CR> 
+nnoremap <leader>/f :Telescope find_files search_dir=/home/$USER/<CR> 
+nnoremap <leader>/b :Telescope buffers<CR>
+nnoremap <leader>/m :Telescope marks<CR>
+
 " Window navigation
 nnoremap <leader>h :wincmd h<CR> 
 nnoremap <leader>j :wincmd j<CR> 
@@ -137,7 +144,7 @@ nnoremap <leader>l :wincmd l<CR>
 nnoremap <leader>p :wincmd p<CR> 
 nnoremap <leader>wk :sp<CR> 
 nnoremap <leader>wl :vsp<CR> 
-nnoremap <leader>t :terminal ++rows=10<CR>
+nnoremap <leader>t :bo new <bar> :resize 10 <bar> :term<CR>
 
 " lsp remaps
 nnoremap <leader>gd :lua vim.lsp.buf.definition()<CR>
