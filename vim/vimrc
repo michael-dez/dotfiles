@@ -46,6 +46,8 @@ call plug#begin('~/.vim/plugged')
   "highlights chars for f/t movement
   Plug 'deris/vim-shot-f' 
 
+ " Plug 'jiangmao/autopairs'
+
   Plug 'vim-utils/vim-man'
 
   Plug 'mbbill/undotree'

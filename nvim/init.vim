@@ -28,32 +28,38 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'tpope/vim-fugitive'
 
+  "highlights chars for f/t movement
+  Plug 'deris/vim-shot-f' 
+
+" Plug 'jiangmao/autopairs'
+
   Plug 'vim-utils/vim-man'
 
   Plug 'mbbill/undotree'
 
-  Plug 'L3MON4D3/LuaSnip' " when I get better at lua
-
-  Plug 'vim-airline/vim-airline' " :h airline
-
-  Plug 'bling/vim-bufferline' " :h bufferline
-
-  Plug 'kyazdani42/nvim-web-devicons'
-
-  Plug 'neovim/nvim-lspconfig' 
+" Plug 'bling/vim-bufferline' " :h bufferline
+"
+  Plug 'nvim-telescope/telescope.nvim'
 
   Plug 'williamboman/nvim-lsp-installer' " install lsps with :LspInstall
 
-  Plug 'nvim-telescope/telescope.nvim'
+  Plug 'neovim/nvim-lspconfig' 
+
+  Plug 'L3MON4D3/LuaSnip' " when I get better at lua
+
+  Plug 'kyazdani42/nvim-web-devicons'
 
   " telescope dependencies
   Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
 
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 
-  " colorschemes
+  " colorschemes and fluff
   Plug 'morhetz/gruvbox'
 
+  Plug 'wojciechkepka/vim-github-dark'
+
+  Plug 'vim-airline/vim-airline' " :h airline
 call plug#end()
 
 
@@ -66,8 +72,8 @@ set shiftround
 set shiftwidth=4
 set smarttab
 set tabstop=4
-set wrap
 set linebreak
+set scrolloff=10
 
 
 "-----------------------------------------------------------Language Specific----------------------------------------------------------------------------------
@@ -111,6 +117,9 @@ set undofile
 set background=dark
 " colorscheme
 autocmd vimenter * ++nested colorscheme gruvbox
+" airline
+ let g:airline_powerline_fonts = 1
+
 "-----------------------------------------------------------Remaps----------------------------------------------------------------------------------
 let mapleader = " " " leader = space
 
@@ -128,6 +137,7 @@ nnoremap <leader>l :wincmd l<CR>
 nnoremap <leader>p :wincmd p<CR> 
 nnoremap <leader>wk :sp<CR> 
 nnoremap <leader>wl :vsp<CR> 
+nnoremap <leader>t :terminal ++rows=10<CR>
 
 " lsp remaps
 nnoremap <leader>gd :lua vim.lsp.buf.definition()<CR>
@@ -141,6 +151,6 @@ nnoremap <leader>ga :lua vim.lsp.buf.code_action()<CR>
 "-----------------------------------------------------------lua----------------------------------------------------------------------------------
 " Treesitter configuration 
 lua require'nvim-treesitter.configs'.setup { highlight = { enable = true }, incremental_selection = { enable = true }, textobjects = { enable = true }}
-" LSP config
+" LSP config go/python
 lua require'lspconfig'.pyright.setup{}
 lua require'lspconfig'.gopls.setup{}
