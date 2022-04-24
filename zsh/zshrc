@@ -102,7 +102,7 @@ ZSH_THEME="nicoulaj"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(vi-mode git aws fzf)
+plugins=(vi-mode aws fzf)
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -128,8 +128,8 @@ source $ZSH/oh-my-zsh.sh
 # For a full list of active aliases, run `alias`.
 #
 alias p3="python3"
-alias nvim="~/appimages/nvim.appimage"
 alias F="sudo !!"
+alias vi="nvim"
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"

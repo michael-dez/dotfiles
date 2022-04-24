@@ -126,7 +126,7 @@ set undodir=~/.vim/undodir
 set undofile
 set background=dark
 " colorscheme
-autocmd vimenter * ++nested colorscheme jellybeans
+autocmd vimenter * ++nested colorscheme ghdark
 " airline
  let g:airline_powerline_fonts = 1
  
@@ -152,9 +152,10 @@ set timeoutlen=200 " set timeout for leader key sequence, default seemed very sl
 
 nnoremap <leader>u :UndotreeShow<CR> 
 nnoremap <leader>x !chmod :silent !chmod +x %<CR> "borrowed this one and leader<CR> from @ThePrimeagen
+nnoremap <leader>. :edit $MYVIMRC<CR>
 nnoremap <leader><CR> :so ~/.config/nvim/init.vim<CR>
 nnoremap <leader>/ :Telescope<CR> 
-nnoremap <leader>/h :Telescope find_files hidden=true no_ignore=true<CR> 
+nnoremap <leader>/h :Telescope find_files search_dir=/home/$USER/ hidden=true no_ignore=true<CR> 
 nnoremap <leader>/f :Telescope find_files search_dir=/home/$USER/<CR> 
 nnoremap <leader>/b :Telescope buffers<CR>
 nnoremap <leader>/m :Telescope marks<CR>
