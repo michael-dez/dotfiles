@@ -113,11 +113,11 @@ source $ZSH/oh-my-zsh.sh
 # export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+ if [[ -n $SSH_CONNECTION ]]; then
+   export EDITOR='vim'
+ else
+   export EDITOR='nvim'
+ fi
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -129,9 +129,10 @@ source $ZSH/oh-my-zsh.sh
 #
 alias p3="python3"
 alias F="sudo !!"
-alias vi="nvim"
+alias vi="$EDITOR"
+alias k="kubectl"
+alias zshrc="$EDITOR ~/.zshrc"
 # Example aliases
-# alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 PATH="$HOME/.local/bin:$PATH"
 # Install Ruby Gems to ~/gems

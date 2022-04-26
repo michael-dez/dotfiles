@@ -73,7 +73,7 @@ call plug#end()
 
 
 
-"-----------------------------------------------------------Numbers and Indentation-------------------------------------------------------------
+"-----------------------------------------------------------Numbers, Lines, and Indentation-------------------------------------------------------------
 set relativenumber number
 set cursorline
 set autoindent
@@ -84,6 +84,7 @@ set smarttab
 set tabstop=4
 set linebreak
 set scrolloff=10
+set list
 
 
 "-----------------------------------------------------------Language Specific----------------------------------------------------------------------------------
@@ -121,6 +122,7 @@ let g:go_auto_sameids = 1
 
 
 "-----------------------------------------------------------Misc----------------------------------------------------------------------------------
+set clipboard=unnamedplus
 set incsearch
 set undodir=~/.vim/undodir
 set undofile
@@ -128,7 +130,7 @@ set background=dark
 " colorscheme
 autocmd vimenter * ++nested colorscheme ghdark
 " airline
- let g:airline_powerline_fonts = 1
+"let g:airline_powerline_fonts = 1
  
  " true color support
 "Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
@@ -168,7 +170,7 @@ nnoremap <leader>l :wincmd l<CR>
 nnoremap <leader>p :wincmd p<CR> 
 nnoremap <leader>wk :sp<CR> 
 nnoremap <leader>wl :vsp<CR> 
-nnoremap <leader>t :bo new <bar> :resize 10 <bar> :term<CR>
+nnoremap <leader>t :bo<bar>:resize 10<bar>:term<CR>
 
 " lsp remaps
 nnoremap <leader>gd :lua vim.lsp.buf.definition()<CR>
