@@ -156,6 +156,7 @@ nnoremap <leader>u :UndotreeShow<CR>
 nnoremap <leader>x !chmod :silent !chmod +x %<CR> "borrowed this one and leader<CR> from @ThePrimeagen
 nnoremap <leader>. :edit $MYVIMRC<CR>
 nnoremap <leader><CR> :so ~/.config/nvim/init.vim<CR>
+nnoremap <leader>xp :put =system(getline('.'))<CR>
 nnoremap <leader>/ :Telescope<CR> 
 nnoremap <leader>/h :Telescope find_files search_dir=/home/$USER/ hidden=true no_ignore=true<CR> 
 nnoremap <leader>/f :Telescope find_files search_dir=/home/$USER/<CR> 

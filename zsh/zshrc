@@ -126,14 +126,16 @@ source $ZSH/oh-my-zsh.sh
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
-#
+
+#autoload -U edit-command-line (full screen comand edit on Esc-v)
+zle -N edit-command-line 
+bindkey -M vicmd v edit-command-line
+# aliases
 alias p3="python3"
 alias F="sudo !!"
 alias vi="$EDITOR"
 alias k="kubectl"
 alias zshrc="$EDITOR ~/.zshrc"
-# Example aliases
-# alias ohmyzsh="mate ~/.oh-my-zsh"
 PATH="$HOME/.local/bin:$PATH"
 # Install Ruby Gems to ~/gems
 export GEM_HOME="$HOME/gems"
@@ -141,3 +143,5 @@ export GEM_HOME="$HOME/gems"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+alias arec="asciinema rec"
+alias a2gif="sudo docker run --rm -v $PWD:/data asciinema/asciicast2gif"
