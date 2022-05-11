@@ -144,4 +144,4 @@ export GEM_HOME="$HOME/gems"
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 alias arec="asciinema rec"
-alias a2gif="sudo docker run --rm -v $PWD:/data asciinema/asciicast2gif"
+alias a2gif='sudo docker run --rm -v "${PWD}":/data asciinema/asciicast2gif'
