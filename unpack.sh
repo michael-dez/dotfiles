@@ -17,5 +17,4 @@ fonts="/home/$USER/.local/share/fonts"
 [ ! -d "$fonts" ] && mkdir $fonts
 unzip ${BASEDIR}/fonts/MesloLGS.zip -d $fonts
 
-# make i3 directory if does not exist and adds symlink to directory
-
+# TODO: add option to restore from bak folder

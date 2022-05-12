@@ -117,8 +117,13 @@ source $ZSH/oh-my-zsh.sh
    export EDITOR='nvim'
  fi
 
-# Set keymap (xorg)
+# Set keymap for laptop on xorg, experimental
 setxkbmap -layout us  -option ctrl:nocaps
+
+# export Pacman package list
+pkgs=/home/${USER}/repos/dotfiles/bak
+mkdir -p $pkgs && pacman -Qq > ${pkgs}/$(date --iso-8601='minutes').pkgs
+
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
