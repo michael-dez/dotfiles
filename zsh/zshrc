@@ -122,7 +122,8 @@ setxkbmap -layout us  -option ctrl:nocaps
 
 # export Pacman package list
 pkgs=/home/${USER}/repos/dotfiles/bak
-mkdir -p $pkgs && pacman -Qq > ${pkgs}/$(date --iso-8601='minutes').pkgs
+pacman -Qqe | grep -Fvx "$(pacman -Qqm)" > ${pkgs}/$(date --iso-8601='minutes').pkgs
+pacman -Qqm > ${pkgs}/$(date --iso-8601='minutes').pkgs.aur
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"

@@ -154,6 +154,7 @@ set timeoutlen=200 " set timeout for leader key sequence, default seemed very sl
 
 nnoremap <leader>u :UndotreeShow<CR> 
 nnoremap <leader>x !chmod :silent !chmod +x %<CR> "borrowed this one and leader<CR> from @ThePrimeagen
+nnoremap <leader>su :command command SuWrite %!sudo tee %
 nnoremap <leader>. :edit $MYVIMRC<CR>
 nnoremap <leader><CR> :so ~/.config/nvim/init.vim<CR>
 nnoremap <leader>xp :put =system(getline('.'))<CR>
