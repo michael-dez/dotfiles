@@ -280,17 +280,17 @@
       - zsh
       - zsh-syntax-highlighting
       
-    tasks:
-      - name: "Upgrade all installed packages"
-        pacman:
-          update_cache: yes
-          upgrade: yes
+  tasks:
+    - name: "Upgrade all installed packages"
+      pacman:
+        update_cache: yes
+        upgrade: yes
 
-      - name: "Install from package list"
-        package:
-            name: "{{ pkg }}"
-            state: latest
-        when:
-            - pkg is defined
-            - pkg|length|int >=1
-            - pkg[0]|length|int >= 1    
+    - name: "Install from package list"
+      package:
+          name: "{{ pkg }}"
+          state: latest
+      when:
+          - pkg is defined
+          - pkg|length|int >=1
+          - pkg[0]|length|int >= 1    

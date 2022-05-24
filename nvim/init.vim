@@ -28,7 +28,7 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'tpope/vim-fugitive'
 
-  Plug 'tpope/surround.vim'
+  Plug 'tpope/vim-surround'
 
   "highlights chars for f/t movement
   Plug 'deris/vim-shot-f' 
@@ -126,9 +126,10 @@ set clipboard=unnamedplus
 set incsearch
 set undodir=~/.vim/undodir
 set undofile
-set background=dark
+"set background=dark
+set background=light
 " colorscheme
-autocmd vimenter * ++nested colorscheme ghdark
+autocmd vimenter * ++nested colorscheme gruvbox
 " airline
 "let g:airline_powerline_fonts = 1
  
