@@ -30,8 +30,8 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'tpope/vim-surround'
 
-  "highlights chars for f/t movement
-  Plug 'deris/vim-shot-f' 
+
+  Plug 'deris/vim-shot-f'   "highlights chars for f/t movement
 
 " Plug 'jiangmao/autopairs'
 
@@ -50,7 +50,6 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'nvim-lua/plenary.nvim'
 
-
   Plug 'williamboman/nvim-lsp-installer' " install lsps with :LspInstall
 
   Plug 'neovim/nvim-lspconfig' 
@@ -63,6 +62,8 @@ call plug#begin('~/.vim/plugged')
   Plug 'morhetz/gruvbox'
 
   Plug 'wojciechkepka/vim-github-dark'
+
+  Plug 'bluz71/vim-nightfly-guicolors'
 
   Plug 'nanotech/jellybeans.vim'
 
@@ -129,7 +130,7 @@ set undofile
 "set background=dark
 set background=light
 " colorscheme
-autocmd vimenter * ++nested colorscheme gruvbox
+autocmd vimenter * ++nested colorscheme nightfly
 " airline
 "let g:airline_powerline_fonts = 1
  

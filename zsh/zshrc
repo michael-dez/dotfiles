@@ -110,12 +110,6 @@ source $ZSH/oh-my-zsh.sh
 # export MANPATH="/usr/local/man:$MANPATH"
 
 
-# Preferred editor for local and remote sessions
- if [[ -n $SSH_CONNECTION ]]; then
-   export EDITOR='vim'
- else
-   export EDITOR='nvim'
- fi
 
 # Set keymap for laptop on xorg, experimental
 setxkbmap -layout us  -option ctrl:nocaps
@@ -142,9 +136,6 @@ alias F="sudo !!"
 alias vi="$EDITOR"
 alias k="minikube kubectl --"
 alias zshrc="$EDITOR ~/.zshrc"
-PATH="$HOME/.local/bin:$PATH"
-# Install Ruby Gems to ~/gems
-export GEM_HOME="$HOME/gems"
 # misc aliases
 # record asciinema asciicast
 alias arec="asciinema rec"
@@ -154,5 +145,9 @@ alias a2gif='sudo docker run --rm -v "${PWD}":/data asciinema/asciicast2gif'
 alias teams='flatpak run com.microsoft.Teams'
 # set brightness for Thinkpad t14 gen1 arg= 0-1.0
 alias light='xrandr --output eDP --brightness'
+
+# run neofetch for max cool
+neofetch
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
