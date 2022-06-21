@@ -9,3 +9,7 @@ export GEM_HOME="$HOME/gems"
  else
    export EDITOR='nvim'
  fi
+ # AWS (set to mars for duration of internship)
+ export AWS_PROFILE='mars'
+ # Kops
+export KOPS_STATE_STORE='s3://k8s22-state-store'

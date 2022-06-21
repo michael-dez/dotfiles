@@ -30,8 +30,7 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'tpope/vim-surround'
 
-
-  Plug 'deris/vim-shot-f'   "highlights chars for f/t movement
+  Plug 'unblevable/quick-scope'   "highlights chars for f/t movement
 
 " Plug 'jiangmao/autopairs'
 
@@ -42,6 +41,8 @@ call plug#begin('~/.vim/plugged')
 " Plug 'bling/vim-bufferline' " :h bufferline
 
   Plug 'nvim-telescope/telescope.nvim'
+
+  Plug 'preservim/nerdtree'
 
   " telescope dependencies
   Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
@@ -127,13 +128,16 @@ set clipboard=unnamedplus
 set incsearch
 set undodir=~/.vim/undodir
 set undofile
-"set background=dark
-set background=light
+
 " colorscheme
 autocmd vimenter * ++nested colorscheme nightfly
-" airline
-"let g:airline_powerline_fonts = 1
- 
+"set background=NONE
+"set background=light
+
+" Start NERDTree when Vim is started without file arguments.
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | NERDTree | endif
+
  " true color support
 "Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
 "If you're using tmux version 2.2 or later, you can remove the outermost $TMUX check and use tmux's 24-bit color support
@@ -150,6 +154,10 @@ if (empty($TMUX))
     set termguicolors
   endif
 endif
+
+"Set bg transparency
+"hi Normal guibg=NONE ctermbg=NONE
+
 "-----------------------------------------------------------Remaps----------------------------------------------------------------------------------
 let mapleader=" " " leader = space
 set timeoutlen=200 " set timeout for leader key sequence, default seemed very slow for <leader>t for some reason
@@ -160,6 +168,7 @@ nnoremap <leader>su :command command SuWrite %!sudo tee %
 nnoremap <leader>. :edit $MYVIMRC<CR>
 nnoremap <leader><CR> :so ~/.config/nvim/init.vim<CR>
 nnoremap <leader>xp :put =system(getline('.'))<CR>
+nnoremap <leader>nt :NERDTree<CR>
 nnoremap <leader>/ :Telescope<CR> 
 nnoremap <leader>/h :Telescope find_files search_dir=/home/$USER/ hidden=true no_ignore=true<CR> 
 nnoremap <leader>/f :Telescope find_files search_dir=/home/$USER/<CR> 
