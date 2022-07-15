@@ -137,6 +137,10 @@ alias vi="$EDITOR"
 #alias k="minikube kubectl --"
 alias zshrc="$EDITOR ~/.zshrc"
 alias zshenv="$EDITOR ~/.zshenv"
+# git
+alias gs="git status"
+alias gc="git commit"
+alias ga="git add"
 # misc aliases
 # record asciinema asciicast
 alias arec="asciinema rec"

@@ -55,8 +55,15 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'neovim/nvim-lspconfig' 
 
+  " completion and prereqs
   Plug 'L3MON4D3/LuaSnip' " when I get better at lua
 
+  Plug 'hrsh7th/nvim-cmp'
+  Plug 'hrsh7th/cmp-nvim-lsp'
+
+  Plug 'saadparwaiz1/cmp_luasnip'
+
+  " devicons
   Plug 'kyazdani42/nvim-web-devicons'
 
   " colorschemes and fluff
@@ -99,7 +106,8 @@ au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml foldmethod=indent
 autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 
 " Python
-
+autocmd FileType python map <buffer> <F9> :w<CR>:exec '!python3' shellescape(@%, 1)<CR>
+autocmd FileType python imap <buffer> <F9> <esc>:w<CR>:exec '!python3' shellescape(@%, 1)<CR>
 " JSON
 " formats json on save, set 'python3' to system specific python command
 au! BufNewFile,BufReadPost *.json set filetype=json
@@ -200,3 +208,73 @@ lua require'nvim-treesitter.configs'.setup { highlight = { enable = true }, incr
 " LSP config go/python
 lua require'lspconfig'.pyright.setup{}
 lua require'lspconfig'.gopls.setup{}
+" completion options and lua script
+set completeopt=menu,menuone,noselect
+
+lua <<EOF
+  -- Setup nvim-cmp.
+  local cmp = require'cmp'
+
+  cmp.setup({
+    snippet = {
+      -- REQUIRED - you must specify a snippet engine
+      expand = function(args)
+        require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+      end,
+    },
+    window = {
+      completion = cmp.config.window.bordered(),
+      documentation = cmp.config.window.bordered(),
+    },
+    mapping = cmp.mapping.preset.insert({
+      ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+      ['<C-f>'] = cmp.mapping.scroll_docs(4),
+      ['<C-Space>'] = cmp.mapping.complete(),
+      ['<C-e>'] = cmp.mapping.abort(),
+      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+    }),
+    sources = cmp.config.sources({
+      { name = 'nvim_lsp' },
+      { name = 'luasnip' }, -- For luasnip users.
+    }, {
+      { name = 'buffer' },
+    })
+  })
+
+  -- Set configuration for specific filetype.
+--  cmp.setup.filetype('gitcommit', {
+--    sources = cmp.config.sources({
+--      { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.
+--    }, {
+--      { name = 'buffer' },
+--    })
+--  })
+
+  -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
+  cmp.setup.cmdline('/', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = {
+      { name = 'buffer' }
+    }
+  })
+
+  -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+  cmp.setup.cmdline(':', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = cmp.config.sources({
+      { name = 'path' }
+    }, {
+      { name = 'cmdline' }
+    })
+  })
+
+  -- Setup lspconfig.
+  local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+  -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
+  require('lspconfig')['pyright'].setup {
+    capabilities = capabilities
+  }
+  require('lspconfig')['gopls'].setup {
+    capabilities = capabilities
+  }
+EOF

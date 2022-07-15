@@ -13,3 +13,6 @@ export GEM_HOME="$HOME/gems"
  export AWS_PROFILE='mars'
  # Kops
 export KOPS_STATE_STORE='s3://k8s22-state-store'
+# Docker
+export DOCKER_BUILDKIT=1
+export WIKI_ACCESS_TOKEN=$(sed -n 6p ~/.api/wikimedia)
