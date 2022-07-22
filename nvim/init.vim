@@ -205,9 +205,10 @@ nnoremap <leader>ga :lua vim.lsp.buf.code_action()<CR>
 "-----------------------------------------------------------lua----------------------------------------------------------------------------------
 " Treesitter configuration 
 lua require'nvim-treesitter.configs'.setup { highlight = { enable = true }, incremental_selection = { enable = true }, textobjects = { enable = true }}
-" LSP config go/python
+" LSP config
 lua require'lspconfig'.pyright.setup{}
 lua require'lspconfig'.gopls.setup{}
+lua require'lspconfig'.tflint.setup{}
 " completion options and lua script
 set completeopt=menu,menuone,noselect
 
