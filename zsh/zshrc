@@ -116,8 +116,9 @@ setxkbmap -layout us  -option ctrl:nocaps
 
 # export Pacman package list
 pkgs=/home/${USER}/repos/dotfiles/bak
-pacman -Qqe | grep -Fvx "$(pacman -Qqm)" > ${pkgs}/$(date --iso-8601='minutes').pkgs
-pacman -Qqm > ${pkgs}/$(date --iso-8601='minutes').pkgs.aur
+pacman -Qqe | grep -Fvx "$(pacman -Qqm)" > ${pkgs}/pacman-export.txt
+pacman -Qqm > ${pkgs}/aur-export.txt
+pip3 freeze > ${pkgs}/pip3-export.txt
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -141,6 +142,7 @@ alias zshenv="$EDITOR ~/.zshenv"
 alias gs="git status"
 alias gc="git commit"
 alias ga="git add"
+alias ghm='cd $(git rev-parse --show-toplevel)'
 # misc aliases
 # record asciinema asciicast
 alias arec="asciinema rec"
@@ -148,7 +150,7 @@ alias arec="asciinema rec"
 alias a2gif='sudo docker run --rm -v "${PWD}":/data asciinema/asciicast2gif'
 # run Microsoft Teams flatpak
 alias teams='flatpak run com.microsoft.Teams'
-# set brightness for Thinkpad t14 gen1 arg= 0-1.0
+# set brightness for Thinkpad t14 gen1 arg=0-1.0
 alias light='xrandr --output eDP --brightness'
 
 # run neofetch for max cool

@@ -78,6 +78,7 @@ gcc
 gettext
 gimp
 git
+gitlab-runner
 glances
 gnu-netcat
 go
@@ -102,6 +103,7 @@ gvfs-smb
 gzip
 haveged
 hdparm
+helm
 htop
 hwdetect
 hwinfo
@@ -118,6 +120,7 @@ iwd
 jfsutils
 jq
 jupyter-notebook
+k9s
 keepassxc
 less
 libdvdcss
@@ -171,6 +174,7 @@ nss-mdns
 ntfs-3g
 ntp
 numlockx
+obs-studio
 openconnect
 openvpn
 os-prober

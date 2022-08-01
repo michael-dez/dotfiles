@@ -81,6 +81,10 @@ bindsym $mod+8    workspace  $ws8
 bindsym $mod+9    workspace  $ws9
 bindsym $mod+0    workspace  $ws10
 
+# move focued workspace between monitors
+bindsym $mod+Ctrl+K move workspace to output HDMI-A-0
+bindsym $mod+Ctrl+J move workspace to output eDP
+
 # switch to workspace with numpad keys
 bindcode $mod+87 workspace 1
 bindcode $mod+88 workspace 2
