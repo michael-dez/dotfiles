@@ -10,7 +10,7 @@ export GEM_HOME="$HOME/gems"
    export EDITOR='nvim'
  fi
  # AWS (set to mars for duration of internship)
- export AWS_PROFILE='mars'
+ export AWS_PROFILE='bigjoj'
  # Kops
 export KOPS_STATE_STORE='s3://k8s22-state-store'
 # Docker

@@ -143,15 +143,21 @@ alias gs="git status"
 alias gc="git commit"
 alias ga="git add"
 alias ghm='cd $(git rev-parse --show-toplevel)'
+
 # misc aliases
-# record asciinema asciicast
+## record asciinema asciicast
 alias arec="asciinema rec"
-# convert asciicast to gif
+## convert asciicast to gif
 alias a2gif='sudo docker run --rm -v "${PWD}":/data asciinema/asciicast2gif'
-# run Microsoft Teams flatpak
+## run Microsoft Teams flatpak
 alias teams='flatpak run com.microsoft.Teams'
-# set brightness for Thinkpad t14 gen1 arg=0-1.0
+## set brightness for Thinkpad t14 gen1 arg=0-1.0
 alias light='xrandr --output eDP --brightness'
+
+# completion
+## qmk completion
+source /home/mike/repos/qmk_firmware/util/qmk_tab_complete.sh
+autoload -Uz bashcompinit && bashcompinit
 
 # run neofetch for max cool
 neofetch
