@@ -143,8 +143,8 @@ autocmd vimenter * ++nested colorscheme nightfly
 "set background=light
 
 " Start NERDTree when Vim is started without file arguments.
-autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | NERDTree | endif
+" autocmd StdinReadPre * let s:std_in=1
+" autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | NERDTree | endif
 
  " true color support
 "Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.

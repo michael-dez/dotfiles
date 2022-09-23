@@ -102,7 +102,7 @@ ZSH_THEME="nicoulaj"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(vi-mode fzf colored-man-pages aws kubectl zsh-syntax-highlighting)
+plugins=(git vi-mode fzf colored-man-pages aws kubectl zsh-syntax-highlighting)
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -138,6 +138,7 @@ alias vi="$EDITOR"
 #alias k="minikube kubectl --"
 alias zshrc="$EDITOR ~/.zshrc"
 alias zshenv="$EDITOR ~/.zshenv"
+alias r="cd ~/repos"
 # git
 alias gs="git status"
 alias gc="git commit"
