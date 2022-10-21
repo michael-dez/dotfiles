@@ -1,3 +1,8 @@
 google-chrome
+grub-tools
+ipw2100-fw
+ipw2200-fw
+libvterm01
+lightdm-settings
 tflint
 vial-appimage

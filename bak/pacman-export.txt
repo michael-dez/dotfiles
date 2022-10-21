@@ -96,7 +96,6 @@ gopls
 grep
 groff
 grub
-grub-tools
 grub2-theme-endeavouros
 gst-libav
 gst-plugin-pipewire
@@ -125,8 +124,6 @@ icedtea-web
 inetutils
 intel-ucode
 inxi
-ipw2100-fw
-ipw2200-fw
 iwd
 jdk-openjdk
 jfsutils
@@ -192,6 +189,7 @@ openvpn
 os-prober
 pacman
 pacman-contrib
+pamixer
 pandoc
 patch
 pavucontrol
@@ -237,6 +235,7 @@ sudo
 sysfsutils
 sysstat
 systemd-sysvcompat
+task
 terraform
 texinfo
 texlive-core

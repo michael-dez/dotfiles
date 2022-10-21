@@ -26,9 +26,11 @@ call plug#begin('~/.vim/plugged')
 
 " Initialize plugin system
 
-  Plug 'tpope/vim-fugitive'
+  "Plug 'tpope/vim-fugitive'
 
   Plug 'tpope/vim-surround'
+
+  Plug 'tpope/vim-unimpaired' " I only use [q & ]q
 
   Plug 'unblevable/quick-scope'   "highlights chars for f/t movement
 
@@ -36,22 +38,33 @@ call plug#begin('~/.vim/plugged')
 
 " Plug 'vim-utils/vim-man'
 
+  Plug 'mattboehm/vim-unstack'
+
   Plug 'mbbill/undotree'
 
 " Plug 'bling/vim-bufferline' " :h bufferline
 
-  Plug 'nvim-telescope/telescope.nvim'
+  Plug 'nvim-telescope/telescope.nvim' " the best picker because tj
 
-  Plug 'preservim/nerdtree'
+  Plug 'voldikss/vim-floaterm' " floating terminal
 
-  " telescope dependencies
-  Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
+  Plug 'TimUntersberger/neogit' " git tui
+
+  Plug 'sbdchd/neoformat' " formatter
+
+  Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' } " should auto-open markdown previews
+
+  Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }   " telescope dependency
 
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 
   Plug 'nvim-lua/plenary.nvim'
 
-  Plug 'williamboman/nvim-lsp-installer' " install lsps with :LspInstall
+  Plug 'sindrets/diffview.nvim' 
+
+  Plug 'williamboman/mason.nvim' " vim package manager
+
+  Plug 'williamboman/mason-lspconfig.nvim'
 
   Plug 'neovim/nvim-lspconfig' 
 
@@ -59,12 +72,12 @@ call plug#begin('~/.vim/plugged')
   Plug 'L3MON4D3/LuaSnip' " when I get better at lua
 
   Plug 'hrsh7th/nvim-cmp'
+
   Plug 'hrsh7th/cmp-nvim-lsp'
 
   Plug 'saadparwaiz1/cmp_luasnip'
 
-  " devicons
-  Plug 'kyazdani42/nvim-web-devicons'
+  Plug 'kyazdani42/nvim-web-devicons'   " devicons
 
   " colorschemes and fluff
   Plug 'morhetz/gruvbox'
@@ -108,6 +121,7 @@ autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 " Python
 autocmd FileType python map <buffer> <F9> :w<CR>:exec '!python3' shellescape(@%, 1)<CR>
 autocmd FileType python imap <buffer> <F9> <esc>:w<CR>:exec '!python3' shellescape(@%, 1)<CR>
+autocmd BufNewFile,BufRead *.py set keywordprg=pydoc3
 " JSON
 " formats json on save, set 'python3' to system specific python command
 au! BufNewFile,BufReadPost *.json set filetype=json
@@ -116,6 +130,10 @@ autocmd FileType json autocmd BufWritePre <buffer> %!python3 -m json.tool 2>/dev
 " Markdown
 au! BufNewFile,BufReadPost *.{md,MARKDOWN} set filetype=markdown
 autocmd FileType markdown setlocal textwidth=0
+let g:mkdp_auto_start = 1 " autostart markdown preview in new markdown buffer
+let g:mkdp_refresh_slow = 0 " refresh when exiting insert or on write
+let g:mkdp_filetypes = ['markdown'] " filetypes associated with markdown preview
+    let g:mkdp_browser = '/usr/bin/firefox'
 
 " Go
 " highlighting
@@ -136,15 +154,14 @@ set clipboard=unnamedplus
 set incsearch
 set undodir=~/.vim/undodir
 set undofile
+" floaterm settings
+let g:floaterm_width = 0.8
+let g:floaterm_height = 0.5
 
 " colorscheme
 autocmd vimenter * ++nested colorscheme nightfly
 "set background=NONE
 "set background=light
-
-" Start NERDTree when Vim is started without file arguments.
-" autocmd StdinReadPre * let s:std_in=1
-" autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | NERDTree | endif
 
  " true color support
 "Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
@@ -171,16 +188,17 @@ let mapleader=" " " leader = space
 set timeoutlen=200 " set timeout for leader key sequence, default seemed very slow for <leader>t for some reason
 
 nnoremap <leader>u :UndotreeShow<CR> 
-nnoremap <leader>x !chmod :silent !chmod +x %<CR> "borrowed this one and leader<CR> from @ThePrimeagen
+nnoremap <leader>x !chmod :silent !chmod +x %<CR> " borrowed this one and leader<CR> from @ThePrimeagen
 nnoremap <leader>su :command command SuWrite %!sudo tee %
 nnoremap <leader>. :edit $MYVIMRC<CR>
-nnoremap <leader><CR> :so ~/.config/nvim/init.vim<CR>
+nnoremap <leader><CR> :so $MYVIMRC<CR>
 nnoremap <leader>xp :put =system(getline('.'))<CR>
+nnoremap <leader>do :DiffOrig<CR> " TODO. https://neovim.io/doc/user/diff.html#:DiffOrig
 nnoremap <leader>nt :NERDTree<CR>
 nnoremap <leader>/ :Telescope<CR> 
 nnoremap <leader>/h :Telescope find_files search_dir=/home/$USER/ hidden=true no_ignore=true<CR> 
 nnoremap <leader>/f :Telescope find_files search_dir=/home/$USER/<CR> 
-nnoremap <leader>/b :Telescope buffers<CR>
+nnoremap <leader><BS> :Telescope buffers<CR>
 nnoremap <leader>/m :Telescope marks<CR>
 
 " Window navigation
@@ -191,29 +209,44 @@ nnoremap <leader>l :wincmd l<CR>
 nnoremap <leader>p :wincmd p<CR> 
 nnoremap <leader>wk :sp<CR> 
 nnoremap <leader>wl :vsp<CR> 
-nnoremap <leader>t :below new<CR><bar>:resize 10<CR><bar>:term<CR><bar>:startinsert<CR>
-
+"nnoremap <leader>t :below new<CR><bar>:resize 10<CR><bar>:term<CR><bar>:startinsert<CR>
+nnoremap <C-t> :FloatermToggle<CR>
+tnoremap <C-t> <C-\><C-n>:FloatermToggle<CR>
+" git
+nnoremap <C-g> :Neogit<CR>
 " lsp remaps
 nnoremap <leader>gd :lua vim.lsp.buf.definition()<CR>
 nnoremap <leader>gi :lua vim.lsp.buf.implementation()<CR>
+nnoremap <leader>gh :lua vim.lsp.diagnostic.open_float()<CR>
 nnoremap <leader>gsh :lua vim.lsp.buf.signature_help()<CR>
 nnoremap <leader>gr :lua vim.lsp.buf.references()<CR>
 nnoremap <leader>grn :lua vim.lsp.buf.rename()<CR>
-nnoremap <leader>gh :lua vim.lsp.buf.hover()<CR>
 nnoremap <leader>ga :lua vim.lsp.buf.code_action()<CR>
 
 "-----------------------------------------------------------lua----------------------------------------------------------------------------------
 " Treesitter configuration 
 lua require'nvim-treesitter.configs'.setup { highlight = { enable = true }, incremental_selection = { enable = true }, textobjects = { enable = true }}
+" mason setup https://github.com/williamboman/mason.nvim#setup
+lua require("mason").setup()
+lua require("mason-lspconfig").setup({ensure_installed = { "pyright", "gopls", "bashls", "ansiblels", "dockerls", "terraformls" }})
 " LSP config
 lua require'lspconfig'.pyright.setup{}
 lua require'lspconfig'.gopls.setup{}
-lua require'lspconfig'.tflint.setup{}
+lua require'lspconfig'.bashls.setup{}
+lua require'lspconfig'.ansiblels.setup{}
+lua require'lspconfig'.dockerls.setup{}
+lua require'lspconfig'.terraformls.setup{}
 " completion options and lua script
 set completeopt=menu,menuone,noselect
 
 lua <<EOF
-  -- Setup nvim-cmp.
+    -- Setup neogit
+    local neogit = require("neogit")
+
+    neogit.setup {
+    
+    }
+-- Setup nvim-cmp.
   local cmp = require'cmp'
 
   cmp.setup({
