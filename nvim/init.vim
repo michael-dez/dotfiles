@@ -54,6 +54,8 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' } " should auto-open markdown previews
 
+  Plug 'mickael-menu/zk-nvim'
+
   Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }   " telescope dependency
 
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
@@ -198,8 +200,12 @@ nnoremap <leader>nt :NERDTree<CR>
 nnoremap <leader>/ :Telescope<CR> 
 nnoremap <leader>/h :Telescope find_files search_dir=/home/$USER/ hidden=true no_ignore=true<CR> 
 nnoremap <leader>/f :Telescope find_files search_dir=/home/$USER/<CR> 
-nnoremap <leader><BS> :Telescope buffers<CR>
+nnoremap <leader><leader> :Telescope buffers<CR>
 nnoremap <leader>/m :Telescope marks<CR>
+
+" zk
+nnoremap <leader>zn :'<,'>ZkNewFromTitleSelection<CR>
+nnoremap <leader>z/ :ZkNotes<CR> 
 
 " Window navigation
 nnoremap <leader>h :wincmd h<CR> 
@@ -212,6 +218,7 @@ nnoremap <leader>wl :vsp<CR>
 "nnoremap <leader>t :below new<CR><bar>:resize 10<CR><bar>:term<CR><bar>:startinsert<CR>
 nnoremap <C-t> :FloatermToggle<CR>
 tnoremap <C-t> <C-\><C-n>:FloatermToggle<CR>
+inoremap <C-o> :FloatermToggle<CR>
 " git
 nnoremap <C-g> :Neogit<CR>
 " lsp remaps
@@ -229,6 +236,8 @@ lua require'nvim-treesitter.configs'.setup { highlight = { enable = true }, incr
 " mason setup https://github.com/williamboman/mason.nvim#setup
 lua require("mason").setup()
 lua require("mason-lspconfig").setup({ensure_installed = { "pyright", "gopls", "bashls", "ansiblels", "dockerls", "terraformls" }})
+" zk-vim setup https://github.com/mickael-menu/zk-nvim#setup
+lua require("zk").setup()
 " LSP config
 lua require'lspconfig'.pyright.setup{}
 lua require'lspconfig'.gopls.setup{}

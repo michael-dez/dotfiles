@@ -138,7 +138,11 @@ alias vi="$EDITOR"
 #alias k="minikube kubectl --"
 alias zshrc="$EDITOR ~/.zshrc"
 alias zshenv="$EDITOR ~/.zshenv"
+alias szshrc='. ~/.zshrc'
+alias szshenv='. ~/.zshenv'
 alias r="cd ~/repos"
+alias n="cd ~/notes"
+alias s="cd ~/repos/scripts"
 # git
 alias gs="git status"
 alias gc="git commit"
@@ -154,6 +158,8 @@ alias a2gif='sudo docker run --rm -v "${PWD}":/data asciinema/asciicast2gif'
 alias teams='flatpak run com.microsoft.Teams'
 ## set brightness for Thinkpad t14 gen1 arg=0-1.0
 alias light='xrandr --output eDP --brightness'
+## search notes to edit
+alias ze='zk edit -i'
 
 # completion
 ## qmk completion
