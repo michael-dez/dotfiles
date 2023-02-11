@@ -84,6 +84,7 @@ firefox
 firewalld
 flatpak
 flex
+fluxctl
 fsarchiver
 galculator
 gawk
@@ -118,7 +119,7 @@ helm
 htop
 hwdetect
 hwinfo
-i3-gaps
+i3-wm
 i3blocks
 i3lock
 i3status
@@ -294,7 +295,7 @@ xorg-xinput
 xorg-xkill
 xorg-xrandr
 xterm
-yad-eos
+yad
 yarn
 yay
 yq

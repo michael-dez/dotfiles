@@ -19,3 +19,6 @@ export WIKI_ACCESS_TOKEN=$(sed -n 6p ~/.api/wikimedia)
 # kube
 export KUBE_CONFIG_DEFAULT_LOCATION=~/.kube/config
 export KUBECONFIG=~/.kube/config
+# golang
+export GOPATH="$/home/mike/go"
+export PATH="$PATH:/home/mike/go/bin"

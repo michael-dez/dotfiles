@@ -157,8 +157,8 @@ set incsearch
 set undodir=~/.vim/undodir
 set undofile
 " floaterm settings
-let g:floaterm_width = 0.8
-let g:floaterm_height = 0.5
+let g:floaterm_width = 0.9
+let g:floaterm_height = 0.8
 
 " colorscheme
 autocmd vimenter * ++nested colorscheme nightfly
@@ -218,7 +218,7 @@ nnoremap <leader>wl :vsp<CR>
 "nnoremap <leader>t :below new<CR><bar>:resize 10<CR><bar>:term<CR><bar>:startinsert<CR>
 nnoremap <C-t> :FloatermToggle<CR>
 tnoremap <C-t> <C-\><C-n>:FloatermToggle<CR>
-inoremap <C-o> :FloatermToggle<CR>
+inoremap <C-t> <C-o>:FloatermToggle<CR>
 " git
 nnoremap <C-g> :Neogit<CR>
 " lsp remaps
