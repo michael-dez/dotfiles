@@ -1,4 +1,4 @@
-" __            __    __                 __               
+"color __            __    __                 __               
 "|  \          |  \  |  \               |  \              
 " \$$ _______   \$$ _| $$_    __     __  \$$ ______ ____  
 "|  \|       \ |  \|   $$ \  |  \   /  \|  \|      \    \ 
@@ -87,6 +87,8 @@ call plug#begin('~/.vim/plugged')
   Plug 'wojciechkepka/vim-github-dark'
 
   Plug 'bluz71/vim-nightfly-guicolors'
+  
+  Plug 'catppuccin/vim', { 'as': 'catppuccin' }
 
   Plug 'nanotech/jellybeans.vim'
 
@@ -161,7 +163,7 @@ let g:floaterm_width = 0.9
 let g:floaterm_height = 0.8
 
 " colorscheme
-autocmd vimenter * ++nested colorscheme nightfly
+autocmd vimenter * ++nested colorscheme catppuccin_frappe
 "set background=NONE
 "set background=light
 

@@ -44,6 +44,7 @@ dfu-util
 dhclient
 dialog
 diffutils
+discord
 dmenu
 dmidecode
 dmraid
@@ -76,6 +77,7 @@ ethtool
 exfatprogs
 f2fs-tools
 fakeroot
+fd
 ffmpegthumbnailer
 file
 file-roller
@@ -135,6 +137,7 @@ jq
 jupyter-notebook
 k9s
 keepassxc
+kubectx
 less
 libdvdcss
 libgsf
