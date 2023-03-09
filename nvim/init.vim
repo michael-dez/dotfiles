@@ -40,6 +40,8 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'mattboehm/vim-unstack'
 
+  Plug 'mogelbrod/vim-jsonpath'
+
   Plug 'mbbill/undotree'
 
 " Plug 'bling/vim-bufferline' " :h bufferline
@@ -48,7 +50,7 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'voldikss/vim-floaterm' " floating terminal
 
-  Plug 'TimUntersberger/neogit' " git tui
+  "Plug 'TimUntersberger/neogit' " git tui
 
   Plug 'sbdchd/neoformat' " formatter
 
@@ -115,6 +117,7 @@ set list
 
 "-----------------------------------------------------------Language Specific----------------------------------------------------------------------------------
 syntax on
+filetype plugin on
 filetype indent on
 filetype on
 
@@ -129,7 +132,8 @@ autocmd BufNewFile,BufRead *.py set keywordprg=pydoc3
 " JSON
 " formats json on save, set 'python3' to system specific python command
 au! BufNewFile,BufReadPost *.json set filetype=json
-autocmd FileType json autocmd BufWritePre <buffer> %!python3 -m json.tool 2>/dev/null || echo <buffer>
+"autocmd FileType json autocmd BufWritePre <buffer> %!python3 -m json.tool 2>/dev/null || echo <buffer>
+let g:jsonpath_register = '+'
 
 " Markdown
 au! BufNewFile,BufReadPost *.{md,MARKDOWN} set filetype=markdown
@@ -151,6 +155,8 @@ let g:go_highlight_structs = 1
 let g:go_highlight_types = 1
 let g:go_auto_sameids = 1
 
+" Makefile
+ au! BufNewFile,BufReadPost makefile set filetype=make noexpandtab
 
 
 "-----------------------------------------------------------Misc----------------------------------------------------------------------------------
@@ -198,25 +204,30 @@ nnoremap <leader>. :edit $MYVIMRC<CR>
 nnoremap <leader><CR> :so $MYVIMRC<CR>
 nnoremap <leader>xp :put =system(getline('.'))<CR>
 nnoremap <leader>do :DiffOrig<CR> " TODO. https://neovim.io/doc/user/diff.html#:DiffOrig
-nnoremap <leader>nt :NERDTree<CR>
+nnoremap <leader>jp :JsonPath<CR>
 nnoremap <leader>/ :Telescope<CR> 
-nnoremap <leader>/h :Telescope find_files search_dir=/home/$USER/ hidden=true no_ignore=true<CR> 
-nnoremap <leader>/f :Telescope find_files search_dir=/home/$USER/<CR> 
+nnoremap <leader>// :Telescope live_grep<CR> 
+nnoremap <leader>/. :Telescope find_files hidden=true no_ignore=true<CR> 
+nnoremap <leader>/f :Telescope find_files<CR> 
+nnoremap <leader>/o :Telescope old_files<CR> 
 nnoremap <leader><leader> :Telescope buffers<CR>
 nnoremap <leader>/m :Telescope marks<CR>
 
+" markdown preview
+autocmd FileType markdown nnoremap <leader>mt <Plug>MarkdownPreviewToggle
+
 " zk
 nnoremap <leader>zn :'<,'>ZkNewFromTitleSelection<CR>
-nnoremap <leader>z/ :ZkNotes<CR> 
+nnoremap <leader>z/ :ZkNotes<CR>
 
 " Window navigation
-nnoremap <leader>h :wincmd h<CR> 
-nnoremap <leader>j :wincmd j<CR> 
-nnoremap <leader>k :wincmd k<CR> 
-nnoremap <leader>l :wincmd l<CR> 
-nnoremap <leader>p :wincmd p<CR> 
-nnoremap <leader>wk :sp<CR> 
-nnoremap <leader>wl :vsp<CR> 
+nnoremap <C-h> :wincmd h<CR>
+nnoremap <C-j> :wincmd j<CR>
+nnoremap <C-k> :wincmd k<CR>
+nnoremap <C-l> :wincmd l<CR>
+nnoremap <leader>p :wincmd p<CR>
+nnoremap <leader>wk :sp<CR>
+nnoremap <leader>wl :vsp<CR>
 "nnoremap <leader>t :below new<CR><bar>:resize 10<CR><bar>:term<CR><bar>:startinsert<CR>
 nnoremap <C-t> :FloatermToggle<CR>
 tnoremap <C-t> <C-\><C-n>:FloatermToggle<CR>
