@@ -113,13 +113,13 @@ source $ZSH/oh-my-zsh.sh
 
 
 # Set keymap for laptop on xorg, experimental
-setxkbmap -layout us  -option ctrl:nocaps
+#setxkbmap -layout us  -option ctrl:nocaps
 
 # export Pacman package list
-pkgs=/home/${USER}/repos/dotfiles/bak
-pacman -Qqe | grep -Fvx "$(pacman -Qqm)" > ${pkgs}/pacman-export.txt
-pacman -Qqm > ${pkgs}/aur-export.txt
-pip3 freeze > ${pkgs}/pip3-export.txt
+#pkgs=/home/${USER}/repos/dotfiles/bak
+#pacman -Qqe | grep -Fvx "$(pacman -Qqm)" > ${pkgs}/pacman-export.txt
+#pacman -Qqm > ${pkgs}/aur-export.txt
+#pip3 freeze > ${pkgs}/pip3-export.txt
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -136,7 +136,6 @@ bindkey -M vicmd v edit-command-line
 alias p3="python3"
 alias F="sudo !!"
 alias vi="$EDITOR"
-#alias k="minikube kubectl --"
 alias zshrc="$EDITOR ~/.zshrc"
 alias zshenv="$EDITOR ~/.zshenv"
 alias szshrc='. ~/.zshrc'
@@ -150,6 +149,7 @@ alias gc="git commit"
 alias ga="git add"
 alias ghm='cd $(git rev-parse --show-toplevel)'
 # kube
+alias k="kubectl"
 alias ktx="kubectx"
 alias kns="kubens"
 
@@ -167,8 +167,8 @@ alias ze='zk edit -i'
 
 # completion
 ## qmk completion
-source /home/mike/repos/qmk_firmware/util/qmk_tab_complete.sh
-autoload -Uz bashcompinit && bashcompinit
+#source /home/mike/repos/qmk_firmware/util/qmk_tab_complete.sh
+#autoload -Uz bashcompinit && bashcompinit
 
 # run neofetch for max cool
 #neofetch

@@ -26,7 +26,7 @@ call plug#begin('~/.vim/plugged')
 
 " Initialize plugin system
 
-  "Plug 'tpope/vim-fugitive'
+  Plug 'tpope/vim-fugitive'
 
   Plug 'tpope/vim-surround'
 
@@ -173,6 +173,15 @@ autocmd vimenter * ++nested colorscheme catppuccin_frappe
 "set background=NONE
 "set background=light
 
+" WSL yank support
+let s:clip = '/mnt/c/Windows/System32/clip.exe'  " change this path according to your mount point
+if executable(s:clip)
+    augroup WSLYank
+        autocmd!
+        autocmd TextYankPost * if v:event.operator ==# 'y' | call system(s:clip, @0) | endif
+    augroup END
+endif
+
  " true color support
 "Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
 "If you're using tmux version 2.2 or later, you can remove the outermost $TMUX check and use tmux's 24-bit color support
@@ -262,12 +271,6 @@ lua require'lspconfig'.terraformls.setup{}
 set completeopt=menu,menuone,noselect
 
 lua <<EOF
-    -- Setup neogit
-    local neogit = require("neogit")
-
-    neogit.setup {
-    
-    }
 -- Setup nvim-cmp.
   local cmp = require'cmp'
 
@@ -325,7 +328,7 @@ lua <<EOF
   })
 
   -- Setup lspconfig.
-  local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+  local capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities())
   -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
   require('lspconfig')['pyright'].setup {
     capabilities = capabilities
