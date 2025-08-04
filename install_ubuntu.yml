@@ -1,0 +1,46 @@
+# Configures WSL Ubuntu environment
+# Run with: ansible-playbook -i inventory install_ubuntu.yml
+- hosts: localhost
+  connection: local
+  become: yes
+  vars:
+    packages:
+      - build-essential
+      - curl
+      - git
+      - tmux
+      - unzip
+      - wget
+      - zsh
+      - npm
+  tasks:
+    - name: "Update apt cache and upgrade all installed packages"
+      apt:
+        update_cache: yes
+        state: latest
+        name: "{{ packages }}"
+    - name: "Install brew"
+      become: no
+      shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      args:
+        creates: /home/{{ ansible_user_id }}/.linuxbrew
+    - name: "Install neovim and terraform with brew"
+      become: no
+      shell: /home/{{ ansible_user_id }}/.linuxbrew/bin/brew install {{ item }}
+      args:
+        creates: "/home/{{ ansible_user_id }}/.linuxbrew/bin/{{ item }}"
+      with_items:
+        - nvim
+        - terraform
+    - name: "Link dotfiles"
+      become: no
+      file:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        state: link
+        force: yes
+      with_items:
+        - { src: "{{ playbook_dir }}/zsh/zshrc", dest: "/home/{{ ansible_user_id }}/.zshrc" }
+        - { src: "{{ playbook_dir }}/zsh/zshenv", dest: "/home/{{ ansible_user_id }}/.zshenv" }
+        - { src: "{{ playbook_dir }}/tmux/tmux.conf", dest: "/home/{{ ansible_user_id }}/.tmux.conf" }
+        - { src: "{{ playbook_dir }}/nvim/init.vim", dest: "/home/{{ ansible_user_id }}/.config/nvim/init.vim" }

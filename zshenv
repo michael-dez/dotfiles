@@ -9,16 +9,14 @@ export GEM_HOME="$HOME/gems"
  else
    export EDITOR='nvim'
  fi
- # AWS (set to mars for duration of internship)
- export AWS_PROFILE='bigjoj'
  # Kops
-export KOPS_STATE_STORE='s3://k8s22-state-store'
 # Docker
 export DOCKER_BUILDKIT=1
-export WIKI_ACCESS_TOKEN=$(sed -n 6p ~/.api/wikimedia)
 # kube
 export KUBE_CONFIG_DEFAULT_LOCATION=~/.kube/config
 export KUBECONFIG=~/.kube/config
 # golang
-export GOPATH="$/home/mike/go"
+export GOPATH="/home/mike/go"
 export PATH="$PATH:/home/mike/go/bin"
+# sops
+# github

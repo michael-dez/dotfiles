@@ -7,6 +7,7 @@ alsa-firmware
 alsa-plugins
 alsa-utils
 amd-ucode
+amdvlk
 ansible
 arandr
 arc-gtk-theme-eos
@@ -23,6 +24,7 @@ avr-gcc
 avr-libc
 avrdude
 awesome-terminal-fonts
+aws-cli-v2
 b43-fwcutter
 base
 bash-completion
@@ -34,6 +36,8 @@ bluez-utils
 btrfs-progs
 cantarell-fonts
 clang
+cloudflared
+cmake
 copyq
 cryptsetup
 debugedit
@@ -59,10 +63,9 @@ e2fsprogs
 efibootmgr
 efitools
 eksctl
+endeavouros-branding
 endeavouros-keyring
 endeavouros-mirrorlist
-endeavouros-skel-i3wm
-endeavouros-theming
 endeavouros-xfce4-terminal-colors
 eos-apps-info
 eos-hooks
@@ -86,7 +89,6 @@ firefox
 firewalld
 flatpak
 flex
-fluxctl
 fsarchiver
 galculator
 gawk
@@ -99,6 +101,7 @@ glances
 gnu-netcat
 go
 gopls
+gparted
 grep
 groff
 grub
@@ -125,13 +128,12 @@ i3-wm
 i3blocks
 i3lock
 i3status
-icedtea-web
+ibus
 inetutils
 intel-ucode
 inxi
 iptables-nft
 iwd
-jdk-openjdk
 jfsutils
 jq
 jupyter-notebook
@@ -151,6 +153,7 @@ linux-firmware
 linux-headers
 logrotate
 lsb-release
+lshw
 lsscsi
 lvm2
 lxappearance-gtk3
@@ -166,7 +169,6 @@ mkinitcpio
 mkinitcpio-busybox
 mkinitcpio-nfs-utils
 mkinitcpio-openswap
-mlocate
 modemmanager
 mpv
 mtools
@@ -174,7 +176,6 @@ nano
 nano-syntax-highlighting
 nbd
 ndisc6
-neofetch
 neovim
 netctl
 network-manager-applet
@@ -182,6 +183,7 @@ networkmanager
 networkmanager-openvpn
 nfs-utils
 nilfs-utils
+ninja
 nitrogen
 nmap
 nodejs
@@ -197,6 +199,7 @@ openvpn
 os-prober
 pacman
 pacman-contrib
+pass
 patch
 pavucontrol
 perl
@@ -207,6 +210,7 @@ pipewire-pulse
 pkgconf
 pkgfile
 playerctl
+plocate
 polkit-gnome
 poppler-glib
 power-profiles-daemon
@@ -217,14 +221,15 @@ pyright
 python
 python-capng
 python-defusedxml
+python-hypothesis
 python-packaging
 python-pip
 python-pyqt5
+qmk
 qutebrowser
 rebuild-detector
 reflector
 reflector-simple
-reiserfsprogs
 ripgrep
 rofi
 rp-pppoe
@@ -236,6 +241,7 @@ sed
 sg3_utils
 smartmontools
 sof-firmware
+sops
 sshfs
 sshpass
 sudo
@@ -245,7 +251,7 @@ systemd-sysvcompat
 task
 terraform
 texinfo
-texlive-core
+texlive-basic
 thunar
 thunar-archive-plugin
 thunar-volman
@@ -264,7 +270,6 @@ unzip
 upower
 usb_modeswitch
 usbutils
-vagrant
 vi
 vim
 virtualbox
@@ -302,6 +307,7 @@ yad
 yarn
 yay
 yq
+z
 zk
 zsh
 zsh-syntax-highlighting

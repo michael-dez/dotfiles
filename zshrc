@@ -130,12 +130,13 @@ pip3 freeze > ${pkgs}/pip3-export.txt
 # For a full list of active aliases, run `alias`.
 
 #autoload -U edit-command-line (full screen comand edit on Esc-v)
-zle -N edit-command-line 
+zle -N edit-command-line
 bindkey -M vicmd v edit-command-line
 # aliases
 alias p3="python3"
 alias F="sudo !!"
 alias vi="$EDITOR"
+alias s3="aws s3"
 #alias k="minikube kubectl --"
 alias zshrc="$EDITOR ~/.zshrc"
 alias zshenv="$EDITOR ~/.zshenv"
@@ -143,7 +144,6 @@ alias szshrc='. ~/.zshrc'
 alias szshenv='. ~/.zshenv'
 alias r="cd ~/repos"
 alias n="cd ~/notes"
-alias s="cd ~/repos/scripts"
 # git
 alias gs="git status"
 alias gc="git commit"
@@ -164,6 +164,8 @@ alias teams='flatpak run com.microsoft.Teams'
 alias light='xrandr --output eDP --brightness'
 ## search notes to edit
 alias ze='zk edit -i'
+alias zi='zk index'
+alias cdz='cd ~/repos/slipbox'
 
 # completion
 ## qmk completion
@@ -175,3 +177,4 @@ autoload -Uz bashcompinit && bashcompinit
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+. /usr/share/z/z.sh

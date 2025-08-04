@@ -1,4 +1,4 @@
-"color __            __    __                 __               
+" __            __    __                 __               
 "|  \          |  \  |  \               |  \              
 " \$$ _______   \$$ _| $$_    __     __  \$$ ______ ____  
 "|  \|       \ |  \|   $$ \  |  \   /  \|  \|      \    \ 
@@ -26,11 +26,13 @@ call plug#begin('~/.vim/plugged')
 
 " Initialize plugin system
 
-  "Plug 'tpope/vim-fugitive'
+  Plug 'tpope/vim-fugitive'
 
   Plug 'tpope/vim-surround'
 
   Plug 'tpope/vim-unimpaired' " I only use [q & ]q
+
+  Plug 'tpope/vim-repeat'
 
   Plug 'unblevable/quick-scope'   "highlights chars for f/t movement
 
@@ -38,19 +40,17 @@ call plug#begin('~/.vim/plugged')
 
 " Plug 'vim-utils/vim-man'
 
+  Plug 'github/copilot.vim'
+
   Plug 'mattboehm/vim-unstack'
 
   Plug 'mogelbrod/vim-jsonpath'
 
   Plug 'mbbill/undotree'
 
-" Plug 'bling/vim-bufferline' " :h bufferline
-
   Plug 'nvim-telescope/telescope.nvim' " the best picker because tj
 
   Plug 'voldikss/vim-floaterm' " floating terminal
-
-  "Plug 'TimUntersberger/neogit' " git tui
 
   Plug 'sbdchd/neoformat' " formatter
 
@@ -64,13 +64,25 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'nvim-lua/plenary.nvim'
 
-  Plug 'sindrets/diffview.nvim' 
+  Plug 'sindrets/diffview.nvim'
 
   Plug 'williamboman/mason.nvim' " vim package manager
 
   Plug 'williamboman/mason-lspconfig.nvim'
 
-  Plug 'neovim/nvim-lspconfig' 
+  Plug 'neovim/nvim-lspconfig'
+
+  Plug 'mfussenegger/nvim-dap'
+
+  Plug 'leoluz/nvim-dap-go'
+
+  Plug 'rcarriga/nvim-dap-ui'
+
+  Plug 'nvim-neotest/nvim-nio'
+
+  Plug 'theHamsta/nvim-dap-virtual-text'
+
+  Plug 'nvim-telescope/telescope-dap.nvim'
 
   " completion and prereqs
   Plug 'L3MON4D3/LuaSnip' " when I get better at lua
@@ -89,7 +101,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'wojciechkepka/vim-github-dark'
 
   Plug 'bluz71/vim-nightfly-guicolors'
-  
+
   Plug 'catppuccin/vim', { 'as': 'catppuccin' }
 
   Plug 'nanotech/jellybeans.vim'
@@ -113,6 +125,7 @@ set tabstop=4
 set linebreak
 set scrolloff=10
 set list
+set diffopt+=vertical
 
 
 "-----------------------------------------------------------Language Specific----------------------------------------------------------------------------------
@@ -123,12 +136,12 @@ filetype on
 
 " YAML
 au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml foldmethod=indent
-autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
+autocmd FileType yaml setlocal ts=2 sts=2 sw=2 indentkeys-=0#
 
 " Python
 autocmd FileType python map <buffer> <F9> :w<CR>:exec '!python3' shellescape(@%, 1)<CR>
 autocmd FileType python imap <buffer> <F9> <esc>:w<CR>:exec '!python3' shellescape(@%, 1)<CR>
-autocmd BufNewFile,BufRead *.py set keywordprg=pydoc3
+autocmd BufNewFile,BufRead *.py set keywordprg=pydoc3 indentkeys-=0#
 " JSON
 " formats json on save, set 'python3' to system specific python command
 au! BufNewFile,BufReadPost *.json set filetype=json
@@ -205,11 +218,11 @@ nnoremap <leader><CR> :so $MYVIMRC<CR>
 nnoremap <leader>xp :put =system(getline('.'))<CR>
 nnoremap <leader>do :DiffOrig<CR> " TODO. https://neovim.io/doc/user/diff.html#:DiffOrig
 nnoremap <leader>jp :JsonPath<CR>
-nnoremap <leader>/ :Telescope<CR> 
-nnoremap <leader>// :Telescope live_grep<CR> 
-nnoremap <leader>/. :Telescope find_files hidden=true no_ignore=true<CR> 
-nnoremap <leader>/f :Telescope find_files<CR> 
-nnoremap <leader>/o :Telescope old_files<CR> 
+nnoremap <leader>/ :Telescope<CR>
+nnoremap <leader>// :Telescope live_grep<CR>
+nnoremap <leader>/. :Telescope find_files hidden=true no_ignore=true<CR>
+nnoremap <leader>/f :Telescope find_files<CR>
+nnoremap <leader>/o :Telescope old_files<CR>
 nnoremap <leader><leader> :Telescope buffers<CR>
 nnoremap <leader>/m :Telescope marks<CR>
 
@@ -218,7 +231,7 @@ autocmd FileType markdown nnoremap <leader>mt <Plug>MarkdownPreviewToggle
 
 " zk
 nnoremap <leader>zn :'<,'>ZkNewFromTitleSelection<CR>
-nnoremap <leader>z/ :ZkNotes<CR>
+nnoremap <leader>z :ZkNotes<CR>
 
 " Window navigation
 nnoremap <C-h> :wincmd h<CR>
@@ -228,12 +241,10 @@ nnoremap <C-l> :wincmd l<CR>
 nnoremap <leader>p :wincmd p<CR>
 nnoremap <leader>wk :sp<CR>
 nnoremap <leader>wl :vsp<CR>
-"nnoremap <leader>t :below new<CR><bar>:resize 10<CR><bar>:term<CR><bar>:startinsert<CR>
 nnoremap <C-t> :FloatermToggle<CR>
 tnoremap <C-t> <C-\><C-n>:FloatermToggle<CR>
 inoremap <C-t> <C-o>:FloatermToggle<CR>
-" git
-nnoremap <C-g> :Neogit<CR>
+
 " lsp remaps
 nnoremap <leader>gd :lua vim.lsp.buf.definition()<CR>
 nnoremap <leader>gi :lua vim.lsp.buf.implementation()<CR>
@@ -242,32 +253,49 @@ nnoremap <leader>gsh :lua vim.lsp.buf.signature_help()<CR>
 nnoremap <leader>gr :lua vim.lsp.buf.references()<CR>
 nnoremap <leader>grn :lua vim.lsp.buf.rename()<CR>
 nnoremap <leader>ga :lua vim.lsp.buf.code_action()<CR>
+" debugging
+nnoremap <F5> :lua require'dap'.continue()<CR>
+nnoremap <F6> :lua require'dapui'.open()<CR>
+nnoremap <F7> :lua require'dapui'.close()<CR>
+nnoremap <F10> :lua require'dap'.step_over()<CR>
+nnoremap <F11> :lua require'dap'.step_into()<CR>
+nnoremap <F12> :lua require'dap'.step_out()<CR>
+nnoremap <leader>b :lua require'dap'.toggle_breakpoint()<CR>
+nnoremap <leader>B :lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>
+nnoremap <leader>dr :lua require'dap'.repl.open()<CR>
 
 "-----------------------------------------------------------lua----------------------------------------------------------------------------------
 " Treesitter configuration 
-lua require'nvim-treesitter.configs'.setup { highlight = { enable = true }, incremental_selection = { enable = true }, textobjects = { enable = true }}
-" mason setup https://github.com/williamboman/mason.nvim#setup
-lua require("mason").setup()
-lua require("mason-lspconfig").setup({ensure_installed = { "pyright", "gopls", "bashls", "ansiblels", "dockerls", "terraformls" }})
-" zk-vim setup https://github.com/mickael-menu/zk-nvim#setup
-lua require("zk").setup()
-" LSP config
-lua require'lspconfig'.pyright.setup{}
-lua require'lspconfig'.gopls.setup{}
-lua require'lspconfig'.bashls.setup{}
-lua require'lspconfig'.ansiblels.setup{}
-lua require'lspconfig'.dockerls.setup{}
-lua require'lspconfig'.terraformls.setup{}
-" completion options and lua script
 set completeopt=menu,menuone,noselect
-
 lua <<EOF
-    -- Setup neogit
-    local neogit = require("neogit")
+require'nvim-treesitter.configs'.setup { highlight = { enable = true }, incremental_selection = { enable = true }, textobjects = { enable = true }}
+-- mason setup https://github.com/williamboman/mason.nvim#setup
+require("mason").setup()
+require("mason-lspconfig").setup({
+    ensure_installed = { "pyright", "gopls", "bashls", "ansiblels", "dockerls", "terraformls" }
+})
+-- zk-vim setup https://github.com/mickael-menu/zk-nvim#setup
+require("zk").setup({picker = "telescope"})
+-- LSP config
+require'lspconfig'.pyright.setup{}
+require'lspconfig'.gopls.setup{}
+require'lspconfig'.bashls.setup{}
+require'lspconfig'.ansiblels.setup{}
+require'lspconfig'.dockerls.setup{}
+require'lspconfig'.terraformls.setup{}
+-- dap-go
+require('dap-go').setup()
+require('dapui').setup()
+-- gopls configuration, see: https://github.com/golang/tools/blob/master/gopls/doc/vim.md#neovim-config
+require'lspconfig'.gopls.setup({})
+-- Go import organization
+vim.api.nvim_create_autocmd('BufWritePre', {
+    pattern = "*.go",
+    callback = function()
+        vim.lsp.buf.code_action({ context = { only = { 'source.organizeImports'} }, apply = true })
+    end
+})
 
-    neogit.setup {
-    
-    }
 -- Setup nvim-cmp.
   local cmp = require'cmp'
 
@@ -297,15 +325,6 @@ lua <<EOF
     })
   })
 
-  -- Set configuration for specific filetype.
---  cmp.setup.filetype('gitcommit', {
---    sources = cmp.config.sources({
---      { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.
---    }, {
---      { name = 'buffer' },
---    })
---  })
-
   -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
   cmp.setup.cmdline('/', {
     mapping = cmp.mapping.preset.cmdline(),
@@ -325,7 +344,7 @@ lua <<EOF
   })
 
   -- Setup lspconfig.
-  local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+  local capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities())
   -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
   require('lspconfig')['pyright'].setup {
     capabilities = capabilities
