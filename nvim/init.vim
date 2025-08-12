@@ -66,9 +66,9 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'sindrets/diffview.nvim'
 
-  Plug 'williamboman/mason.nvim' " vim package manager
+  "Plug 'williamboman/mason.nvim' " vim package manager
 
-  Plug 'williamboman/mason-lspconfig.nvim'
+  "Plug 'williamboman/mason-lspconfig.nvim'
 
   Plug 'neovim/nvim-lspconfig'
 
@@ -248,7 +248,7 @@ inoremap <C-t> <C-o>:FloatermToggle<CR>
 " lsp remaps
 nnoremap <leader>gd :lua vim.lsp.buf.definition()<CR>
 nnoremap <leader>gi :lua vim.lsp.buf.implementation()<CR>
-nnoremap <leader>gh :lua vim.lsp.diagnostic.open_float()<CR>
+nnoremap <leader>gh :lua vim.diagnostic.open_float()<CR>
 nnoremap <leader>gsh :lua vim.lsp.buf.signature_help()<CR>
 nnoremap <leader>gr :lua vim.lsp.buf.references()<CR>
 nnoremap <leader>grn :lua vim.lsp.buf.rename()<CR>
@@ -270,19 +270,19 @@ set completeopt=menu,menuone,noselect
 lua <<EOF
 require'nvim-treesitter.configs'.setup { highlight = { enable = true }, incremental_selection = { enable = true }, textobjects = { enable = true }}
 -- mason setup https://github.com/williamboman/mason.nvim#setup
-require("mason").setup()
-require("mason-lspconfig").setup({
-    ensure_installed = { "pyright", "gopls", "bashls", "ansiblels", "dockerls", "terraformls" }
-})
+-- require("mason").setup()
+-- require("mason-lspconfig").setup({
+--     ensure_installed = { "pyright", "gopls", "bashls", "ansiblels", "dockerls", "terraformls" }
+-- })
 -- zk-vim setup https://github.com/mickael-menu/zk-nvim#setup
 require("zk").setup({picker = "telescope"})
 -- LSP config
-require'lspconfig'.pyright.setup{}
-require'lspconfig'.gopls.setup{}
-require'lspconfig'.bashls.setup{}
-require'lspconfig'.ansiblels.setup{}
-require'lspconfig'.dockerls.setup{}
-require'lspconfig'.terraformls.setup{}
+-- require'lspconfig'.pyright.setup{}
+-- require'lspconfig'.gopls.setup{}
+-- require'lspconfig'.bashls.setup{}
+-- require'lspconfig'.ansiblels.setup{}
+-- require'lspconfig'.dockerls.setup{}
+-- require'lspconfig'.terraformls.setup{}
 -- dap-go
 require('dap-go').setup()
 require('dapui').setup()
