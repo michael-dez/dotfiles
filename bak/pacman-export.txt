@@ -244,6 +244,7 @@ sof-firmware
 sops
 sshfs
 sshpass
+stow
 sudo
 sysfsutils
 sysstat

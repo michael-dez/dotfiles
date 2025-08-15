@@ -3,6 +3,7 @@
 - hosts: localhost
   connection: local
   become: yes
+  gather_facts: yes
   vars:
     packages:
       - build-essential
@@ -14,16 +15,19 @@
       - zsh
       - npm
   tasks:
-    - name: "Update apt cache and upgrade all installed packages"
+    - name: "Update apt cache, install dependencies and upgrade all installed packages"
       apt:
         update_cache: yes
         state: latest
         name: "{{ packages }}"
+        when: ansible_facts['distribution'] == 'Ubuntu'
+
     - name: "Install brew"
       become: no
       shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       args:
         creates: /home/{{ ansible_user_id }}/.linuxbrew
+
     - name: "Install neovim and terraform with brew"
       become: no
       shell: /home/{{ ansible_user_id }}/.linuxbrew/bin/brew install {{ item }}
@@ -32,7 +36,8 @@
       with_items:
         - nvim
         - terraform
-    - name: "Link dotfiles"
+
+    - name: "Link the most important dotfiles"
       become: no
       file:
         src: "{{ item.src }}"
@@ -43,4 +48,4 @@
         - { src: "{{ playbook_dir }}/zsh/zshrc", dest: "/home/{{ ansible_user_id }}/.zshrc" }
         - { src: "{{ playbook_dir }}/zsh/zshenv", dest: "/home/{{ ansible_user_id }}/.zshenv" }
         - { src: "{{ playbook_dir }}/tmux/tmux.conf", dest: "/home/{{ ansible_user_id }}/.tmux.conf" }
-        - { src: "{{ playbook_dir }}/nvim/init.vim", dest: "/home/{{ ansible_user_id }}/.config/nvim/init.vim" }
+        - { src: "{{ playbook_dir }}/nvim/init.lua", dest: "/home/{{ ansible_user_id }}/.config/nvim/init.lua" }
