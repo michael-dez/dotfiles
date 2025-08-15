@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 
 <channel name="xfce4-terminal" version="1.0">
   <property name="background-mode" type="string" value="TERMINAL_BACKGROUND_TRANSPARENT"/>
@@ -9,7 +9,7 @@
   <property name="color-palette" type="string" value="#51576D;#E78284;#A6D189;#E5C890;#8CAAEE;#F4B8E4;#81C8BE;#B5BFE2;#626880;#E78284;#A6D189;#E5C890;#8CAAEE;#F4B8E4;#81C8BE;#A5ADCE"/>
   <property name="run-custom-command" type="bool" value="true"/>
   <property name="custom-command" type="string" value="/bin/zsh"/>
-  <property name="font-name" type="string" value="Source Code Pro 16"/>
+  <property name="font-name" type="string" value="MesloLGS NF 16"/>
   <property name="misc-always-show-tabs" type="bool" value="false"/>
   <property name="misc-bell" type="bool" value="false"/>
   <property name="misc-bell-urgent" type="bool" value="false"/>

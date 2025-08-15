@@ -41,7 +41,7 @@ _link_home_files zshrc
 _link_home_files zshrc.pre-oh-my-zsh
 _link_home_files p10k.zsh
 
-_link_xdg_files nvim init.vim
+_link_xdg_files nvim init.lua
 _link_xdg_files picom picom.conf
 _link_xdg_files texinfo infokey
 _link_xdg_files xfce4 terminal/terminalrc
