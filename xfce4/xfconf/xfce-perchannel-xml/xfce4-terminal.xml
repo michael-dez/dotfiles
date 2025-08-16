@@ -9,7 +9,7 @@
   <property name="color-palette" type="string" value="#51576D;#E78284;#A6D189;#E5C890;#8CAAEE;#F4B8E4;#81C8BE;#B5BFE2;#626880;#E78284;#A6D189;#E5C890;#8CAAEE;#F4B8E4;#81C8BE;#A5ADCE"/>
   <property name="run-custom-command" type="bool" value="true"/>
   <property name="custom-command" type="string" value="/bin/zsh"/>
-  <property name="font-name" type="string" value="MesloLGS NF 16"/>
+  <property name="font-name" type="string" value="MesloLGS NF 20"/>
   <property name="misc-always-show-tabs" type="bool" value="false"/>
   <property name="misc-bell" type="bool" value="false"/>
   <property name="misc-bell-urgent" type="bool" value="false"/>
@@ -21,7 +21,7 @@
   <property name="misc-menubar-default" type="bool" value="false"/>
   <property name="misc-mouse-autohide" type="bool" value="false"/>
   <property name="misc-mouse-wheel-zoom" type="bool" value="true"/>
-  <property name="misc-toolbar-default" type="bool" value="false"/>
+  <property name="misc-toolbar-default" type="bool" value="true"/>
   <property name="misc-confirm-close" type="bool" value="true"/>
   <property name="misc-cycle-tabs" type="bool" value="true"/>
   <property name="misc-tab-close-buttons" type="bool" value="true"/>
