@@ -54,15 +54,47 @@
         - nvim
         - terraform
 
-    #- name: "Link the most important dotfiles"
-    #  become: no
-    #  file:
-    #    src: "{{ item.src }}"
-    #    dest: "{{ item.dest }}"
-    #    state: link
-    #    force: yes
-    #  with_items:
-    #    - { src: "{{ playbook_dir }}/zsh/zshrc", dest: "/home/{{ ansible_user_id }}/.zshrc" }
-    #    - { src: "{{ playbook_dir }}/zsh/zshenv", dest: "/home/{{ ansible_user_id }}/.zshenv" }
-    #    - { src: "{{ playbook_dir }}/tmux/tmux.conf", dest: "/home/{{ ansible_user_id }}/.tmux.conf" }
-    #    - { src: "{{ playbook_dir }}/nvim/init.lua", dest: "/home/{{ ansible_user_id }}/.config/nvim/init.lua" }
+    # Dotfile symlinking tasks
+    - name: "Create symlinks for home directory dotfiles"
+      become: no
+      file:
+        src: "{{ ansible_env.PWD }}/{{ item }}"
+        dest: "{{ ansible_env.HOME }}/.{{ item }}"
+        state: link
+        force: yes
+      with_items:
+        - vimrc
+        - tmux.conf
+        - zshenv
+        - zshrc
+        - zshrc.pre-oh-my-zsh
+        - p10k.zsh
+
+    - name: "Create config directories for XDG config files"
+      become: no
+      file:
+        path: "{{ ansible_env.HOME }}/.config/{{ item }}"
+        state: directory
+        mode: '0755'
+      with_items:
+        - nvim
+        - picom
+        - texinfo
+        - xfce4/terminal
+        - xfce4/xfconf/xfce-perchannel-xml
+
+    - name: "Create symlinks for XDG config files"
+      become: no
+      file:
+        src: "{{ ansible_env.PWD }}/{{ item.src }}"
+        dest: "{{ ansible_env.HOME }}/.config/{{ item.dest }}"
+        state: link
+        force: yes
+      with_items:
+        - { src: "nvim/init.lua", dest: "nvim/init.lua" }
+        - { src: "picom/picom.conf", dest: "picom/picom.conf" }
+        - { src: "picom/picom-animations.conf", dest: "picom/picom-animations.conf" }
+        - { src: "texinfo/infokey", dest: "texinfo/infokey" }
+        - { src: "xfce4/terminal/terminalrc", dest: "xfce4/terminal/terminalrc" }
+        - { src: "xfce4/terminal/accels.scm", dest: "xfce4/terminal/accels.scm" }
+        - { src: "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml", dest: "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml" }
