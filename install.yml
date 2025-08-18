@@ -16,38 +16,36 @@
       - npm
   tasks:
     - name: "Arch: Upgrade all installed packages"
-      become: yes
+      when: ansible_facts['distribution'] == 'Archlinux'
       pacman:
         update_cache: yes
         upgrade: yes
-        when: ansible_facts['distribution'] == 'Archlinux'
 
     - name: "Arch: Install from package list"
-      become: yes
+      when: ansible_facts['distribution'] == 'Archlinux'
       package:
         name: "{{ item }}"
         state: latest
-        when: ansible_facts['distribution'] == 'Archlinux'
       with_items: "{{ lookup('file', 'bak/pacman-export.txt').splitlines() }}"
 
     - name: "Ubuntu: Update apt cache, install dependencies and upgrade all installed packages"
+      when: ansible_facts['distribution'] == 'Ubuntu'
       apt:
         update_cache: yes
         state: latest
         name: "{{ packages }}"
-        when: ansible_facts['distribution'] == 'Ubuntu'
 
     - name: "Ubuntu: Install brew"
       become: no
+      when: ansible_facts['distribution'] == 'Ubuntu'
       shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        when: ansible_facts['distribution'] == 'Ubuntu'
       args:
         creates: /home/{{ ansible_user_id }}/.linuxbrew
 
     - name: "Ubuntu: Install neovim and terraform with brew"
       become: no
+      when: ansible_facts['distribution'] == 'Ubuntu'
       shell: /home/{{ ansible_user_id }}/.linuxbrew/bin/brew install {{ item }}
-        when: ansible_facts['distribution'] == 'Ubuntu'
       args:
         creates: "/home/{{ ansible_user_id }}/.linuxbrew/bin/{{ item }}"
       with_items:
