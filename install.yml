@@ -1,10 +1,12 @@
 # Configures WSL Ubuntu environment
-# Run with: ansible-playbook -i inventory install_ubuntu.yml
+# Install requirements: ansible-galaxy collection install community.general
+# Run with: ansible-playbook -K install.yml
 - hosts: localhost
   connection: local
-  become: yes
+  become: no
   gather_facts: yes
   vars:
+    username: "{{ ansible_user_id }}"
     packages:
       - build-essential
       - curl
@@ -17,12 +19,14 @@
   tasks:
     - name: "Arch: Upgrade all installed packages"
       when: ansible_facts['distribution'] == 'Archlinux'
+      become: yes
       pacman:
         update_cache: yes
         upgrade: yes
 
     - name: "Arch: Install from package list"
       when: ansible_facts['distribution'] == 'Archlinux'
+      become: yes
       package:
         name: "{{ item }}"
         state: latest
@@ -30,6 +34,7 @@
 
     - name: "Ubuntu: Update apt cache, install dependencies and upgrade all installed packages"
       when: ansible_facts['distribution'] == 'Ubuntu'
+      become: yes
       apt:
         update_cache: yes
         state: latest
@@ -38,19 +43,27 @@
     - name: "Ubuntu: Install brew"
       become: no
       when: ansible_facts['distribution'] == 'Ubuntu'
-      shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      shell: NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       args:
-        creates: /home/{{ ansible_user_id }}/.linuxbrew
+        creates: /home/linuxbrew/.linuxbrew
 
-    - name: "Ubuntu: Install neovim and terraform with brew"
+    - name: "Ubuntu: Add brew to PATH"
       become: no
       when: ansible_facts['distribution'] == 'Ubuntu'
-      shell: /home/{{ ansible_user_id }}/.linuxbrew/bin/brew install {{ item }}
+      lineinfile:
+        path: /home/{{ username }}/.bashrc
+        line: 'eval /home/linuxbrew/.linuxbrew/bin/brew shellenv'
+
+    - name: "Ubuntu: Install brew packages"
+      become: no
+      when: ansible_facts['distribution'] == 'Ubuntu'
+      shell: /home/linuxbrew/.linuxbrew/bin/brew install {{ item }}
       args:
-        creates: "/home/{{ ansible_user_id }}/.linuxbrew/bin/{{ item }}"
+        creates: "/home/linuxbrew/.linuxbrew/bin/{{ item }}"
       with_items:
         - nvim
         - terraform
+        - fzf
 
     # Dotfile symlinking tasks
     - name: "Create symlinks for home directory dotfiles"
@@ -96,3 +109,16 @@
         - { src: "xfce4/terminal/terminalrc", dest: "xfce4/terminal/terminalrc" }
         - { src: "xfce4/terminal/accels.scm", dest: "xfce4/terminal/accels.scm" }
         - { src: "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml", dest: "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml" }
+
+    - name: "Change user shell to zsh"
+      become: yes
+      user:
+        name: "{{ username }}"
+        shell: /usr/bin/zsh
+
+    - name: "Ubuntu: Add brew to PATH"
+      become: no
+      when: ansible_facts['distribution'] == 'Ubuntu'
+      lineinfile:
+        path: /home/{{ username }}/.zshrc
+        line: 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)'

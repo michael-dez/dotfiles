@@ -35,6 +35,15 @@ if [ ! -d "/home/$USER/.oh-my-zsh" ]; then
   echo "Installing oh-my-zsh for user $USER..."
   /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
   git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+fi
+
+if [ ! -d "/home/$USER/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ]; then
+  echo "Installing zsh-syntax-highlighting for user $USER..."
+  git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+fi
+
+if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k" ]; then
+  echo "Installing powerlevel10k for user $USER..."
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 fi
 
@@ -53,7 +62,7 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git vi-mode fzf colored-man-pages aws kubectl zsh-syntax-highlighting)
+plugins=(git vi-mode fzf aws kubectl zsh-syntax-highlighting)
 source $ZSH/oh-my-zsh.sh
 
 # Set keymap for laptop on xorg if setxkbmap is available
