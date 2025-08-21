@@ -83,23 +83,22 @@ require("lazy").setup({
     "williamboman/mason.nvim",
     config = function()
       require("mason").setup()
-    end,
-  },
-  {
-    "williamboman/mason-lspconfig.nvim",
-    dependencies = { "williamboman/mason.nvim" },
-    config = function()
-      require("mason-lspconfig").setup({
-        ensure_installed = { "pyright", "gopls", "terraformls" },
-        automatic_installation = true,
-      })
+      -- Auto-install language servers
+      local mason_registry = require("mason-registry")
+      local servers = { "pyright", "gopls", "terraform-ls" }
+      
+      for _, server in ipairs(servers) do
+        if not mason_registry.is_installed(server) then
+          vim.cmd("MasonInstall " .. server)
+        end
+      end
     end,
   },
 
   -- LSP
   {
     "neovim/nvim-lspconfig",
-    dependencies = { "williamboman/mason-lspconfig.nvim" },
+    dependencies = { "williamboman/mason.nvim" },
     config = function()
       local ok_cmp, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
       local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -107,9 +106,11 @@ require("lazy").setup({
         capabilities = cmp_nvim_lsp.default_capabilities(capabilities)
       end
 
-      require("lspconfig").pyright.setup({ capabilities = capabilities })
-      require("lspconfig").gopls.setup({ capabilities = capabilities })
-      require("lspconfig").terraformls.setup({ capabilities = capabilities })
+      -- Setup language servers
+      local lspconfig = require("lspconfig")
+      lspconfig.pyright.setup({ capabilities = capabilities })
+      lspconfig.gopls.setup({ capabilities = capabilities })
+      lspconfig.terraformls.setup({ capabilities = capabilities })
 
       -- Go import organization on save
       vim.api.nvim_create_autocmd("BufWritePre", {
