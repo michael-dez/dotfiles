@@ -78,9 +78,28 @@ require("lazy").setup({
     end,
   },
 
+  -- Mason
+  {
+    "williamboman/mason.nvim",
+    config = function()
+      require("mason").setup()
+    end,
+  },
+  {
+    "williamboman/mason-lspconfig.nvim",
+    dependencies = { "williamboman/mason.nvim" },
+    config = function()
+      require("mason-lspconfig").setup({
+        ensure_installed = { "pyright", "gopls", "terraformls" },
+        automatic_installation = true,
+      })
+    end,
+  },
+
   -- LSP
   {
     "neovim/nvim-lspconfig",
+    dependencies = { "williamboman/mason-lspconfig.nvim" },
     config = function()
       local ok_cmp, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
       local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -90,6 +109,7 @@ require("lazy").setup({
 
       require("lspconfig").pyright.setup({ capabilities = capabilities })
       require("lspconfig").gopls.setup({ capabilities = capabilities })
+      require("lspconfig").terraformls.setup({ capabilities = capabilities })
 
       -- Go import organization on save
       vim.api.nvim_create_autocmd("BufWritePre", {

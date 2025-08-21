@@ -10,6 +10,8 @@ export KUBECONFIG=~/.kube/config
 # golang
 export GOPATH="/home/${USER}/go"
 export PATH="${PATH}:/home/${USER}/go/bin"
+# npm
+export NPM_CONFIG_PREFIX="$HOME/.local"
 # Preferred editor for local and remote sessions
  if [[ -n $SSH_CONNECTION ]]; then
    export EDITOR='vim'
