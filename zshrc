@@ -78,15 +78,19 @@ else
 fi
 
 # export Pacman package list if distro is EndeavourOS or Arch Linux
-if [[ "$DISTRO" == "EndeavourOS Linux" || "$DISTRO" == "Arch Linux" ]]; then
+if [[ "$NAME" == "EndeavourOS Linux" || "$DISTRO" == "Arch Linux" ]]; then
   pkgs=/home/${USER}/repos/dotfiles/bak
   pacman -Qqe | grep -Fvx "$(pacman -Qqm)" > ${pkgs}/pacman-export.txt
   pacman -Qqm > ${pkgs}/aur-export.txt
   pip3 freeze > ${pkgs}/pip3-export.txt
 fi
 
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
+# if distribution is Ubuntu, set FZF_BASE
+if [[ "$NAME" == "Ubuntu" ]]; then
+  export FZF_BASE="/home/linuxbrew/.linuxbrew/bin/"
+else
+  export FZF_BASE="/usr/bin/fzf"
+fi
 
 # Set personal aliases, overriding those provided by oh-my-zsh libs,
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh

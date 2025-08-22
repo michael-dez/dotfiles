@@ -85,8 +85,8 @@ require("lazy").setup({
       require("mason").setup()
       -- Auto-install language servers
       local mason_registry = require("mason-registry")
-      local servers = { "pyright", "gopls", "terraform-ls" }
-      
+      local servers = { "pyright", "gopls", "terraform-ls", "lua-language-server" }
+
       for _, server in ipairs(servers) do
         if not mason_registry.is_installed(server) then
           vim.cmd("MasonInstall " .. server)
@@ -222,6 +222,9 @@ require("lazy").setup({
   }
 })
 
+-- General settings
+local os_id_like = os.getenv("ID_LIKE") or ""
+
 -- Leader and basic timings
 vim.g.mapleader = " "
 vim.opt.timeoutlen = 200
@@ -261,7 +264,11 @@ vim.g.floaterm_height = 0.8
 vim.g.mkdp_auto_start = 1
 vim.g.mkdp_refresh_slow = 0
 vim.g.mkdp_filetypes = { "markdown" }
-vim.g.mkdp_browser = "/usr/bin/firefox"
+if os_id_like == "arch"
+    vim.g.mkdp_browser = "/usr/bin/firefox"
+elseif os_id_like == "debian" then
+    vim.g.mkdp_browser = "google-chrome"
+end
 
 -- JSONPath register
 vim.g.jsonpath_register = "+"
