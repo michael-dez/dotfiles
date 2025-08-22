@@ -111,6 +111,7 @@ require("lazy").setup({
       lspconfig.pyright.setup({ capabilities = capabilities })
       lspconfig.gopls.setup({ capabilities = capabilities })
       lspconfig.terraformls.setup({ capabilities = capabilities })
+      lspconfig.lua_ls.setup({ capabilities = capabilities })
 
       -- Go import organization on save
       vim.api.nvim_create_autocmd("BufWritePre", {
@@ -264,7 +265,7 @@ vim.g.floaterm_height = 0.8
 vim.g.mkdp_auto_start = 1
 vim.g.mkdp_refresh_slow = 0
 vim.g.mkdp_filetypes = { "markdown" }
-if os_id_like == "arch"
+if os_id_like == "arch" then
     vim.g.mkdp_browser = "/usr/bin/firefox"
 elseif os_id_like == "debian" then
     vim.g.mkdp_browser = "google-chrome"
