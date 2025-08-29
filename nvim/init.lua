@@ -85,7 +85,8 @@ require("lazy").setup({
       require("mason").setup()
       -- Auto-install language servers
       local mason_registry = require("mason-registry")
-      local servers = { "pyright", "gopls", "terraform-ls", "lua-language-server" }
+      --local servers = { "pyright", "gopls", "terraform-ls", "lua-language-server" }
+      local servers = { "pyright", "terraform-ls", "lua-language-server" }
 
       for _, server in ipairs(servers) do
         if not mason_registry.is_installed(server) then
@@ -109,7 +110,7 @@ require("lazy").setup({
       -- Setup language servers
       local lspconfig = require("lspconfig")
       lspconfig.pyright.setup({ capabilities = capabilities })
-      lspconfig.gopls.setup({ capabilities = capabilities })
+      --lspconfig.gopls.setup({ capabilities = capabilities })
       lspconfig.terraformls.setup({ capabilities = capabilities })
       lspconfig.lua_ls.setup({ capabilities = capabilities })
 
