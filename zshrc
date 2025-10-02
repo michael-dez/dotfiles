@@ -86,7 +86,7 @@ if [[ "$NAME" == "EndeavourOS Linux" || "$DISTRO" == "Arch Linux" ]]; then
 fi
 
 # if distribution is Ubuntu, set FZF_BASE
-if [[ "$NAME" == "ubuntu" ]]; then
+if [[ "$NAME" == "Ubuntu" ]]; then
   export FZF_BASE="/home/linuxbrew/.linuxbrew/bin/"
   eval $(/home/linux/.linuxbrew/bin/brew shellenv)
 else
