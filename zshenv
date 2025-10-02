@@ -18,3 +18,5 @@ export NPM_CONFIG_PREFIX="$HOME/.local"
  else
    export EDITOR='nvim'
  fi
+# GPG
+export GPG_TTY=$(tty)
