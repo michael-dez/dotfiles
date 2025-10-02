@@ -266,10 +266,10 @@ vim.g.floaterm_height = 0.8
 vim.g.mkdp_auto_start = 1
 vim.g.mkdp_refresh_slow = 0
 vim.g.mkdp_filetypes = { "markdown" }
-if os_id_like == "arch" then
+if os_id_like == "debian" then
+    vim.g.mkdp_browser = "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
+else
     vim.g.mkdp_browser = "/usr/bin/firefox"
-elseif os_id_like == "debian" then
-    vim.g.mkdp_browser = "google-chrome"
 end
 
 -- JSONPath register
