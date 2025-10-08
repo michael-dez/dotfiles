@@ -88,7 +88,7 @@ fi
 # if distribution is Ubuntu, set FZF_BASE
 if [[ "$NAME" == "Ubuntu" ]]; then
   export FZF_BASE="/home/linuxbrew/.linuxbrew/bin/"
-  eval $(/home/linux/.linuxbrew/bin/brew shellenv)
+  eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 else
   export FZF_BASE="/usr/bin/fzf"
 fi
