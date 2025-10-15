@@ -54,16 +54,35 @@
         path: /home/{{ username }}/.bashrc
         line: 'eval /home/linuxbrew/.linuxbrew/bin/brew shellenv'
 
+    - name: "Ubuntu: Add hashicorp tap for packer"
+      become: no
+      when: ansible_facts['distribution'] == 'Ubuntu'
+      shell: /home/linuxbrew/.linuxbrew/bin/brew tap hashicorp/tap
+      args:
+        creates: "/home/linuxbrew/.linuxbrew/Library/Taps/hashicorp/homebrew-tap"
+
     - name: "Ubuntu: Install brew packages"
       become: no
       when: ansible_facts['distribution'] == 'Ubuntu'
-      shell: /home/linuxbrew/.linuxbrew/bin/brew install {{ item }}
+      shell: /home/linuxbrew/.linuxbrew/bin/brew install {{ item.package }}
       args:
-        creates: "/home/linuxbrew/.linuxbrew/bin/{{ item }}"
+        creates: "/home/linuxbrew/.linuxbrew/bin/{{ item.binary }}"
       with_items:
-        - nvim
-        - terraform
-        - fzf
+        - { package: "nvim", binary: "nvim" }
+        - { package: "terraform", binary: "terraform" }
+        - { package: "fzf", binary: "fzf" }
+        - { package: "ripgrep", binary: "rg" }
+        - { package: "azure-cli", binary: "az" }
+        - { package: "hashicorp/tap/packer", binary: "packer" }
+
+    - name: "Install npm packages globally"
+      become: no
+      npm:
+        name: "{{ item }}"
+        global: yes
+        state: present
+      with_items:
+        - yarn
 
     # Dotfile symlinking tasks
     - name: "Create symlinks for home directory dotfiles"
