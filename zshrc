@@ -33,7 +33,7 @@ fi
 # Install oh-my-zsh if not already installed
 if [ ! -d "/home/$USER/.oh-my-zsh" ]; then
   echo "Installing oh-my-zsh for user $USER..."
-  /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc
   git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 fi
 
