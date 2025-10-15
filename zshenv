@@ -1,3 +1,11 @@
+# Get distro name
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+  export DISTRO=$NAME
+else
+  export DISTRO="unknown"
+fi
+
 export PATH=$PATH:/usr/local/go/bin
 export PATH="$HOME/.local/bin:$PATH"
 # Install Ruby Gems to ~/gems

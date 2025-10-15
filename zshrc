@@ -101,8 +101,10 @@ fi
 
 # if distribution is Ubuntu, set FZF_BASE
 if [[ "$NAME" == "Ubuntu" ]]; then
-  export FZF_BASE="/home/linuxbrew/.linuxbrew/bin/"
+  brew_bin="/home/linuxbrew/.linuxbrew/bin/"
+  export FZF_BASE="${brew_bin}"
   eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+  export PATH="$brew_bin:$PATH"
 else
   export FZF_BASE="/usr/bin/fzf"
 fi
