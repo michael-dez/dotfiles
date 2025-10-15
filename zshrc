@@ -47,6 +47,20 @@ if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k" ]; then
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 fi
 
+# Install z (jump around) if not available
+if ! command -v z >/dev/null 2>&1 && [ ! -f "/usr/share/z/z.sh" ] && [ ! -f "$HOME/.local/share/z/z.sh" ]; then
+  echo "Installing z"
+  mkdir -p "$HOME/.local/share/z"
+  curl -fsSL https://raw.githubusercontent.com/rupa/z/master/z.sh -o "$HOME/.local/share/z/z.sh"
+fi
+
+# Source z (jump around) from available location
+if [ -f /usr/share/z/z.sh ]; then
+  . /usr/share/z/z.sh
+elif [ -f "$HOME/.local/share/z/z.sh" ]; then
+  . "$HOME/.local/share/z/z.sh"
+fi
+
 # Path to your oh-my-zsh installation.
 export ZSH="/home/$USER/.oh-my-zsh"
 
@@ -144,4 +158,3 @@ autoload -Uz bashcompinit && bashcompinit
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-[ -d /usr/share/z ] && . /usr/share/z/z.sh
