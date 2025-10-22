@@ -81,6 +81,7 @@
         name: "{{ item }}"
         global: yes
         state: present
+        path: /home/{{ username }}/.local
       with_items:
         - yarn
 
