@@ -108,11 +108,11 @@ require("lazy").setup({
       end
 
       -- Setup language servers
-      local lspconfig = require("lspconfig")
-      lspconfig.pyright.setup({ capabilities = capabilities })
+      --local lspconfig = require("lspconfig")
+      --lspconfig.pyright.setup({ capabilities = capabilities })
       --lspconfig.gopls.setup({ capabilities = capabilities })
-      lspconfig.terraformls.setup({ capabilities = capabilities })
-      lspconfig.lua_ls.setup({ capabilities = capabilities })
+      --lspconfig.terraformls.setup({ capabilities = capabilities })
+      --lspconfig.lua_ls.setup({ capabilities = capabilities })
 
       -- Go import organization on save
       vim.api.nvim_create_autocmd("BufWritePre", {
