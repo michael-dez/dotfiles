@@ -67,15 +67,7 @@ require("lazy").setup({
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
-    dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
-    config = function()
-      require("nvim-treesitter.configs").setup({
-        highlight = { enable = true },
-        incremental_selection = { enable = true },
-        -- Kept from original; textobjects config is minimal here
-        textobjects = { enable = true },
-      })
-    end,
+    lazy = false,
   },
 
   -- Mason
