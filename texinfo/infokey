@@ -1,8 +1,6 @@
 #info
-gg       first-node
-G       last-node
-\mb     beginning-of-node
-\me     end-of-node
+gg      beginning-of-node
+G       end-of-node
 j       next-line
 k       prev-line
 
@@ -15,13 +13,11 @@ w       scroll-backward-page-only-set-window
 ^j      down-line
 ^k      up-line
 
-d       scroll-half-screen-down
 ^d      scroll-half-screen-down
-u       scroll-half-screen-up
 ^u      scroll-half-screen-up
 
-^n     next-node
-^p     prev-node
+n     next-node
+p     prev-node
 ^xu     up-node
 '       last-node
 gg      top-node

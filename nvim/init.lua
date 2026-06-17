@@ -27,7 +27,7 @@ require("lazy").setup({
   { "unblevable/quick-scope" },
 
   -- Tools
-  { "github/copilot.vim" },
+  --{ "github/copilot.vim" },
   { "mattboehm/vim-unstack" },
   { "mogelbrod/vim-jsonpath" },
   { "mbbill/undotree" },
@@ -67,6 +67,7 @@ require("lazy").setup({
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
+    branch = "main",
     lazy = false,
   },
 
@@ -386,8 +387,9 @@ map("n", "<leader><leader>", ":Telescope buffers<CR>", silent)
 map("n", "<leader>/m", ":Telescope marks<CR>", silent)
 
 -- ZK
-map("v", "<leader>zn", ":'<,'>ZkNewFromTitleSelection<CR>", { silent = true })
+map("v", "<leader>zn", ":'<,'>ZkNewFromTitleSelection<CR>", silent)
 map("n", "<leader>z", ":ZkNotes<CR>", silent)
+map("n", "<leader>zb", ":ZkBuffers<CR>", silent)
 
 -- Window navigation
 map("n", "<C-h>", "<C-w>h", silent)
