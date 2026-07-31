@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 
 <channel name="thunar" version="1.0">
   <property name="last-view" type="string" value="ThunarIconView"/>
@@ -10,4 +10,6 @@
   <property name="last-side-pane" type="string" value="ThunarShortcutsPane"/>
   <property name="misc-single-click" type="bool" value="false"/>
   <property name="shortcuts-icon-size" type="string" value="THUNAR_ICON_SIZE_24"/>
+  <property name="last-details-view-zoom-level" type="string" value="THUNAR_ZOOM_LEVEL_38_PERCENT"/>
+  <property name="last-details-view-column-widths" type="string" value="50,50,124,50,50,111,50,50,1271,50,50,69,50,140"/>
 </channel>

@@ -121,6 +121,7 @@ bindkey -M vicmd v edit-command-line
 alias p3="python3"
 alias F="sudo !!"
 alias vi="$EDITOR"
+alias view="$EDITOR -R"
 alias s3="aws s3"
 #alias k="minikube kubectl --"
 alias zshrc="$EDITOR ~/.zshrc"
