@@ -218,7 +218,11 @@ require("lazy").setup({
 })
 
 -- General settings
-local os_id_like = os.getenv("ID_LIKE") or ""
+-- WSL detection for the markdown-preview browser below. This replaces a test
+-- on os.getenv("ID_LIKE"), which was always nil: zshrc/zshenv source
+-- /etc/os-release but export only DISTRO, so ID_LIKE never reached the
+-- environment and the Chrome-on-Windows branch was unreachable on every host.
+local is_wsl = (os.getenv("WSL_DISTRO_NAME") ~= nil)
 
 -- Leader and basic timings
 vim.g.mapleader = " "
@@ -259,10 +263,12 @@ vim.g.floaterm_height = 0.8
 vim.g.mkdp_auto_start = 1
 vim.g.mkdp_refresh_slow = 0
 vim.g.mkdp_filetypes = { "markdown" }
-if os_id_like == "debian" then
+if is_wsl then
     vim.g.mkdp_browser = "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
+elseif vim.fn.executable("firefox") == 1 then
+    vim.g.mkdp_browser = vim.fn.exepath("firefox")
 else
-    vim.g.mkdp_browser = "/usr/bin/firefox"
+    vim.g.mkdp_browser = ""
 end
 
 -- JSONPath register

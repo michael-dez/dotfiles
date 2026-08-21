@@ -1,0 +1,18 @@
+# bcpc -- per-host shell config. Linked to ~/.zshrc.local by install.yml when
+# os-release ID is cachyos, and sourced from the end of zshrc.
+# Interactive-shell scope only. Session-wide env (Wayland/NVIDIA/toolkit) lives
+# in hypr/bcpc.conf, because GUI apps launched from the Noctalia launcher never
+# source ~/.zshrc.
+
+# --- CUDA / local inference ---
+export CUDA_HOME=/opt/cuda
+export PATH="$CUDA_HOME/bin:$PATH"
+
+# Host-specific addresses and mount points intentionally live in an untracked
+# file, not here -- this repo is published. Put them in ~/.zshrc.private and
+# they will be picked up below.
+[ -f ~/.zshrc.private ] && . ~/.zshrc.private
+
+# NOTE: gs is already `git status` in zshrc, so this is gs-run, not gs.
+# Resolution/refresh are placeholders until the monitor is confirmed.
+alias gs-run='gamescope -W 2560 -H 1440 -r 165 -f --'

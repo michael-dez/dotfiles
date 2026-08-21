@@ -1,4 +1,4 @@
-# Configures WSL Ubuntu environment
+# Configures WSL Ubuntu, EndeavourOS (BCLT) and CachyOS (bcpc) environments.
 # Install requirements: ansible-galaxy collection install community.general
 # Run with: ansible-playbook -K install.yml
 - hosts: localhost
@@ -7,6 +7,11 @@
   gather_facts: yes
   vars:
     username: "{{ ansible_user_id }}"
+    # ansible_distribution reports "Archlinux" on every Arch derivative that
+    # ships /etc/arch-release -- including EndeavourOS, and presumably CachyOS.
+    # It cannot tell the hosts apart, so read ID from os-release for the
+    # host-specific arms. Handles both quoted and unquoted values.
+    os_id: "{{ (lookup('file', '/etc/os-release') | regex_search('^ID=\"?([a-z0-9._-]+)\"?', '\\1', multiline=True) | first) | default('unknown', true) }}"
     packages:
       - build-essential
       - curl
@@ -24,13 +29,25 @@
         update_cache: yes
         upgrade: yes
 
-    - name: "Arch: Install from package list"
-      when: ansible_facts['distribution'] == 'Archlinux'
+    # Per-host manifest. The unsuffixed bak/pacman-export.txt is an
+    # EndeavourOS X11/i3/LightDM list; installing it on bcpc would drag a
+    # second display manager onto a Hyprland box. zshrc writes
+    # pacman-export-<hostname>.txt, and this only restores a matching one.
+    - name: "Arch: Look for this host's package manifest"
+      when: ansible_facts['os_family'] == 'Archlinux'
+      stat:
+        path: "{{ playbook_dir }}/bak/pacman-export-{{ ansible_hostname }}.txt"
+      register: pkglist
+
+    - name: "Arch: Install from this host's package list"
+      when:
+        - ansible_facts['os_family'] == 'Archlinux'
+        - pkglist.stat.exists | default(false)
       become: yes
       package:
         name: "{{ item }}"
         state: latest
-      with_items: "{{ lookup('file', 'bak/pacman-export.txt').splitlines() }}"
+      with_items: "{{ lookup('file', pkglist.stat.path).splitlines() }}"
 
     - name: "Ubuntu: Update apt cache, install dependencies and upgrade all installed packages"
       when: ansible_facts['distribution'] == 'Ubuntu'
@@ -85,10 +102,13 @@
         - yarn
 
     # Dotfile symlinking tasks
+    # playbook_dir, not ansible_env.PWD: PWD is wherever you invoked
+    # ansible-playbook from, so running it outside the repo produced symlinks
+    # pointing at paths that do not exist.
     - name: "Create symlinks for home directory dotfiles"
       become: no
       file:
-        src: "{{ ansible_env.PWD }}/{{ item }}"
+        src: "{{ playbook_dir }}/{{ item }}"
         dest: "{{ ansible_env.HOME }}/.{{ item }}"
         state: link
         force: yes
@@ -97,7 +117,6 @@
         - tmux.conf
         - zshenv
         - zshrc
-        - zshrc.pre-oh-my-zsh
         - p10k.zsh
 
     - name: "Create config directories for XDG config files"
@@ -116,7 +135,7 @@
     - name: "Create symlinks for XDG config files"
       become: no
       file:
-        src: "{{ ansible_env.PWD }}/{{ item.src }}"
+        src: "{{ playbook_dir }}/{{ item.src }}"
         dest: "{{ ansible_env.HOME }}/.config/{{ item.dest }}"
         state: link
         force: yes
@@ -128,6 +147,41 @@
         - { src: "xfce4/terminal/terminalrc", dest: "xfce4/terminal/terminalrc" }
         - { src: "xfce4/terminal/accels.scm", dest: "xfce4/terminal/accels.scm" }
         - { src: "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml", dest: "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml" }
+
+    # --- bcpc / CachyOS only: Wayland desktop configs ---------------------
+    # Guarded on os-release ID, which is the only fact that distinguishes
+    # CachyOS from the other Arch derivatives. No-op on WSL and EndeavourOS.
+    - name: "bcpc: Create config directories for Wayland desktop"
+      become: no
+      when: os_id == 'cachyos'
+      file:
+        path: "{{ ansible_env.HOME }}/.config/{{ item }}"
+        state: directory
+        mode: '0755'
+      with_items:
+        - hypr
+        - mangohud
+
+    - name: "bcpc: Symlink per-host shell config"
+      become: no
+      when: os_id == 'cachyos'
+      file:
+        src: "{{ playbook_dir }}/zshrc.bcpc"
+        dest: "{{ ansible_env.HOME }}/.zshrc.local"
+        state: link
+        force: yes
+
+    - name: "bcpc: Symlink Wayland desktop configs"
+      become: no
+      when: os_id == 'cachyos'
+      file:
+        src: "{{ playbook_dir }}/{{ item.src }}"
+        dest: "{{ ansible_env.HOME }}/.config/{{ item.dest }}"
+        state: link
+        force: yes
+      with_items:
+        - { src: "hypr/bcpc.conf", dest: "hypr/bcpc.conf" }
+        - { src: "mangohud/MangoHud.conf", dest: "mangohud/MangoHud.conf" }
 
     - name: "Change user shell to zsh"
       become: yes

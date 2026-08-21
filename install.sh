@@ -38,7 +38,6 @@ _link_home_files vimrc
 _link_home_files tmux.conf
 _link_home_files zshenv
 _link_home_files zshrc
-_link_home_files zshrc.pre-oh-my-zsh
 _link_home_files p10k.zsh
 
 _link_xdg_files nvim init.lua
@@ -48,4 +47,14 @@ _link_xdg_files texinfo infokey
 _link_xdg_files xfce4 terminal/terminalrc
 _link_xdg_files xfce4 terminal/accels.scm
 _link_xdg_files xfce4 xfconf/xfce-perchannel-xml/xfce4-terminal.xml
+
+# --- bcpc / CachyOS only: Wayland desktop configs -------------------------
+# Guarded on os-release so this is a no-op on Ubuntu-WSL and EndeavourOS.
+# Keyed on ID rather than hostname so it survives a rename of the box.
+[ -f /etc/os-release ] && . /etc/os-release
+if [ "${ID:-}" = "cachyos" ]; then
+    _link_home_files zshrc.bcpc
+    _link_xdg_files hypr bcpc.conf
+    _link_xdg_files mangohud MangoHud.conf
+fi
 # TODO: add option to restore from bak folder

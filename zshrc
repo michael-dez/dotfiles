@@ -79,8 +79,10 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 plugins=(git vi-mode fzf aws kubectl zsh-syntax-highlighting)
 source $ZSH/oh-my-zsh.sh
 
-# Set keymap for laptop on xorg if setxkbmap is available
-command -v setxkbmap >/dev/null 2>&1 && \
+# Set keymap on X11 only. Under Wayland the compositor owns keyboard layout
+# (Hyprland: input { kb_options = ctrl:nocaps } -- see hypr/hyprland.conf).
+# xorg-xwayland pulls in setxkbmap, so the command test alone is not enough.
+[ -z "$WAYLAND_DISPLAY" ] && command -v setxkbmap >/dev/null 2>&1 && \
 setxkbmap -layout us  -option ctrl:nocaps
 
 # Store distribution name as variable
@@ -91,12 +93,21 @@ else
   export DISTRO="unknown"
 fi
 
-# export Pacman package list if distro is EndeavourOS or Arch Linux
-if [[ "$NAME" == "EndeavourOS Linux" || "$DISTRO" == "Arch Linux" ]]; then
-  pkgs=/home/${USER}/repos/dotfiles/bak
-  pacman -Qqe | grep -Fvx "$(pacman -Qqm)" > ${pkgs}/pacman-export.txt
-  pacman -Qqm > ${pkgs}/aur-export.txt
-  pip3 freeze > ${pkgs}/pip3-export.txt
+# Export package lists on Arch-family distros.
+# Keyed on ID/ID_LIKE rather than NAME: this box reports NAME="EndeavourOS"
+# (not "EndeavourOS Linux"), so the old NAME test never matched and these
+# exports had not run since 2025-08. ID_LIKE=arch also covers CachyOS.
+if [[ "${ID:-}" == "arch" || "${ID_LIKE:-}" == *arch* ]]; then
+  pkgs="${DOTFILES:-$HOME/repos/dotfiles}/bak"
+  # Per-host filenames: bcpc and BCLT must not overwrite each other's manifest.
+  host="$(uname -n)"
+  # Refresh at most once a day rather than on every single shell startup.
+  if [ ! -f "${pkgs}/pacman-export-${host}.txt" ] || \
+     [ -n "$(find "${pkgs}/pacman-export-${host}.txt" -mtime +1 2>/dev/null)" ]; then
+    pacman -Qqe | grep -Fvx "$(pacman -Qqm)" > "${pkgs}/pacman-export-${host}.txt"
+    pacman -Qqm > "${pkgs}/aur-export-${host}.txt"
+    command -v pip3 >/dev/null 2>&1 && pip3 freeze > "${pkgs}/pip3-export-${host}.txt"
+  fi
 fi
 
 # if distribution is Ubuntu, set FZF_BASE
@@ -146,8 +157,11 @@ alias arec="asciinema rec"
 alias a2gif='sudo docker run --rm -v "${PWD}":/data asciinema/asciicast2gif'
 ## run Microsoft Teams flatpak
 alias teams='flatpak run com.microsoft.Teams'
-## set brightness for Thinkpad t14 gen1 arg=0-1.0
-alias light='xrandr --output eDP --brightness'
+## screen brightness, arg=0-1.0 on X11 / 0-100 on Wayland
+## ThinkPad T14 gen1 internal panel via xrandr (X11 only)
+[ -z "$WAYLAND_DISPLAY" ] && alias light='xrandr --output eDP --brightness'
+## desktop monitor over DDC/CI (bcpc)
+[ -n "$WAYLAND_DISPLAY" ] && alias light='ddcutil setvcp 10'
 ## search notes to edit
 alias ze='zk edit -i'
 alias zi='zk index'
@@ -161,3 +175,10 @@ autoload -Uz bashcompinit && bashcompinit
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Per-host overrides. The installer decides which per-host file to link here
+# based on os-release ID, so this is a fixed name rather than $(uname -n):
+# WSL-on-bcpc reports uname -n as "BCPC" and CachyOS-on-bcpc as "bcpc", which
+# would differ only by case and collide on a case-insensitive checkout.
+# No-op until the installer links something.
+[[ ! -f ~/.zshrc.local ]] || source ~/.zshrc.local
