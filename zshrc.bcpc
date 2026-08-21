@@ -13,6 +13,10 @@ export PATH="$CUDA_HOME/bin:$PATH"
 # they will be picked up below.
 [ -f ~/.zshrc.private ] && . ~/.zshrc.private
 
-# NOTE: gs is already `git status` in zshrc, so this is gs-run, not gs.
-# Resolution/refresh are placeholders until the monitor is confirmed.
-alias gs-run='gamescope -W 2560 -H 1440 -r 165 -f --'
+# NOTE: gs is already `git status` in zshrc, so these are gs-*, not gs.
+# Resolutions confirmed from EDID. Refresh rates deliberately omitted: the
+# EDID preferred-mode block reports 60 Hz for both because the high-refresh
+# modes come from the driver. Confirm with `hyprctl monitors` from a running
+# session, then add -r here.
+alias gs-wide='gamescope -W 3440 -H 1440 -f --'
+alias gs-fast='gamescope -W 1920 -H 1080 -f --'

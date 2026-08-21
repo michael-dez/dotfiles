@@ -30,6 +30,7 @@ add_dod_certs() {
         certdir=/usr/local/share/ca-certificates
         update='update-ca-certificates'
     elif [[ ${ID:-} =~ (arch) ||
+        ${ID:-} == cachyos ||
         ${ID_LIKE:-} =~ (arch) ]]; then
         certdir=/etc/ca-certificates/trust-source/anchors
         update='update-ca-trust'
