@@ -14,9 +14,17 @@ export PATH="$CUDA_HOME/bin:$PATH"
 [ -f ~/.zshrc.private ] && . ~/.zshrc.private
 
 # NOTE: gs is already `git status` in zshrc, so these are gs-*, not gs.
-# Resolutions confirmed from EDID. Refresh rates deliberately omitted: the
-# EDID preferred-mode block reports 60 Hz for both because the high-refresh
-# modes come from the driver. Confirm with `hyprctl monitors` from a running
-# session, then add -r here.
-alias gs-wide='gamescope -W 3440 -H 1440 -f --'
-alias gs-fast='gamescope -W 1920 -H 1080 -f --'
+# Modes confirmed from a live session via `hyprctl monitors`:
+#   DP-3  BenQ ZOWIE XL2586X   1920x1080@539.56   (left)
+#   DP-1  Alienware AW3425DWM  3440x1440@179.99   (right)
+#
+# -O/--prefer-output only takes effect on the DRM backend (a standalone
+# gamescope session). Running NESTED inside Hyprland, gamescope is just another
+# window and Hyprland decides where it lands -- workspace 1 is bound to DP-3, so
+# launching from workspace 1 puts it on the fast panel. -O is harmless either
+# way and correct if you ever use gamescope-session.
+alias gs-fast='gamescope -W 1920 -H 1080 -r 540 -O DP-3,DP-1 -f --'
+alias gs-wide='gamescope -W 3440 -H 1440 -r 180 -O DP-1,DP-3 -f --'
+
+# Steam per-game launch options for the 540Hz panel:
+#   gamescope -W 1920 -H 1080 -r 540 -O DP-3,DP-1 -f -- %command%

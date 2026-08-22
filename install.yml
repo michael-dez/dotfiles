@@ -161,6 +161,7 @@
       with_items:
         - hypr
         - mangohud
+        - kitty
 
     - name: "bcpc: Symlink per-host shell config"
       become: no
@@ -180,7 +181,11 @@
         state: link
         force: yes
       with_items:
+        - { src: "hypr/hyprland.conf", dest: "hypr/hyprland.conf" }
         - { src: "hypr/bcpc.conf", dest: "hypr/bcpc.conf" }
+        - { src: "hypr/keybinds.conf", dest: "hypr/keybinds.conf" }
+        - { src: "hypr/decoration.conf", dest: "hypr/decoration.conf" }
+        - { src: "kitty/kitty.conf", dest: "kitty/kitty.conf" }
         - { src: "mangohud/MangoHud.conf", dest: "mangohud/MangoHud.conf" }
 
     - name: "Change user shell to zsh"
