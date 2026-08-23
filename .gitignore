@@ -2,3 +2,6 @@
 vim/vim/plugged/*
 vim/vim/undodir/*
 zsh/oh-my-zsh
+
+# Python bytecode from syntax-checking the hooks.
+__pycache__/

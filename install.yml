@@ -178,6 +178,25 @@
         state: link
         force: yes
 
+    # Ansible's file/with_items only creates what is listed; it has no concept
+    # of an item that used to be there. Removing these explicitly is what keeps
+    # a machine that ran an older install.yml from being left with dangling
+    # hyprland.conf symlinks alongside the Lua ones -- which matters more than
+    # usual here, because Hyprland would have two plausible config files to
+    # choose between.
+    - name: "bcpc: Remove superseded hyprlang and stream-focus symlinks"
+      become: no
+      when: is_cachyos | bool
+      file:
+        path: "{{ ansible_env.HOME }}/.config/{{ item }}"
+        state: absent
+      with_items:
+        - hypr/hyprland.conf
+        - hypr/bcpc.conf
+        - hypr/keybinds.conf
+        - hypr/decoration.conf
+        - sunshine/hooks/stream-focus.py
+
     - name: "bcpc: Symlink Wayland desktop configs"
       become: no
       when: is_cachyos | bool
@@ -187,10 +206,16 @@
         state: link
         force: yes
       with_items:
-        - { src: "hypr/hyprland.conf", dest: "hypr/hyprland.conf" }
-        - { src: "hypr/bcpc.conf", dest: "hypr/bcpc.conf" }
-        - { src: "hypr/keybinds.conf", dest: "hypr/keybinds.conf" }
-        - { src: "hypr/decoration.conf", dest: "hypr/decoration.conf" }
+        # Hyprland config is Lua: upstream deprecated hyprlang in 0.55. Each
+        # file is a separate require() scope, so an error in one does not take
+        # the rest of the config down. The stale .conf symlinks are removed by
+        # the task above -- Ansible does not clean up items dropped from a list.
+        - { src: "hypr/hyprland.lua", dest: "hypr/hyprland.lua" }
+        - { src: "hypr/bcpc.lua", dest: "hypr/bcpc.lua" }
+        - { src: "hypr/keybinds.lua", dest: "hypr/keybinds.lua" }
+        - { src: "hypr/decoration.lua", dest: "hypr/decoration.lua" }
+        - { src: "hypr/gaming.lua", dest: "hypr/gaming.lua" }
+        - { src: "hypr/stream.lua", dest: "hypr/stream.lua" }
         - { src: "kitty/kitty.conf", dest: "kitty/kitty.conf" }
         - { src: "mangohud/MangoHud.conf", dest: "mangohud/MangoHud.conf" }
         # Sunshine rewrites sunshine.conf and apps.json when saved from its Web
@@ -204,7 +229,6 @@
         - { src: "sunshine/hooks/hyprctl-env.sh", dest: "sunshine/hooks/hyprctl-env.sh" }
         - { src: "sunshine/hooks/stream-start.sh", dest: "sunshine/hooks/stream-start.sh" }
         - { src: "sunshine/hooks/stream-end.sh", dest: "sunshine/hooks/stream-end.sh" }
-        - { src: "sunshine/hooks/stream-focus.py", dest: "sunshine/hooks/stream-focus.py" }
         - { src: "sunshine/hooks/launch-bigpicture.sh", dest: "sunshine/hooks/launch-bigpicture.sh" }
         - { src: "pipewire/sunshine-sink.conf", dest: "pipewire/pipewire.conf.d/sunshine-sink.conf" }
 
