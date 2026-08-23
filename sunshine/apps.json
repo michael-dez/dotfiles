@@ -1,0 +1,25 @@
+{
+  "env": {
+    "PATH": "$(PATH):$(HOME)/.local/bin",
+    "PULSE_SINK": "sunshine-stream"
+  },
+  "apps": [
+    {
+      "name": "Desktop",
+      "image-path": "desktop.png"
+    },
+    {
+      "name": "Steam Big Picture",
+      "detached": [
+        "setsid /home/mike/.config/sunshine/hooks/launch-bigpicture.sh"
+      ],
+      "prep-cmd": [
+        {
+          "do": "",
+          "undo": "setsid steam steam://close/bigpicture"
+        }
+      ],
+      "image-path": "steam.png"
+    }
+  ]
+}

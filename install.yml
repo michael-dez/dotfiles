@@ -8,10 +8,13 @@
   vars:
     username: "{{ ansible_user_id }}"
     # ansible_distribution reports "Archlinux" on every Arch derivative that
-    # ships /etc/arch-release -- including EndeavourOS, and presumably CachyOS.
-    # It cannot tell the hosts apart, so read ID from os-release for the
-    # host-specific arms. Handles both quoted and unquoted values.
-    os_id: "{{ (lookup('file', '/etc/os-release') | regex_search('^ID=\"?([a-z0-9._-]+)\"?', '\\1', multiline=True) | first) | default('unknown', true) }}"
+    # ships /etc/arch-release, so it cannot tell the hosts apart. Reading ID
+    # from /etc/os-release does not help either: CachyOS ships Arch's own
+    # os-release verbatim, ID=arch and all, so that check silently skipped
+    # every bcpc task it guarded. The mirrorlist dropped in by the
+    # cachyos-mirrorlist package is present on any CachyOS install and on no
+    # plain Arch or EndeavourOS one, which makes it the honest marker.
+    is_cachyos: "{{ '/etc/pacman.d/cachyos-mirrorlist' is exists }}"
     packages:
       - build-essential
       - curl
@@ -149,11 +152,11 @@
         - { src: "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml", dest: "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml" }
 
     # --- bcpc / CachyOS only: Wayland desktop configs ---------------------
-    # Guarded on os-release ID, which is the only fact that distinguishes
-    # CachyOS from the other Arch derivatives. No-op on WSL and EndeavourOS.
+    # Guarded on is_cachyos; see the comment on that var for why the obvious
+    # os-release check does not work. No-op on WSL and EndeavourOS.
     - name: "bcpc: Create config directories for Wayland desktop"
       become: no
-      when: os_id == 'cachyos'
+      when: is_cachyos | bool
       file:
         path: "{{ ansible_env.HOME }}/.config/{{ item }}"
         state: directory
@@ -162,10 +165,13 @@
         - hypr
         - mangohud
         - kitty
+        - sunshine
+        - sunshine/hooks
+        - pipewire/pipewire.conf.d
 
     - name: "bcpc: Symlink per-host shell config"
       become: no
-      when: os_id == 'cachyos'
+      when: is_cachyos | bool
       file:
         src: "{{ playbook_dir }}/zshrc.bcpc"
         dest: "{{ ansible_env.HOME }}/.zshrc.local"
@@ -174,7 +180,7 @@
 
     - name: "bcpc: Symlink Wayland desktop configs"
       become: no
-      when: os_id == 'cachyos'
+      when: is_cachyos | bool
       file:
         src: "{{ playbook_dir }}/{{ item.src }}"
         dest: "{{ ansible_env.HOME }}/.config/{{ item.dest }}"
@@ -187,6 +193,34 @@
         - { src: "hypr/decoration.conf", dest: "hypr/decoration.conf" }
         - { src: "kitty/kitty.conf", dest: "kitty/kitty.conf" }
         - { src: "mangohud/MangoHud.conf", dest: "mangohud/MangoHud.conf" }
+        # Sunshine rewrites sunshine.conf and apps.json when saved from its Web
+        # UI. Linking rather than copying means those edits write through into
+        # this repo and show up in `git status`, instead of drifting silently.
+        # sunshine_state.json and credentials/ are deliberately NOT linked:
+        # they hold the Web UI password hash and paired client certificates,
+        # and this repo is published.
+        - { src: "sunshine/sunshine.conf", dest: "sunshine/sunshine.conf" }
+        - { src: "sunshine/apps.json", dest: "sunshine/apps.json" }
+        - { src: "sunshine/hooks/hyprctl-env.sh", dest: "sunshine/hooks/hyprctl-env.sh" }
+        - { src: "sunshine/hooks/stream-start.sh", dest: "sunshine/hooks/stream-start.sh" }
+        - { src: "sunshine/hooks/stream-end.sh", dest: "sunshine/hooks/stream-end.sh" }
+        - { src: "sunshine/hooks/stream-focus.py", dest: "sunshine/hooks/stream-focus.py" }
+        - { src: "sunshine/hooks/launch-bigpicture.sh", dest: "sunshine/hooks/launch-bigpicture.sh" }
+        - { src: "pipewire/sunshine-sink.conf", dest: "pipewire/pipewire.conf.d/sunshine-sink.conf" }
+
+    # Sunshine logs "setpriority failed for nice -15: Permission denied" on
+    # every stream because RLIMIT_NICE is 0 for ordinary users, so it cannot
+    # raise its capture and encode threads above normal priority -- which shows
+    # up as frame pacing jitter under load. CachyOS already ships
+    # /etc/security/limits.d/10-gamemode.conf granting "@gamemode - nice -10",
+    # so joining the group is the whole fix. Takes effect at next login.
+    - name: "bcpc: Add user to the gamemode group so Sunshine can raise thread priority"
+      become: yes
+      when: is_cachyos | bool
+      user:
+        name: "{{ username }}"
+        groups: gamemode
+        append: yes
 
     - name: "Change user shell to zsh"
       become: yes
