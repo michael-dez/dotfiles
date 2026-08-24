@@ -144,6 +144,7 @@
         force: yes
       with_items:
         - { src: "nvim/init.lua", dest: "nvim/init.lua" }
+        - { src: "nvim/lua", dest: "nvim/lua" }
         - { src: "picom/picom.conf", dest: "picom/picom.conf" }
         - { src: "picom/picom-animations.conf", dest: "picom/picom-animations.conf" }
         - { src: "texinfo/infokey", dest: "texinfo/infokey" }

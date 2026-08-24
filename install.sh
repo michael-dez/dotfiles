@@ -41,6 +41,7 @@ _link_home_files zshrc
 _link_home_files p10k.zsh
 
 _link_xdg_files nvim init.lua
+_link_xdg_files nvim lua
 _link_xdg_files picom picom.conf
 _link_xdg_files picom picom-animations.conf
 _link_xdg_files texinfo infokey
