@@ -21,6 +21,18 @@ hl.bind(mod .. " + n",      hl.dsp.exec_cmd("thunar"))
 -- --- window management ----------------------------------------------------
 hl.bind(mod .. " + q",         hl.dsp.window.close())
 hl.bind(mod .. " + f",         hl.dsp.window.fullscreen({ mode = "fullscreen" }))
+
+-- Force-kill, for when MOD5+q above is being ignored. `close` is only a polite
+-- request -- an xdg_toplevel close event, or WM_DELETE_WINDOW for an XWayland
+-- client -- and a hung game never gets round to servicing it. `kill` is
+-- forcekillactive: SIGKILL straight to the focused window's PID, verified by
+-- dispatching it at a throwaway kitty and watching the shell report 137.
+--
+-- Scope note, so this is not mistaken for more of a safety net than it is: it
+-- rescues a wedged *client*. It does nothing for a wedged *system*, because a
+-- compositor short of memory or CPU cannot run the bind in the first place.
+-- Alt+SysRq+F is the escape hatch for that case -- see system/99-sysrq.conf.
+hl.bind(mod .. " + SHIFT + q", hl.dsp.window.kill())
 hl.bind(mod .. " + SHIFT + space", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mod .. " + space",     hl.dsp.window.cycle_next())                             -- ~ focus mode_toggle
 

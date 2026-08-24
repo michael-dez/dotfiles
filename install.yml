@@ -246,6 +246,124 @@
         groups: gamemode
         append: yes
 
+    # --- memory pressure ------------------------------------------------------
+    # bcpc was built by hand rather than by CachyOS's graphical installer, so it
+    # never received cachyos-settings and so never received the zram that is
+    # meant to stand in for disk swap on CachyOS -- it ran with no swap at all.
+    # A runaway allocation on a swapless machine does not fail cleanly: it puts
+    # the kernel into a reclaim livelock where the only thing left to evict is
+    # the running executables' own text, and the desktop stops responding long
+    # before the OOM killer decides it is entitled to act. These four files are
+    # the layers that address that; each explains its own share in its header.
+    #
+    # Copied, not symlinked -- the one place in this playbook that departs from
+    # the symlink convention. /etc/systemd/zram-generator.conf is consumed by a
+    # systemd generator in early boot and the sysctl drop-ins by
+    # systemd-sysctl.service, both well before /home (a separate btrfs
+    # subvolume) is mounted. A symlink into ~/repos/dotfiles would resolve to
+    # nothing at exactly the moment these need to be readable.
+    - name: "bcpc: Install memory-pressure tooling"
+      become: yes
+      when: is_cachyos | bool
+      package:
+        name:
+          - earlyoom
+          - zram-generator
+        state: present
+
+    # `copy` does not create missing parent directories, and nothing on a fresh
+    # box will have made this one.
+    - name: "bcpc: Create the earlyoom drop-in directory"
+      become: yes
+      when: is_cachyos | bool
+      file:
+        path: /etc/systemd/system/earlyoom.service.d
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: "bcpc: Install sysrq, zram and earlyoom configuration"
+      become: yes
+      when: is_cachyos | bool
+      copy:
+        src: "{{ playbook_dir }}/{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: root
+        group: root
+        mode: "0644"
+      with_items:
+        - { src: "system/99-sysrq.conf",       dest: "/etc/sysctl.d/99-sysrq.conf" }
+        - { src: "system/99-zram.conf",        dest: "/etc/sysctl.d/99-zram.conf" }
+        - { src: "system/zram-generator.conf", dest: "/etc/systemd/zram-generator.conf" }
+        # A unit drop-in rather than /etc/default/earlyoom, which pacman owns
+        # and would shadow with a .pacnew on upgrade. See the file's header.
+        - { src: "system/earlyoom-override.conf", dest: "/etc/systemd/system/earlyoom.service.d/override.conf" }
+      register: mem_conf
+
+    - name: "bcpc: Apply sysctl settings without rebooting"
+      become: yes
+      when:
+        - is_cachyos | bool
+        - mem_conf is changed
+      command: sysctl --system
+
+    # daemon_reload so the drop-in above is picked up, and `restarted` rather
+    # than `started` because the arguments live on the ExecStart line: a running
+    # instance would otherwise keep the ones it was launched with.
+    - name: "bcpc: Enable earlyoom"
+      become: yes
+      when: is_cachyos | bool
+      systemd:
+        name: earlyoom
+        daemon_reload: yes
+        enabled: yes
+        state: restarted
+
+    # zram-generator is a generator, not a daemon: it synthesises
+    # systemd-zram-setup@zram0.service from the config file during early boot.
+    # daemon_reload re-runs generators, which is what makes the device
+    # available without a reboot.
+    - name: "bcpc: Bring up zram"
+      become: yes
+      when: is_cachyos | bool
+      systemd:
+        daemon_reload: yes
+        name: systemd-zram-setup@zram0.service
+        enabled: yes
+        state: started
+
+    # When Sunshine starts Steam itself, what Steam launches inherits Sunshine's
+    # cgroup, and systemd's default OOMPolicy=stop for services means one
+    # OOM-killed descendant stops the unit. A user unit, so this one is a
+    # symlink like the rest of ~/.config.
+    - name: "bcpc: Create the Sunshine systemd drop-in directory"
+      become: no
+      when: is_cachyos | bool
+      file:
+        path: "{{ ansible_env.HOME }}/.config/systemd/user/app-dev.lizardbyte.app.Sunshine.service.d"
+        state: directory
+        mode: "0755"
+
+    - name: "bcpc: Symlink the Sunshine OOMPolicy drop-in"
+      become: no
+      when: is_cachyos | bool
+      file:
+        src: "{{ playbook_dir }}/sunshine/systemd/oom.conf"
+        dest: "{{ ansible_env.HOME }}/.config/systemd/user/app-dev.lizardbyte.app.Sunshine.service.d/oom.conf"
+        state: link
+        force: yes
+      register: sunshine_dropin
+
+    - name: "bcpc: Reload the user systemd manager so the drop-in takes effect"
+      become: no
+      when:
+        - is_cachyos | bool
+        - sunshine_dropin is changed
+      systemd:
+        scope: user
+        daemon_reload: yes
+
     - name: "Change user shell to zsh"
       become: yes
       user:
