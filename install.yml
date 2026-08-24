@@ -217,6 +217,14 @@
         - { src: "hypr/gaming.lua", dest: "hypr/gaming.lua" }
         - { src: "hypr/stream.lua", dest: "hypr/stream.lua" }
         - { src: "kitty/kitty.conf", dest: "kitty/kitty.conf" }
+        # colors.conf is a static Iceberg export that kitty.conf includes by a
+        # path relative to ~/.config/kitty, so it has to be linked alongside
+        # kitty.conf rather than instead of it. It is the pre-Noctalia
+        # fallback; the generated themes/noctalia.conf included after it wins
+        # once Noctalia has applied its templates. Not linking it is only a
+        # warning to kitty, never a hard error -- see the block comment in
+        # kitty/kitty.conf for the full ordering argument.
+        - { src: "kitty/colors.conf", dest: "kitty/colors.conf" }
         - { src: "mangohud/MangoHud.conf", dest: "mangohud/MangoHud.conf" }
         # Sunshine rewrites sunshine.conf and apps.json when saved from its Web
         # UI. Linking rather than copying means those edits write through into
@@ -231,6 +239,70 @@
         - { src: "sunshine/hooks/stream-end.sh", dest: "sunshine/hooks/stream-end.sh" }
         - { src: "sunshine/hooks/launch-bigpicture.sh", dest: "sunshine/hooks/launch-bigpicture.sh" }
         - { src: "pipewire/sunshine-sink.conf", dest: "pipewire/pipewire.conf.d/sunshine-sink.conf" }
+
+    # Noctalia keeps its config under ~/.local/state, not ~/.config -- the
+    # ~/.config/noctalia directory it also creates stays empty -- so these
+    # cannot ride along on the XDG task above.
+    - name: "bcpc: Create state directory for Noctalia"
+      become: no
+      when: is_cachyos | bool
+      file:
+        path: "{{ ansible_env.HOME }}/.local/state/noctalia"
+        state: directory
+        mode: '0755'
+
+    # settings.toml is the only hand-authored file in that directory, and
+    # Noctalia rewrites it on every settings change. Linking it is safe despite
+    # that write being an atomic replace: Noctalia resolves the symlink first
+    # and renames the new file over the target in this repo, so the link itself
+    # survives the save and GUI changes land in `git status` instead of
+    # drifting -- the same bargain as sunshine.conf above. (The replaced file
+    # is a new inode each time, which git does not care about but `ln`-based
+    # tooling watching for inode stability would.)
+    #
+    # Nothing else in ~/.local/state/noctalia is linked, because nothing else
+    # there is config: clipboard/ is encrypted clipboard history,
+    # notification_history.json is a log, community-palettes/ and
+    # community-templates/ are re-downloadable caches, and state.toml holds
+    # credential-migration flags. This repo is published; none of that belongs
+    # in it.
+    - name: "bcpc: Symlink Noctalia settings"
+      become: no
+      when: is_cachyos | bool
+      file:
+        src: "{{ playbook_dir }}/noctalia/settings.toml"
+        dest: "{{ ansible_env.HOME }}/.local/state/noctalia/settings.toml"
+        state: link
+        force: yes
+
+    # Custom palettes are the one Noctalia thing that does live under
+    # ~/.config/noctalia -- specifically ~/.config/noctalia/palettes/ -- which
+    # is why that directory exists but is otherwise empty.
+    #
+    # Iceberg.json is the source of truth for this machine's colors. Noctalia
+    # renders it into every enabled template on each theme change, which is how
+    # kitty gets its palette: settings.toml enables the built-in kitty template
+    # under [theme.templates], and that writes ~/.config/kitty/themes/
+    # noctalia.conf. Editing this file and re-applying is the way to change the
+    # scheme everywhere at once, rather than editing each app's colors.
+    - name: "bcpc: Create Noctalia custom palette directory"
+      become: no
+      when: is_cachyos | bool
+      file:
+        path: "{{ ansible_env.HOME }}/.config/noctalia/palettes"
+        state: directory
+        mode: '0755'
+
+    - name: "bcpc: Symlink Noctalia custom palettes"
+      become: no
+      when: is_cachyos | bool
+      file:
+        src: "{{ playbook_dir }}/noctalia/palettes/{{ item }}"
+        dest: "{{ ansible_env.HOME }}/.config/noctalia/palettes/{{ item }}"
+        state: link
+        force: yes
+      with_items:
+        - Iceberg.json
 
     # Sunshine logs "setpriority failed for nice -15: Permission denied" on
     # every stream because RLIMIT_NICE is 0 for ordinary users, so it cannot
