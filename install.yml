@@ -215,6 +215,7 @@
         - { src: "hypr/bcpc.lua", dest: "hypr/bcpc.lua" }
         - { src: "hypr/keybinds.lua", dest: "hypr/keybinds.lua" }
         - { src: "hypr/decoration.lua", dest: "hypr/decoration.lua" }
+        - { src: "hypr/animations.lua", dest: "hypr/animations.lua" }
         - { src: "hypr/gaming.lua", dest: "hypr/gaming.lua" }
         - { src: "hypr/stream.lua", dest: "hypr/stream.lua" }
         - { src: "kitty/kitty.conf", dest: "kitty/kitty.conf" }

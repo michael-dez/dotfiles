@@ -53,7 +53,8 @@ end)
 -- Last wins, so these override the defaults above. Paths resolve relative to
 -- this file's directory (~/.config/hypr), and Lua's module lookup follows the
 -- symlinks install.yml creates.
-require("decoration")   -- blur and rounding
+require("decoration")   -- blur, dim, shadow, border colour, steam opt-out
+require("animations")   -- curves and timings
 require("bcpc")         -- host input + environment
 require("gaming")       -- local play on DP-3 / DP-1
 require("stream")       -- workspace 11, the headless output, Moonlight
