@@ -164,7 +164,7 @@
         mode: '0755'
       with_items:
         - hypr
-        - mangohud
+        - MangoHud
         - kitty
         - sunshine
         - sunshine/hooks
@@ -227,7 +227,7 @@
         # warning to kitty, never a hard error -- see the block comment in
         # kitty/kitty.conf for the full ordering argument.
         - { src: "kitty/colors.conf", dest: "kitty/colors.conf" }
-        - { src: "mangohud/MangoHud.conf", dest: "mangohud/MangoHud.conf" }
+        - { src: "MangoHud/MangoHud.conf", dest: "MangoHud/MangoHud.conf" }
         # Sunshine rewrites sunshine.conf and apps.json when saved from its Web
         # UI. Linking rather than copying means those edits write through into
         # this repo and show up in `git status`, instead of drifting silently.

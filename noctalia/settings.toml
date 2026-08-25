@@ -178,7 +178,13 @@ palette_source = "community"
 path = "/home/mike/Pictures/Wallpapers/landscape002.jpg"
 theme_mode = "dark"
 
+[widget.clipboard]
+enabled = false
+
 [widget.control-center]
+enabled = false
+
+[widget.launcher]
 enabled = false
 
 [widget.media]
@@ -186,3 +192,6 @@ enabled = false
 
 [widget.tray]
 drawer = true
+
+[widget.wallpaper]
+enabled = false

@@ -84,13 +84,24 @@ hl.config({
 -- play (gaming.lua, DP-3/DP-1) and a Moonlight stream (stream.lua, workspace
 -- 11), so unlike those two files it is scoped to the game, not the display.
 --
--- Two rules rather than one because `match` is an AND -- every prop in a single
--- match table must hold -- and the two ways to spot a game are alternatives:
+-- Class, not content. `content = "game"` comes from the Wayland content-type
+-- protocol, and a Proton title is an XWayland client that never sets it --
+-- verified against a running game, which reports contentType "none" (see the
+-- header in gaming.lua). The content variant that used to sit beside this one
+-- matched nothing, so a Steam game still dimmed when it lost focus; it is gone
+-- rather than kept as decoration, because a rule that cannot fire is worse than
+-- no rule -- it reads as coverage.
 --
---   content = "game"      the Wayland content-type protocol, which an XWayland
---                         title may never set (see the CAVEAT in gaming.lua)
---   class = "^steam_app_" what Steam names a Proton/XWayland title, which is
---                         exactly the case `content` tends to miss
+-- Anchored at BOTH ends, and that is load-bearing. `match.class` is a full
+-- match, not a search: a bare `^steam_app_` prefix matches nothing at all,
+-- silently. Verified by putting both forms on one window at the same reload --
+--
+--     ^steam_app_      -> no_dim stayed false
+--     ^steam_app_.*$   -> no_dim became true
+--
+-- read back with `hyprctl getprop <regex> no_dim`, which is the only honest
+-- oracle here: an unknown or misspelled rule prop is accepted without error and
+-- then ignored, so a rule that does nothing looks exactly like one that works.
 --
 -- `^steam$` -- the client's own library and store windows -- is deliberately
 -- not here; those are desktop windows and should look like desktop windows.
@@ -100,19 +111,14 @@ hl.config({
 -- "leave it alone" form. In practice a fullscreen game has no border to colour
 -- (gaming.lua sets border_size = 0, stream.lua sets no_border), so only a
 -- *windowed* Steam game sees the muted blue.
--- Each gets its own name because a name identifies a rule -- it is the handle
--- `set_enabled()` works through -- so two rules cannot share one.
-for suffix, match in pairs({ content = { content = "game" },
-                             class   = { class = "^steam_app_" } }) do
-    hl.window_rule({
-        name  = "steam-game-chrome-" .. suffix,
-        match = match,
+hl.window_rule({
+    name  = "steam-game-chrome",
+    match = { class = "^steam_app_.*$" },
 
-        no_dim    = true,
-        no_shadow = true,
-        no_anim   = true,
-    })
-end
+    no_dim    = true,
+    no_shadow = true,
+    no_anim   = true,
+})
 
 -- No per-window rule is needed to turn blur ON. Hyprland blurs behind any
 -- translucent surface whenever decoration.blur.enabled is true, so kitty gets
