@@ -146,12 +146,11 @@ corner_radius_scale = 2.0
 builtin = "Ayu"
 community_palette = "Tokyo Night Moon"
 custom_palette = "Iceberg"
-mode = "dark"
 source = "custom"
 wallpaper_scheme = "muted"
 
     [theme.templates]
-    builtin_ids = [ "kitty" ]
+    builtin_ids = [ "btop", "kitty" ]
     enable_builtin_templates = true
 
 [wallpaper.default]

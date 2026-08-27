@@ -1,0 +1,22 @@
+# DoD root certificates, without which every internal HTTPS endpoint on the
+# work network fails to verify.
+#
+# The idempotency lives in the script, not here. It downloads the current DISA
+# bundle, stages the certificates it unpacks, and compares them against what is
+# already in /usr/local/share/ca-certificates before writing anything -- so a
+# second run installs nothing and, more to the point, does not re-run
+# update-ca-certificates. It reports which of the two happened through its exit
+# status, diff-style: 0 for "store already matched", 2 for "certificates
+# changed and the store was rebuilt". That is what keeps this task from
+# reporting changed on every run, which is the usual fate of a `command:` that
+# wraps an installer.
+#
+# The script autodetects the trust store from /etc/os-release and handles Arch
+# too, so it can be lifted into the bcpc role unchanged if that host ever needs
+# these certificates.
+- name: "Ubuntu: Import DoD root certificates into the system trust store"
+  become: yes
+  command: "{{ playbook_dir }}/scripts/add-dod-certs.sh"
+  register: dod_certs
+  changed_when: dod_certs.rc == 2
+  failed_when: dod_certs.rc not in [0, 2]

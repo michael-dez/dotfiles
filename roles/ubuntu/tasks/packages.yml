@@ -1,0 +1,25 @@
+- name: "Ubuntu: Update apt cache, install dependencies and upgrade all installed packages"
+  become: yes
+  apt:
+    update_cache: yes
+    state: latest
+    name: "{{ ubuntu_packages }}"
+
+- name: "Ubuntu: Install brew"
+  become: no
+  shell: NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  args:
+    creates: /home/linuxbrew/.linuxbrew
+
+- name: "Ubuntu: Add hashicorp tap for packer"
+  become: no
+  shell: /home/linuxbrew/.linuxbrew/bin/brew tap hashicorp/tap
+  args:
+    creates: "/home/linuxbrew/.linuxbrew/Library/Taps/hashicorp/homebrew-tap"
+
+- name: "Ubuntu: Install brew packages"
+  become: no
+  shell: /home/linuxbrew/.linuxbrew/bin/brew install {{ item.package }}
+  args:
+    creates: "/home/linuxbrew/.linuxbrew/bin/{{ item.binary }}"
+  with_items: "{{ ubuntu_brew_packages }}"

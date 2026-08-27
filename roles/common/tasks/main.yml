@@ -1,0 +1,8 @@
+# Everything that is not specific to one host: the distro-agnostic package
+# work, and the dotfile symlinking that is the point of this repo.
+- name: "common: Install packages"
+  import_tasks: packages.yml
+  when: not (config_only | bool)
+
+- name: "common: Apply configuration"
+  import_tasks: config.yml

@@ -1,0 +1,29 @@
+# apt packages. build-essential makes this list Debian-specific, which is why
+# it lives here rather than in the common role.
+ubuntu_packages:
+  - build-essential
+  - curl
+  - git
+  - tmux
+  - unzip
+  - wget
+  - zsh
+  - npm
+  # The next three are what scripts/add-dod-certs.sh needs. gawk especially:
+  # the script renames each certificate with gensub(), a gawk extension, and
+  # Ubuntu's default awk is mawk, where that fails at runtime -- after the
+  # bundle has already been downloaded and split.
+  - gawk
+  - openssl
+  - ca-certificates
+
+# brew formulae, and the binary each one is expected to drop in
+# /home/linuxbrew/.linuxbrew/bin. The binary name is the creates: guard, so it
+# has to be the real command name rather than the formula name.
+ubuntu_brew_packages:
+  - { package: "nvim", binary: "nvim" }
+  - { package: "terraform", binary: "terraform" }
+  - { package: "fzf", binary: "fzf" }
+  - { package: "ripgrep", binary: "rg" }
+  - { package: "azure-cli", binary: "az" }
+  - { package: "hashicorp/tap/packer", binary: "packer" }

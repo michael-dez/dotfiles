@@ -1,11 +1,13 @@
 ansible
 base
 base-devel
+btop
 btrfs-assistant
 btrfs-progs
 cachyos-gaming-meta
 cachyos-keyring
 cachyos-mirrorlist
+cachyos-settings
 cachyos-v3-mirrorlist
 cachyos-v4-mirrorlist
 claude-desktop
@@ -17,6 +19,7 @@ earlyoom
 efibootmgr
 egl-wayland
 firefox
+fzf
 gamemode
 gamescope
 git
@@ -66,6 +69,8 @@ sunshine
 thunar
 ttf-meslo-nerd
 vim
+vlc
+vlc-plugins-all
 wget
 wireplumber
 wl-clipboard

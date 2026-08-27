@@ -1,0 +1,9 @@
+# CachyOS on bcpc: the Wayland desktop, the Sunshine streaming host and the
+# memory-pressure work. Gated as a whole by is_cachyos in install.yml -- see
+# the comment on that var for why the obvious os-release check does not work.
+- name: "bcpc: Install packages"
+  import_tasks: packages.yml
+  when: not (config_only | bool)
+
+- name: "bcpc: Apply configuration"
+  import_tasks: config.yml

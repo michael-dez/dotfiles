@@ -1,0 +1,16 @@
+# WSL Ubuntu -- the work box. Gated as a whole on ansible_distribution in
+# install.yml, so nothing in here needs its own distribution check.
+- name: "Ubuntu: Install packages"
+  import_tasks: packages.yml
+  when: not (config_only | bool)
+
+# Not packages, but it downloads a bundle from DISA and rewrites the system
+# trust store, so it belongs on the same side of the config_only line: the
+# point of that flag is a run that touches neither the network nor system
+# package state.
+- name: "Ubuntu: Import root certificates"
+  import_tasks: certs.yml
+  when: not (config_only | bool)
+
+- name: "Ubuntu: Apply configuration"
+  import_tasks: config.yml

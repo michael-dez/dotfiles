@@ -1,0 +1,20 @@
+# bash is not the login shell here, but WSL drops into it often enough
+# (`wsl.exe -e`, VS Code's server, cron) that brew has to be on its PATH there
+# too. Quoted command substitution, not the bare `eval /path/to/brew shellenv`
+# this used to be: that form evaluated the empty output of a command whose own
+# output went nowhere, so it set nothing at all.
+#
+# There is deliberately no matching task for ~/.zshrc. The common role links
+# that to zshrc in this repo, so a lineinfile against it writes *through the
+# symlink into the tracked file* and shows up as a repo modification on every
+# WSL run. It is also unnecessary: zshrc already runs brew shellenv itself
+# inside its `if [[ "$NAME" == "Ubuntu" ]]` block, alongside FZF_BASE.
+- name: "Ubuntu: Add brew to PATH for bash"
+  become: no
+  lineinfile:
+    path: /home/{{ username }}/.bashrc
+    # Matches the broken form as well, so a box that ran the old playbook has
+    # its line rewritten in place rather than gaining a second, contradictory
+    # one below it.
+    regexp: '^eval .*brew shellenv'
+    line: 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'

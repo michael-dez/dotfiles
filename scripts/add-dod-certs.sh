@@ -1,19 +1,53 @@
 #!/bin/bash
-# Imports DoD root certificates into Linux CA store
-# Version 0.4.2 updated 20250425 by AfroThundr
+# Imports DoD root certificates into the Linux CA store.
+# Based on version 0.4.2 (20250425) by AfroThundr -- locally modified.
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # For issues or updated versions of this script, browse to the following URL:
 # https://gist.github.com/AfroThundr3007730/ba99753dda66fc4abaf30fb5c0e5d012
 
-# Dependencies: curl gawk openssl unzip wget
+# Local changes, which need carrying forward if this is ever refreshed from
+# upstream:
+#
+#   * Idempotent. Upstream unconditionally rewrote every certificate and ran
+#     the trust-store update command on each invocation, which is the slow part
+#     and which made the Ansible task that calls this report a change forever.
+#     Certificates are now staged in the temp directory, normalised, and
+#     compared against what is already installed; only the ones that differ are
+#     written, and the update command runs only if at least one did.
+#
+#     One consequence worth expecting: the first run after this change rewrites
+#     every certificate, because upstream left the "subject=" header line that
+#     `openssl pkcs7 -print_certs` emits inside each .crt and this does not.
+#     The run after that is a no-op.
+#
+#   * Exit status distinguishes the two outcomes, following diff(1):
+#         0  trust store already matched the bundle, nothing written
+#         2  certificates were written and the trust store was updated
+#         1  error
+#
+#   * gawk is invoked by name and checked for up front. The rename step uses
+#     gensub(), which is a gawk extension: on Ubuntu, where the default awk is
+#     mawk, it failed at runtime with the download and the split already done.
+#
+#   * Runs as root and the trust store's writability are checked before the
+#     download rather than discovered after it.
+
+# Dependencies: cmp gawk openssl unzip wget
 
 set -euo pipefail
 shopt -s extdebug nullglob
 
 add_dod_certs() {
-    local bundle cert certdir file form tmpdir url update
+    local bundle cert certdir changed dep file form name tmpdir url update
     trap '[[ -d ${tmpdir:-} ]] && rm -fr $tmpdir' EXIT INT TERM
+
+    for dep in cmp gawk openssl unzip wget; do
+        command -v "$dep" >/dev/null || {
+            printf 'Missing required command: %s\n' "$dep" >&2
+            exit 1
+        }
+    done
 
     # Location of bundle from DISA site
     url='https://dl.dod.cyber.mil/wp-content/uploads/pki-pke/zip/'
@@ -45,6 +79,13 @@ add_dod_certs() {
         exit 1
     }
 
+    # Fail on this before spending a download on it, not after.
+    [[ $EUID -eq 0 ]] || {
+        printf 'Must run as root to write to %s.\n' "$certdir" >&2
+        exit 1
+    }
+    [[ -d $certdir ]] || mkdir -p "$certdir"
+
     # Extract the bundle
     wget -qP "${tmpdir:=$(mktemp -d)}" "$bundle"
     unzip -qj "$tmpdir"/"${bundle##*/}" -d "$tmpdir"
@@ -52,26 +93,53 @@ add_dod_certs() {
     # Check for existence of PEM or DER format p7b.
     for file in "$tmpdir"/*_{DoD,dod}{.,_}{pem,der}.p7b; do
         # Iterate over glob instead of testing directly (SC2144)
-        [[ -f ${file:-} ]] && 
+        [[ -f ${file:-} ]] &&
             form=${file%.*} && form=${form##*_} && form=${form##*.} && break
     done
-    [[ ${form:-} && ${file:-} ]] || { printf 'No bundles found!\n' && exit 1; }
+    [[ ${form:-} && ${file:-} ]] || { printf 'No bundles found!\n' >&2 && exit 1; }
 
-    # Convert the PKCS#7 bundle into individual PEM files
+    # Convert the PKCS#7 bundle into individual PEM files. Staged in their own
+    # subdirectory so the glob below cannot pick up the zip or the p7b.
+    mkdir -p "$tmpdir"/staged
     openssl pkcs7 -print_certs -inform "$form" -in "$file" |
-        awk -v d="$tmpdir" \
+        gawk -v d="$tmpdir"/staged \
             'BEGIN {c=0} /subject=/ {c++} {print > d "/cert." c ".pem"}'
 
-    # Rename the files based on the CA name
-    for cert in "$tmpdir"/cert.*.pem; do
-        mv "$cert" "$certdir"/"$(
+    # Name each staged certificate after its CA, then install only the ones
+    # that are missing or different. Comparing before copying is what makes a
+    # second run a no-op, and what keeps $update -- the expensive step -- from
+    # running when there is nothing to rebuild.
+    changed=0
+    for cert in "$tmpdir"/staged/cert.*.pem; do
+        name=$(
             openssl x509 -noout -subject -in "$cert" |
-                awk -F '(=|= )' '{print gensub(/ /, "_", "g", $NF)}'
-        )".crt
+                gawk -F '(=|= )' '{print gensub(/ /, "_", "g", $NF)}'
+        )
+        # Round-tripping through `openssl x509` drops the "subject=" header
+        # that -print_certs put at the top of each block. Without that the
+        # comparison would be against a file the trust store never sees the
+        # same way twice.
+        openssl x509 -in "$cert" -out "$tmpdir"/staged/"$name".crt
+
+        [[ -f $certdir/$name.crt ]] &&
+            cmp -s "$tmpdir"/staged/"$name".crt "$certdir/$name.crt" && continue
+
+        install -m 0644 "$tmpdir"/staged/"$name".crt "$certdir/$name.crt"
+        changed=$((changed + 1))
     done
 
     # Remove temp files and update certificate stores
-    rm -fr "$tmpdir" && $update
+    rm -fr "$tmpdir"
+
+    (( changed )) || {
+        printf 'DoD certificates already up to date in %s.\n' "$certdir"
+        return 0
+    }
+
+    printf 'Wrote %s DoD certificate(s) to %s, updating trust store.\n' \
+        "$changed" "$certdir"
+    $update
+    return 2
 }
 
 # Only execute if not being sourced

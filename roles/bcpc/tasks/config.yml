@@ -1,0 +1,312 @@
+# --- Wayland desktop ---------------------------------------------------
+- name: "bcpc: Create config directories for Wayland desktop"
+  become: no
+  file:
+    path: "{{ ansible_env.HOME }}/.config/{{ item }}"
+    state: directory
+    mode: '0755'
+  with_items:
+    - hypr
+    - MangoHud
+    - kitty
+    - sunshine
+    - sunshine/hooks
+    - pipewire/pipewire.conf.d
+
+- name: "bcpc: Symlink per-host shell config"
+  become: no
+  file:
+    src: "{{ playbook_dir }}/zshrc.bcpc"
+    dest: "{{ ansible_env.HOME }}/.zshrc.local"
+    state: link
+    force: yes
+
+# Ansible's file/with_items only creates what is listed; it has no concept
+# of an item that used to be there. Removing these explicitly is what keeps
+# a machine that ran an older install.yml from being left with dangling
+# hyprland.conf symlinks alongside the Lua ones -- which matters more than
+# usual here, because Hyprland would have two plausible config files to
+# choose between.
+- name: "bcpc: Remove superseded hyprlang and stream-focus symlinks"
+  become: no
+  file:
+    path: "{{ ansible_env.HOME }}/.config/{{ item }}"
+    state: absent
+  with_items:
+    - hypr/hyprland.conf
+    - hypr/bcpc.conf
+    - hypr/keybinds.conf
+    - hypr/decoration.conf
+    - sunshine/hooks/stream-focus.py
+
+- name: "bcpc: Symlink Wayland desktop configs"
+  become: no
+  file:
+    src: "{{ playbook_dir }}/{{ item.src }}"
+    dest: "{{ ansible_env.HOME }}/.config/{{ item.dest }}"
+    state: link
+    force: yes
+  with_items:
+    # Hyprland config is Lua: upstream deprecated hyprlang in 0.55. Each
+    # file is a separate require() scope, so an error in one does not take
+    # the rest of the config down. The stale .conf symlinks are removed by
+    # the task above -- Ansible does not clean up items dropped from a list.
+    - { src: "hypr/hyprland.lua", dest: "hypr/hyprland.lua" }
+    - { src: "hypr/bcpc.lua", dest: "hypr/bcpc.lua" }
+    - { src: "hypr/keybinds.lua", dest: "hypr/keybinds.lua" }
+    - { src: "hypr/decoration.lua", dest: "hypr/decoration.lua" }
+    - { src: "hypr/animations.lua", dest: "hypr/animations.lua" }
+    - { src: "hypr/gaming.lua", dest: "hypr/gaming.lua" }
+    - { src: "hypr/stream.lua", dest: "hypr/stream.lua" }
+    - { src: "kitty/kitty.conf", dest: "kitty/kitty.conf" }
+    # colors.conf is a static Iceberg export that kitty.conf includes by a
+    # path relative to ~/.config/kitty, so it has to be linked alongside
+    # kitty.conf rather than instead of it. It is the pre-Noctalia
+    # fallback; the generated themes/noctalia.conf included after it wins
+    # once Noctalia has applied its templates. Not linking it is only a
+    # warning to kitty, never a hard error -- see the block comment in
+    # kitty/kitty.conf for the full ordering argument.
+    - { src: "kitty/colors.conf", dest: "kitty/colors.conf" }
+    - { src: "MangoHud/MangoHud.conf", dest: "MangoHud/MangoHud.conf" }
+    # Sunshine rewrites sunshine.conf and apps.json when saved from its Web
+    # UI. Linking rather than copying means those edits write through into
+    # this repo and show up in `git status`, instead of drifting silently.
+    # sunshine_state.json and credentials/ are deliberately NOT linked:
+    # they hold the Web UI password hash and paired client certificates,
+    # and this repo is published.
+    - { src: "sunshine/sunshine.conf", dest: "sunshine/sunshine.conf" }
+    - { src: "sunshine/apps.json", dest: "sunshine/apps.json" }
+    - { src: "sunshine/hooks/hyprctl-env.sh", dest: "sunshine/hooks/hyprctl-env.sh" }
+    - { src: "sunshine/hooks/stream-start.sh", dest: "sunshine/hooks/stream-start.sh" }
+    - { src: "sunshine/hooks/stream-end.sh", dest: "sunshine/hooks/stream-end.sh" }
+    - { src: "sunshine/hooks/launch-bigpicture.sh", dest: "sunshine/hooks/launch-bigpicture.sh" }
+    - { src: "pipewire/sunshine-sink.conf", dest: "pipewire/pipewire.conf.d/sunshine-sink.conf" }
+
+# --- Noctalia ----------------------------------------------------------
+# Noctalia keeps its config under ~/.local/state, not ~/.config -- the
+# ~/.config/noctalia directory it also creates stays empty -- so these
+# cannot ride along on the XDG task in the common role.
+- name: "bcpc: Create state directory for Noctalia"
+  become: no
+  file:
+    path: "{{ ansible_env.HOME }}/.local/state/noctalia"
+    state: directory
+    mode: '0755'
+
+# settings.toml is the only hand-authored file in that directory, and
+# Noctalia rewrites it on every settings change. Linking it is safe despite
+# that write being an atomic replace: Noctalia resolves the symlink first
+# and renames the new file over the target in this repo, so the link itself
+# survives the save and GUI changes land in `git status` instead of
+# drifting -- the same bargain as sunshine.conf above. (The replaced file
+# is a new inode each time, which git does not care about but `ln`-based
+# tooling watching for inode stability would.)
+#
+# Nothing else in ~/.local/state/noctalia is linked, because nothing else
+# there is config: clipboard/ is encrypted clipboard history,
+# notification_history.json is a log, community-palettes/ and
+# community-templates/ are re-downloadable caches, and state.toml holds
+# credential-migration flags. This repo is published; none of that belongs
+# in it.
+- name: "bcpc: Symlink Noctalia settings"
+  become: no
+  file:
+    src: "{{ playbook_dir }}/noctalia/settings.toml"
+    dest: "{{ ansible_env.HOME }}/.local/state/noctalia/settings.toml"
+    state: link
+    force: yes
+
+# Custom palettes are the one Noctalia thing that does live under
+# ~/.config/noctalia -- specifically ~/.config/noctalia/palettes/ -- which
+# is why that directory exists but is otherwise empty.
+#
+# Iceberg.json is the source of truth for this machine's colors. Noctalia
+# renders it into every enabled template on each theme change, which is how
+# kitty gets its palette: settings.toml enables the built-in kitty template
+# under [theme.templates], and that writes ~/.config/kitty/themes/
+# noctalia.conf. Editing this file and re-applying is the way to change the
+# scheme everywhere at once, rather than editing each app's colors.
+- name: "bcpc: Create Noctalia custom palette directory"
+  become: no
+  file:
+    path: "{{ ansible_env.HOME }}/.config/noctalia/palettes"
+    state: directory
+    mode: '0755'
+
+- name: "bcpc: Symlink Noctalia custom palettes"
+  become: no
+  file:
+    src: "{{ playbook_dir }}/noctalia/palettes/{{ item }}"
+    dest: "{{ ansible_env.HOME }}/.config/noctalia/palettes/{{ item }}"
+    state: link
+    force: yes
+  with_items:
+    - Iceberg.json
+
+# --- Sunshine ----------------------------------------------------------
+# Sunshine logs "setpriority failed for nice -15: Permission denied" on
+# every stream because RLIMIT_NICE is 0 for ordinary users, so it cannot
+# raise its capture and encode threads above normal priority -- which shows
+# up as frame pacing jitter under load. CachyOS already ships
+# /etc/security/limits.d/10-gamemode.conf granting "@gamemode - nice -10",
+# so joining the group is the whole fix. Takes effect at next login.
+- name: "bcpc: Add user to the gamemode group so Sunshine can raise thread priority"
+  become: yes
+  user:
+    name: "{{ username }}"
+    groups: gamemode
+    append: yes
+
+# When Sunshine starts Steam itself, what Steam launches inherits Sunshine's
+# cgroup, and systemd's default OOMPolicy=stop for services means one
+# OOM-killed descendant stops the unit. A user unit, so this one is a
+# symlink like the rest of ~/.config.
+- name: "bcpc: Create the Sunshine systemd drop-in directory"
+  become: no
+  file:
+    path: "{{ ansible_env.HOME }}/.config/systemd/user/app-dev.lizardbyte.app.Sunshine.service.d"
+    state: directory
+    mode: "0755"
+
+- name: "bcpc: Symlink the Sunshine OOMPolicy drop-in"
+  become: no
+  file:
+    src: "{{ playbook_dir }}/sunshine/systemd/oom.conf"
+    dest: "{{ ansible_env.HOME }}/.config/systemd/user/app-dev.lizardbyte.app.Sunshine.service.d/oom.conf"
+    state: link
+    force: yes
+  register: sunshine_dropin
+
+- name: "bcpc: Reload the user systemd manager so the drop-in takes effect"
+  become: no
+  when: sunshine_dropin is changed
+  systemd:
+    scope: user
+    daemon_reload: yes
+
+# --- memory pressure ------------------------------------------------------
+# bcpc was built by hand rather than by CachyOS's graphical installer, so it
+# never received cachyos-settings and so never received the zram that is
+# meant to stand in for disk swap on CachyOS -- it ran with no swap at all.
+# A runaway allocation on a swapless machine does not fail cleanly: it puts
+# the kernel into a reclaim livelock where the only thing left to evict is
+# the running executables' own text, and the desktop stops responding long
+# before the OOM killer decides it is entitled to act. These four files are
+# the layers that address that; each explains its own share in its header.
+# The packages they need are in this role's packages.yml.
+#
+# Copied, not symlinked -- the one place in this playbook that departs from
+# the symlink convention. /etc/systemd/zram-generator.conf is consumed by a
+# systemd generator in early boot and the sysctl drop-ins by
+# systemd-sysctl.service, both well before /home (a separate btrfs
+# subvolume) is mounted. A symlink into ~/repos/dotfiles would resolve to
+# nothing at exactly the moment these need to be readable.
+
+# `copy` does not create missing parent directories, and nothing on a fresh
+# box will have made this one.
+- name: "bcpc: Create the earlyoom drop-in directory"
+  become: yes
+  file:
+    path: /etc/systemd/system/earlyoom.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "bcpc: Install sysrq, zram and earlyoom configuration"
+  become: yes
+  copy:
+    src: "{{ playbook_dir }}/{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  with_items:
+    - { src: "system/99-sysrq.conf",       dest: "/etc/sysctl.d/99-sysrq.conf" }
+    - { src: "system/99-zram.conf",        dest: "/etc/sysctl.d/99-zram.conf" }
+    - { src: "system/zram-generator.conf", dest: "/etc/systemd/zram-generator.conf" }
+    # A unit drop-in rather than /etc/default/earlyoom, which pacman owns
+    # and would shadow with a .pacnew on upgrade. See the file's header.
+    - { src: "system/earlyoom-override.conf", dest: "/etc/systemd/system/earlyoom.service.d/override.conf" }
+    # NOT nvidia.conf. An exact name match against cachyos-settings'
+    # /usr/lib/modprobe.d/nvidia.conf suppresses that file wholesale rather
+    # than merging with it. See the file's header.
+    - { src: "system/nvidia-bcpc.conf",    dest: "/etc/modprobe.d/nvidia-bcpc.conf" }
+  register: mem_conf
+
+# The file this replaces was hand-written at install time and owned by no
+# package (`pacman -Qo` reported it unowned), so nothing else will ever
+# clean it up. Left in place it keeps its exact-name collision with
+# cachyos-settings and silently suppresses the distro's NVIDIA defaults --
+# including NVreg_InitializeSystemMemoryAllocations=0, which is the value
+# this host now wants. Removal has to be explicit: `copy` above writes the
+# new name but has no opinion about the old one.
+- name: "bcpc: Remove the pre-cachyos-settings NVIDIA modprobe config"
+  become: yes
+  file:
+    path: /etc/modprobe.d/nvidia.conf
+    state: absent
+  register: stale_nvidia_conf
+
+# A reboot on its own is NOT enough, which is the trap this task exists to
+# close. /etc/mkinitcpio.conf carries
+# MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm), so nvidia is loaded
+# out of the initramfs before the real root is mounted, and the `modconf`
+# hook bakes a *copy* of /etc/modprobe.d and /usr/lib/modprobe.d into that
+# image. Until the image is rebuilt, the on-disk files this playbook just
+# wrote are not the files the module actually reads.
+#
+# Observed exactly once, which is why it is worth this much comment: the
+# first run installed cachyos-settings (whose pacman hook rebuilt the
+# initramfs at 11:33) and only then removed the colliding
+# /etc/modprobe.d/nvidia.conf at 11:39. The rebuild therefore captured the
+# image mid-migration, with the old file still present and still shadowing
+# /usr/lib/modprobe.d/nvidia.conf. The 11:41 reboot booted that snapshot,
+# /proc/driver/nvidia/params reported InitializeSystemMemoryAllocations: 1,
+# and every file on disk looked correct. `lsinitcpio <img> | grep modprobe`
+# is the oracle -- it lists what the module will really see.
+#
+# Gate is deliberately broader than it needs to be: mem_conf also covers
+# sysctl and zram files that have nothing to do with the initramfs. A
+# redundant rebuild costs a couple of minutes; a missed one costs a silently
+# inert config that looks applied, which is far worse.
+- name: "bcpc: Rebuild the initramfs so early-loaded NVIDIA options apply"
+  become: yes
+  when: (mem_conf is changed) or (stale_nvidia_conf is changed)
+  command: mkinitcpio -P
+
+- name: "bcpc: Note that NVIDIA module options need a reboot"
+  when: (mem_conf is changed) or (stale_nvidia_conf is changed)
+  debug:
+    msg: >-
+      Initramfs rebuilt. Reboot, then confirm with:
+      grep InitializeSystemMemoryAllocations /proc/driver/nvidia/params
+      -- expect 0, not 1.
+
+- name: "bcpc: Apply sysctl settings without rebooting"
+  become: yes
+  when: mem_conf is changed
+  command: sysctl --system
+
+# daemon_reload so the drop-in above is picked up, and `restarted` rather
+# than `started` because the arguments live on the ExecStart line: a running
+# instance would otherwise keep the ones it was launched with.
+- name: "bcpc: Enable earlyoom"
+  become: yes
+  systemd:
+    name: earlyoom
+    daemon_reload: yes
+    enabled: yes
+    state: restarted
+
+# zram-generator is a generator, not a daemon: it synthesises
+# systemd-zram-setup@zram0.service from the config file during early boot.
+# daemon_reload re-runs generators, which is what makes the device
+# available without a reboot.
+- name: "bcpc: Bring up zram"
+  become: yes
+  systemd:
+    daemon_reload: yes
+    name: systemd-zram-setup@zram0.service
+    enabled: yes
+    state: started

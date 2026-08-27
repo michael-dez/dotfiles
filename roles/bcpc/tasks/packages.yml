@@ -1,0 +1,19 @@
+# The system config files these packages back are installed by config.yml, and
+# the reasoning for each of them lives there. This file is only the part that
+# config_only is meant to skip.
+- name: "bcpc: Install memory-pressure tooling"
+  become: yes
+  package:
+    name:
+      - earlyoom
+      - zram-generator
+      # Not optional, despite reading like a nicety. system/nvidia-bcpc.conf
+      # deliberately does not set NVreg_InitializeSystemMemoryAllocations so
+      # that this package's /usr/lib/modprobe.d/nvidia.conf can supply 0.
+      # Without it installed nothing sets the parameter at all and the
+      # driver default of 1 applies -- the opposite of what was asked for,
+      # arrived at silently. It also carries the 30-zram.rules udev rule
+      # that disables zswap (zswap in front of zram double-compresses into
+      # RAM) and the swappiness=150 that 99-zram.conf otherwise duplicates.
+      - cachyos-settings
+    state: present
