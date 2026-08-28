@@ -1,5 +1,10 @@
 -- nvim-lspconfig
 --
+-- On nvim 0.11+ this plugin is just a library of server definitions: one
+-- lsp/<name>.lua per server, dropped on the runtimepath. Nothing here starts a
+-- server. vim.lsp.enable() does, and mason-lspconfig calls it for every server
+-- it has installed (see pluginconfig/mason.lua).
+
 -- `capabilities` tells a language server what this editor can do. nvim-cmp
 -- advertises extra completion features, so fold those in when it is available.
 local ok_cmp, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
@@ -8,12 +13,27 @@ if ok_cmp then
   capabilities = cmp_nvim_lsp.default_capabilities(capabilities)
 end
 
--- Per-server setup. Disabled; enable a line once mason has installed it.
--- local lspconfig = require("lspconfig")
--- lspconfig.pyright.setup({ capabilities = capabilities })
--- lspconfig.gopls.setup({ capabilities = capabilities })
--- lspconfig.terraformls.setup({ capabilities = capabilities })
--- lspconfig.lua_ls.setup({ capabilities = capabilities })
+-- "*" is the fallback config every server merges on top of, so this applies to
+-- servers added later without another edit here.
+vim.lsp.config("*", {
+  capabilities = capabilities,
+})
+
+-- Per-server overrides. Each one is merged over the "*" block above and over
+-- the defaults nvim-lspconfig ships, so only state what differs.
+vim.lsp.config("pyright", {
+  settings = {
+    python = {
+      analysis = {
+        -- "off" | "basic" | "standard" | "strict"
+        typeCheckingMode = "standard",
+        autoSearchPaths = true,
+        useLibraryCodeForTypes = true,
+        diagnosticMode = "openFilesOnly",
+      },
+    },
+  },
+})
 
 -- Go: organize imports on save.
 vim.api.nvim_create_autocmd("BufWritePre", {
