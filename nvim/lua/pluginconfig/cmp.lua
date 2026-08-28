@@ -18,7 +18,12 @@ cmp.setup({
     ["<C-f>"] = cmp.mapping.scroll_docs(4),
     ["<C-Space>"] = cmp.mapping.complete(),
     ["<C-e>"] = cmp.mapping.abort(),
-    ["<CR>"] = cmp.mapping.confirm({ select = true }),
+    -- Confirm is <C-y> only. <CR> is deliberately left alone so a newline
+    -- typed while the menu happens to be open stays a newline.
+    ["<C-y>"] = cmp.mapping.confirm({ select = false }),
+    ["<CR>"] = cmp.mapping(function(fallback)
+      fallback()
+    end, { "i", "s" }),
   }),
   -- Two groups: buffer words are only offered when LSP and snippets have
   -- nothing to say.

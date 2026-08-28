@@ -85,9 +85,11 @@ hl.config({
 -- 11), so unlike those two files it is scoped to the game, not the display.
 --
 -- Class, not content. `content = "game"` comes from the Wayland content-type
--- protocol, and a Proton title is an XWayland client that never sets it --
--- verified against a running game, which reports contentType "none" (see the
--- header in gaming.lua). The content variant that used to sit beside this one
+-- protocol and a Proton title never sets it -- verified against a running game,
+-- which reports contentType "none" whether it is on XWayland or, as Overwatch
+-- now is under PROTON_ENABLE_WAYLAND=1, a native Wayland client on
+-- winewayland.drv. The driver changes `xwayland`; it does not change this.
+-- (See the header in gaming.lua for the full readout.) The content variant that used to sit beside this one
 -- matched nothing, so a Steam game still dimmed when it lost focus; it is gone
 -- rather than kept as decoration, because a rule that cannot fire is worse than
 -- no rule -- it reads as coverage.

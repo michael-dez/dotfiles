@@ -4,12 +4,27 @@
 -- file used to end with is now settled, and it settled the wrong way: with
 -- Overwatch running under Proton,
 --
---     hyprctl clients -j | jq '.[] | {class, xwayland, contentType}'
---     { "class": "steam_app_2357570", "xwayland": true, "contentType": "none" }
+--     hyprctl clients -j | jq '.[] | {class, xwayland, contentType, xdgTag}'
+--     { "class": "steam_app_2357570", "xwayland": false,
+--       "contentType": "none", "xdgTag": "proton-game" }
 --
--- An XWayland client never sets the content-type protocol, so `content = "game"`
--- matched nothing and every rule here was dead config -- which is why a Steam
--- game landed in a tile with rounded corners and dimmed when it lost focus.
+-- Note `xwayland: false`. That is new, and it is the launch option doing it:
+-- PROTON_ENABLE_WAYLAND=1 makes proton-cachyos load winewayland.drv instead of
+-- winex11.drv, so Overwatch is now a native Wayland client. An earlier revision
+-- of this comment recorded `xwayland: true`, which was true before the option
+-- was added and is not any more.
+--
+-- The conclusion survives the correction, for a different reason than it was
+-- first given: `contentType` is *still* "none". Wine does not set the
+-- content-type protocol on a game surface whichever driver it uses, so
+-- `content = "game"` still matches nothing and every rule here would still be
+-- dead config if it were written that way -- which is why a Steam game landed
+-- in a tile with rounded corners and dimmed when it lost focus.
+--
+-- `xdgTag = "proton-game"` is the honest matcher for "a Proton title" and
+-- Hyprland supports it as a rule prop, but it covers only Wayland-native Proton
+-- clients. Class covers those *and* anything still on XWayland, so the rules
+-- below stay on class.
 --
 -- The tradeoff of matching on class: unlike the content rules, these can reach
 -- a game sitting on workspace 11. That overlap with stream.lua is harmless --
@@ -62,6 +77,29 @@ hl.window_rule({
     fullscreen_state = "2 2",
     sync_fullscreen  = true,
     suppress_event   = "x11configurerequest",
+})
+
+-- Let the game tear. `general:allow_tearing` in hyprland.lua is only the master
+-- switch: with it on but no per-window opt-in, Hyprland still drops the
+-- client's tearing commits and says so in `hyprctl rollinglog` --
+--
+--     Tearing commit requested but the master switch general:allow_tearing is
+--     off, ignoring
+--
+-- Ungated on fullscreen for the same reason the chrome rule below is: rules
+-- apply at map time, when the game is not fullscreen yet. It is self-gating in
+-- practice -- a torn present needs the window to own the scanout plane, which
+-- only a fullscreen one does -- so a windowed game silently gets nothing.
+--
+-- Two things outside Hyprland have to agree before this shows up as an actual
+-- reduction in latency: vsync off inside Overwatch, and `dxvk.tearFree = False`
+-- in ~/.config/dxvk.conf, which the DXVK_CONFIG_FILE launch option already
+-- points at.
+hl.window_rule({
+    name  = "local-game-tearing",
+    match = { class = GAME_CLASS },
+
+    immediate = true,
 })
 
 -- No desktop chrome on a game. Cheaper than it looks: blur in particular is a

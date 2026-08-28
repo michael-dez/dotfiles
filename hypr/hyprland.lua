@@ -37,6 +37,19 @@ hl.config({
         gaps_out    = 8,
         border_size = 2,
         layout      = "dwindle",
+
+        -- Master switch only. Nothing tears because of this line; it just
+        -- stops Hyprland refusing a client that asks to, which it otherwise
+        -- announces in `hyprctl rollinglog` as
+        --
+        --     Tearing commit requested but the master switch
+        --     general:allow_tearing is off, ignoring
+        --
+        -- The per-window opt-in is the `immediate` rule in gaming.lua, so this
+        -- costs the desktop nothing. Paired with vrr = 0 above on purpose:
+        -- tearing and VRR are two answers to the same question, and a 540Hz
+        -- panel is already the "just show me the newest frame" answer.
+        allow_tearing = true,
     },
 })
 
