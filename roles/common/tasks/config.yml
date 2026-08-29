@@ -51,8 +51,22 @@
     - { src: "xfce4/terminal/accels.scm", dest: "xfce4/terminal/accels.scm" }
     - { src: "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml", dest: "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml" }
 
+# Read the login shell out of passwd first so the change below can be skipped
+# outright when it already matches. The user module compares shells itself and
+# would report ok either way, but it still escalates to run, so the guard is
+# what keeps a re-run from needing root at all.
+- name: "Read the user's current login shell"
+  become: no
+  getent:
+    database: passwd
+    key: "{{ username }}"
+
+# getent_passwd drops the name and leaves the remaining passwd fields in order,
+# so index 5 is the shell. Read through ansible_facts rather than the injected
+# top-level name, which core 2.24 stops providing.
 - name: "Change user shell to zsh"
   become: yes
   user:
     name: "{{ username }}"
     shell: /usr/bin/zsh
+  when: ansible_facts['getent_passwd'][username][5] != '/usr/bin/zsh'
