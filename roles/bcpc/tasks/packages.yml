@@ -17,3 +17,19 @@
       # RAM) and the swappiness=150 that 99-zram.conf otherwise duplicates.
       - cachyos-settings
     state: present
+
+# ollama-cuda rather than plain ollama: same version, same binary, plus the
+# CUDA runtime libraries under /usr/lib/ollama that let it use the 4070 Ti.
+# Without it ollama runs models on the CPU and never says why -- it falls back
+# silently, and the only visible symptom is generation an order of magnitude
+# slower than it should be. It depends on `ollama` (the binary, the systemd
+# unit and the ollama system user) and on `cuda`, which is a few GB by itself.
+#
+# The units that turn this into a service, and the reasoning behind each of
+# them, are in ollama.yml.
+- name: "bcpc: Install ollama with CUDA support"
+  become: yes
+  package:
+    name:
+      - ollama-cuda
+    state: present

@@ -80,6 +80,12 @@
     - { src: "sunshine/hooks/stream-start.sh", dest: "sunshine/hooks/stream-start.sh" }
     - { src: "sunshine/hooks/stream-end.sh", dest: "sunshine/hooks/stream-end.sh" }
     - { src: "sunshine/hooks/launch-bigpicture.sh", dest: "sunshine/hooks/launch-bigpicture.sh" }
+    # The second global_prep_cmd pair, which suspends ollama for the duration
+    # of a stream. Separate scripts rather than lines appended to
+    # stream-start.sh: that one bails out early when no Hyprland instance is
+    # live, and freeing the GPU should not depend on the compositor being up.
+    - { src: "sunshine/hooks/ollama-suspend.sh", dest: "sunshine/hooks/ollama-suspend.sh" }
+    - { src: "sunshine/hooks/ollama-resume.sh", dest: "sunshine/hooks/ollama-resume.sh" }
     - { src: "pipewire/sunshine-sink.conf", dest: "pipewire/pipewire.conf.d/sunshine-sink.conf" }
 
 # --- Noctalia ----------------------------------------------------------

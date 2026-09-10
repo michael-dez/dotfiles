@@ -1,0 +1,52 @@
+# bcpc -- the socket-activation shim in front of ollama.
+#   ->  /etc/systemd/system/ollama-proxy.service
+#
+# Started by ollama.socket on the first connection, holding the listening
+# descriptor systemd hands it, and forwards every connection to ollama's real
+# listener on 127.0.0.1:11435 (set by ollama-override.conf). This exists only
+# because ollama cannot inherit a socket itself -- see the header of
+# ollama.socket.
+#
+# BindsTo, not Requires: if ollama.service goes away -- crash, or the Sunshine
+# stream hook stopping it -- the proxy must go with it rather than sit there
+# accepting connections it can only refuse. Stopping it is also what re-arms
+# ollama.socket, so the next request starts the pair again. With Requires= the
+# proxy would survive a backend that had exited and the socket would stay
+# "running", which looks identical from outside and fails every request.
+#
+# The proxy adds a hop, not a copy: it splices in userspace, so throughput is
+# irrelevant here (responses are tokens, not bulk) and the added latency is well
+# under the time to first token. Model pulls do run through it, which is the
+# only bandwidth-shaped traffic involved, and it keeps up with the disk.
+
+[Unit]
+Description=Socket activation proxy for ollama
+Documentation=man:systemd-socket-proxyd(8)
+Requires=ollama.socket
+After=ollama.socket
+BindsTo=ollama.service
+After=ollama.service
+
+[Service]
+Type=notify
+# ollama.service's ExecStartPost does not return until ollama answers HTTP on
+# 11435, and After=ollama.service makes systemd wait for that whole start job.
+# That ordering is the entire reason the first request after an idle period
+# works: without it the proxy would connect to a port ollama has not bound yet
+# and the connection that triggered the activation would be the one to fail.
+ExecStart=/usr/lib/systemd/systemd-socket-proxyd 127.0.0.1:11435
+
+# The proxy needs nothing but the inherited descriptor and a loopback connect,
+# so give it nothing else. Runs as the ollama user rather than root for the
+# same reason ollama.service does.
+User=ollama
+Group=ollama
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallFilter=@system-service

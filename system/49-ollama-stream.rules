@@ -1,0 +1,50 @@
+// bcpc -- let the desktop user suspend ollama around a game stream.
+//   ->  /etc/polkit-1/rules.d/49-ollama-stream.rules
+//
+// The Sunshine stream hooks run as mike, from Sunshine's systemd *user*
+// service, and the units they need to stop are *system* units. Without a rule
+// systemctl falls back to asking polkit interactively, and there is no one to
+// answer: the hook has no terminal and no agent, so the call fails and the
+// stream starts with ollama still holding VRAM -- silently, since the hooks are
+// best-effort by design.
+//
+// Scoped three ways, because "allow systemctl without a password" is a much
+// larger grant than what is needed here:
+//   - to wheel, whose members can already become root via sudo, so this adds no
+//     authority anyone in that group did not already have. It only removes the
+//     password prompt for these units, which is what a non-interactive hook
+//     needs.
+//   - to the three units below by exact name. A prefix or regex match would
+//     quietly cover any future unit whose name starts the same way.
+//   - to start/stop/restart. Not enable/disable/mask: whether ollama comes back
+//     after a reboot is a decision for the playbook, not for a stream hook, and
+//     a hook that could mask a unit could disable it permanently by accident.
+//
+// Group membership, not a hardcoded "mike", so this file needs no templating to
+// stay correct -- and so it grants nothing on a machine where the account was
+// never an administrator in the first place.
+//
+// polkitd watches this directory with inotify and reloads on write, so no
+// daemon-reload or restart is needed after installing it. A syntax error here
+// is logged to the journal by polkitd and the file is skipped -- worth checking
+// after any edit, since a skipped rule looks exactly like a rule that did not
+// match:
+//   journalctl -u polkit -n 20
+polkit.addRule(function(action, subject) {
+    if (action.id !== "org.freedesktop.systemd1.manage-units") {
+        return;
+    }
+    if (!subject.isInGroup("wheel")) {
+        return;
+    }
+
+    var unit = action.lookup("unit");
+    var verb = action.lookup("verb");
+
+    var units = ["ollama.service", "ollama.socket", "ollama-proxy.service"];
+    var verbs = ["start", "stop", "restart"];
+
+    if (units.indexOf(unit) !== -1 && verbs.indexOf(verb) !== -1) {
+        return polkit.Result.YES;
+    }
+});

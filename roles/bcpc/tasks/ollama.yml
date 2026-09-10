@@ -1,0 +1,124 @@
+# --- ollama ---------------------------------------------------------------
+# Local LLM inference on the GPU. Three units' worth of moving parts, and the
+# reasoning for each lives in the file it installs:
+#
+#   system/ollama.socket           the loopback port, and why on demand
+#   system/ollama-proxy.service    why activation needs a proxy at all
+#   system/ollama-override.conf    ollama's own settings on a 12 GB card
+#   system/49-ollama-stream.rules  why the stream hooks may stop a system unit
+#
+# Copied into /etc rather than symlinked out of this repo, for the same reason
+# as the zram and earlyoom files: these are read by systemd (and polkitd) at
+# boot, well before /home is mounted, so a symlink into ~/repos/dotfiles would
+# resolve to nothing at exactly the wrong moment. The Sunshine hooks are
+# symlinked like the rest of ~/.config -- they only run once a session exists.
+
+# `copy` does not create parent directories.
+- name: "bcpc: Create the ollama drop-in directory"
+  become: yes
+  file:
+    path: /etc/systemd/system/ollama.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+# Deliberately no owner/group/mode: polkit ships this directory as
+# root:polkitd 0750 and setting it here would either fight that or, worse,
+# quietly widen it. With no attributes given, `file` leaves an existing
+# directory exactly as it found it and only creates one if polkit is somehow
+# not installed.
+- name: "bcpc: Ensure the polkit rules directory exists"
+  become: yes
+  file:
+    path: /etc/polkit-1/rules.d
+    state: directory
+
+- name: "bcpc: Install the ollama units and polkit rule"
+  become: yes
+  copy:
+    src: "{{ playbook_dir }}/{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  with_items:
+    - { src: "system/ollama.socket",           dest: "/etc/systemd/system/ollama.socket" }
+    - { src: "system/ollama-proxy.service",    dest: "/etc/systemd/system/ollama-proxy.service" }
+    - { src: "system/ollama-override.conf",    dest: "/etc/systemd/system/ollama.service.d/override.conf" }
+    # polkitd picks this up by inotify -- no reload, no restart. 0644 is what
+    # every packaged rule in /usr/share/polkit-1/rules.d uses; polkitd reads
+    # them as root and refuses to load anything group- or world-writable.
+    - { src: "system/49-ollama-stream.rules",  dest: "/etc/polkit-1/rules.d/49-ollama-stream.rules" }
+  register: ollama_units
+
+- name: "bcpc: Reload the system systemd manager"
+  become: yes
+  when: ollama_units is changed
+  systemd:
+    daemon_reload: yes
+
+# `state: stopped`, not `restarted`. The settings that changed live in the
+# environment of a process that may not be running at all right now, and
+# starting one here would defeat the point of activating on demand. Stopping is
+# enough: whatever starts next comes up with the new drop-in.
+- name: "bcpc: Stop ollama so the new settings apply on next activation"
+  become: yes
+  when: ollama_units is changed
+  systemd:
+    name: ollama.service
+    state: stopped
+
+# Restarted rather than started, because a socket unit binds its port at start
+# and would otherwise keep serving with the old ListenStream after an edit.
+# This is also what re-arms activation after the stop above.
+- name: "bcpc: Enable and arm the ollama socket"
+  become: yes
+  systemd:
+    name: ollama.socket
+    enabled: yes
+    state: "{{ 'restarted' if ollama_units is changed else 'started' }}"
+
+# Explicitly NOT enabled: ollama.socket is what starts at boot, and an enabled
+# ollama.service would race it for port 11434 -- winning that race on a boot
+# where nothing wants inference, and losing it noisily on one where the socket
+# got there first. The packaged unit ships disabled, so this only matters on a
+# machine where someone ran `systemctl enable ollama` by hand.
+- name: "bcpc: Keep ollama.service itself off the boot path"
+  become: yes
+  systemd:
+    name: ollama.service
+    enabled: no
+
+# --- models ---------------------------------------------------------------
+# On the far side of the config_only line: this downloads tens of gigabytes,
+# which is exactly the kind of thing that flag exists to skip.
+#
+# Both tasks talk to the server over 127.0.0.1:11434 as an ordinary client, so
+# they run unprivileged -- the files land in /var/lib/ollama because the server
+# writes them, not the client. The first one is also what proves the whole chain
+# works end to end: it connects to the socket, which starts the proxy, which
+# waits on ollama's readiness gate before forwarding. If activation is broken,
+# this is the task that says so.
+- name: "bcpc: Read the models already pulled"
+  become: no
+  when: not (config_only | bool)
+  command: ollama list
+  register: ollama_list
+  changed_when: false
+
+# `ollama pull` is idempotent on its own -- it re-verifies the manifest and
+# reports success without re-downloading -- but that still costs a round trip
+# and reports `changed` every run. Checking the list first keeps a re-run silent
+# and, more usefully, keeps it offline.
+#
+# The substring test is against the NAME column, which prints the tag exactly as
+# written here (`qwen3:14b`). A bare name without a tag would match too loosely;
+# every entry in ollama_models is tagged for that reason.
+- name: "bcpc: Pull the models"
+  become: no
+  when:
+    - not (config_only | bool)
+    - item not in ollama_list.stdout
+  command: "ollama pull {{ item }}"
+  with_items: "{{ ollama_models }}"

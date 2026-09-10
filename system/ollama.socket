@@ -1,0 +1,49 @@
+# bcpc -- the loopback listener that starts ollama on demand.
+#   ->  /etc/systemd/system/ollama.socket
+#
+# ollama has no socket-activation support of its own: the binary carries no
+# reference to LISTEN_FDS, LISTEN_PID or sd_listen_fds
+# (`strings /usr/bin/ollama | grep -i listen_fds` is empty on 0.33.3), so it
+# cannot inherit a listening descriptor and always calls bind() itself. The
+# activation therefore runs through systemd-socket-proxyd, which does speak the
+# protocol: this unit holds port 11434, and ollama-proxy.service forwards
+# whatever arrives to ollama's own port on 11435. See ollama-proxy.service for
+# the second half.
+#
+# Why on demand at all: ollama idles at a few hundred MB and no VRAM, so the
+# saving is small -- the point is that nothing is listening, and no model can be
+# loaded, until something actually asks. On a host that is also a game streamer
+# that is the difference between "the GPU is free unless I am using the LLM" and
+# "the GPU is free unless something ever touched the LLM".
+#
+# Loopback only. The client is a desktop app on this machine, so nothing needs
+# to reach ollama from off-box, and that is worth being deliberate about because
+# ollama has no authentication of any kind: anything that can open this port can
+# list, pull, delete and run models and read whatever is in /var/lib/ollama.
+# bcpc runs no firewall (firewalld, ufw and nftables are all inactive), so the
+# bind address is the only thing standing between this and the LAN. Opening it
+# up later is a one-line change here -- but it is a change that hands the whole
+# LAN an unauthenticated API, not just a wider bind.
+
+[Unit]
+Description=Ollama on-demand listener
+Documentation=man:systemd-socket-proxyd(8)
+
+[Socket]
+# Both loopback families, not just 127.0.0.1. A client that connects to the name
+# "localhost" gets whatever getaddrinfo returns first, which on this host is ::1
+# -- a v4-only bind would leave such a client with a connection refused while
+# `curl 127.0.0.1:11434` worked fine, which is a miserable thing to debug.
+# systemd hands both descriptors to the one proxy process; verified by running
+# systemd-socket-activate with exactly these two addresses and reaching ollama
+# through 127.0.0.1, [::1] and localhost alike.
+ListenStream=127.0.0.1:11434
+ListenStream=[::1]:11434
+
+# Required because the socket name does not match the service it triggers.
+# Without it systemd would look for ollama.service and hand the descriptor to a
+# process that cannot use it.
+Service=ollama-proxy.service
+
+[Install]
+WantedBy=sockets.target

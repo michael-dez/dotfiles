@@ -30,6 +30,7 @@ hyprpaper
 intel-ucode
 jq
 kitty
+kubectl
 lib32-gamemode
 lib32-mangohud
 lib32-nvidia-utils
@@ -50,6 +51,7 @@ npm
 nvidia-open-dkms
 nvidia-utils
 openssh
+pass
 pipewire-alsa
 pipewire-pulse
 playerctl
@@ -59,10 +61,12 @@ proton-vpn-gtk-app
 qt5-wayland
 qt6-wayland
 ripgrep
+rsync
 sddm
 slurp
 snap-pac
 snapper
+solaar
 steam
 sudo
 sunshine

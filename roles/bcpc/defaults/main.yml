@@ -1,0 +1,29 @@
+# Models the playbook pulls into /var/lib/ollama. A model that does not fit
+# entirely in VRAM still runs -- ollama offloads the overflow layers to the CPU
+# and the generation rate drops by roughly an order of magnitude -- so the fit
+# is the thing worth checking before adding to this list.
+#
+# The budget is smaller than the card. ollama reports the 4070 Ti as 11.6 GiB
+# total and 10.0 GiB *available* with the Hyprland desktop up (`inference
+# compute` line in its startup log), and the KV cache and context window come
+# out of that on top of the weights below. Anything much past 9 GB of weights
+# is already spilling.
+#
+# Pulling is idempotent by name -- roles/bcpc/tasks/ollama.yml skips anything
+# `ollama list` already reports -- but the first run downloads all of these,
+# which is about 30 GB and takes as long as the connection takes. Drop entries
+# here rather than editing the task if that is not wanted.
+ollama_models:
+  # ~9 GB. The general-purpose default: fits in VRAM with room for a long
+  # context, and the only one of these with real reasoning ability.
+  - qwen3:14b
+  # ~13 GB at MXFP4, so this one does NOT fit -- a few layers land on the CPU
+  # and it is noticeably slower than the rest. Kept because it is the strongest
+  # model this host can run at all, for the times that is worth the wait.
+  - gpt-oss:20b
+  # ~4.9 GB. Small, fast, leaves most of the card free -- the one to reach for
+  # while something else is using the GPU.
+  - llama3.1:8b
+  # ~4.7 GB. Fill-in-the-middle completion for editor plugins, which want a
+  # model that answers in milliseconds far more than they want a clever one.
+  - qwen2.5-coder:7b

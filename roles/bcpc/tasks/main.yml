@@ -7,3 +7,11 @@
 
 - name: "bcpc: Apply configuration"
   import_tasks: config.yml
+
+# After config.yml, not before: the Sunshine stream hooks that suspend ollama
+# are symlinked there, and ollama.yml installs the polkit rule that lets them
+# run. Neither ordering breaks the other -- the hooks are only read when a
+# stream starts -- but this keeps a first run from arming a service whose
+# hooks are not in place yet.
+- name: "bcpc: Set up ollama"
+  import_tasks: ollama.yml
