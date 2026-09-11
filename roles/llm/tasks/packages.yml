@@ -1,0 +1,48 @@
+# Rootless podman needs less than it looks like. Because every quadlet in this
+# role uses Network=host, the container shares the host's network namespace and
+# no user-mode network stack is involved at all -- so neither passt/pasta nor
+# slirp4netns is pulled in as a hard requirement here. podman brings its own
+# runtime (crun) and needs newuidmap/newgidmap from shadow, which is already on
+# any Arch system.
+- name: "llm: Install podman"
+  become: yes
+  package:
+    name:
+      - podman
+    state: present
+
+# Rootless podman maps container uids onto a range of host uids delegated to
+# your account. Without an entry in both files podman refuses to start a
+# container at all, with an error about newuidmap that does not obviously point
+# here. Arch's shadow package ships the files but does not populate them, and
+# useradd only allocates a range when it creates the account -- which for a
+# hand-built machine like bcpc it never did.
+#
+# 100000:65536 is the conventional first range and the one useradd would have
+# chosen. The regexp anchors on the username so a re-run updates the existing
+# line rather than appending a second, conflicting one.
+- name: "llm: Delegate a subordinate id range for rootless containers"
+  become: yes
+  lineinfile:
+    path: "{{ item }}"
+    regexp: "^{{ username }}:"
+    line: "{{ username }}:100000:65536"
+    create: yes
+    owner: root
+    group: root
+    mode: "0644"
+  with_items:
+    - /etc/subuid
+    - /etc/subgid
+  register: subids
+
+# podman caches the id mapping in its own storage on first use. Changing the
+# range afterwards leaves containers that were created under the old one
+# unusable until storage is migrated, and the error ("there might not be enough
+# IDs available in the namespace") does not mention that. Harmless when nothing
+# has been created yet, which is the common case on a first run.
+- name: "llm: Migrate podman storage to the new id range"
+  become: no
+  when: subids is changed
+  command: podman system migrate
+  changed_when: true

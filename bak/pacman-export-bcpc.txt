@@ -50,6 +50,7 @@ noctalia
 npm
 nvidia-open-dkms
 nvidia-utils
+ollama-cuda
 openssh
 pass
 pipewire-alsa
@@ -71,7 +72,9 @@ steam
 sudo
 sunshine
 thunar
+tldr
 ttf-meslo-nerd
+uv
 vim
 vlc
 vlc-plugins-all

@@ -16,14 +16,21 @@
 # that is the difference between "the GPU is free unless I am using the LLM" and
 # "the GPU is free unless something ever touched the LLM".
 #
-# Loopback only. The client is a desktop app on this machine, so nothing needs
-# to reach ollama from off-box, and that is worth being deliberate about because
-# ollama has no authentication of any kind: anything that can open this port can
-# list, pull, delete and run models and read whatever is in /var/lib/ollama.
-# bcpc runs no firewall (firewalld, ufw and nftables are all inactive), so the
-# bind address is the only thing standing between this and the LAN. Opening it
-# up later is a one-line change here -- but it is a change that hands the whole
-# LAN an unauthenticated API, not just a wider bind.
+# Loopback only, and every client is arranged to make that workable rather than
+# to work around it. On this machine the clients are Open WebUI and Langflow,
+# running as rootless podman containers with Network=host so that 127.0.0.1
+# means this host's loopback (containers/*.container). On BCLT the same two UIs
+# run locally there, pointed at BCLT's own 127.0.0.1:11434, which is an
+# `ssh -L` forward into this host -- see the ollama-forward alias in zshrc.bclt.
+# Nothing reaches ollama from off-box without authenticating to sshd first.
+#
+# That is worth being deliberate about, because ollama has no authentication of
+# any kind: anything that can open this port can list, pull, delete and run
+# models and read whatever is in /var/lib/ollama. bcpc runs no firewall
+# (firewalld, ufw and nftables are all inactive), so the bind address is the
+# only thing standing between this and the LAN. Widening it is a one-line change
+# here -- but it is a change that hands the whole LAN an unauthenticated API,
+# not just a wider bind.
 
 [Unit]
 Description=Ollama on-demand listener

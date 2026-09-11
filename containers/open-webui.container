@@ -1,0 +1,76 @@
+# bcpc / BCLT -- Open WebUI, run locally on whichever machine you are sitting at.
+#   ->  ~/.config/containers/systemd/open-webui.container
+#
+# A quadlet, not a unit: podman's systemd generator turns this into
+# open-webui.service at daemon-reload time. Start it with
+# `systemctl --user start open-webui`. Nothing enables it -- it is meant to be
+# up while you are using it and gone the rest of the time, which is also what
+# keeps ollama's own on-demand activation meaningful.
+#
+# The point of running it locally on both machines rather than once in the k3s
+# cluster: ollama binds 127.0.0.1 only (see system/ollama.socket), and a pod on
+# another host cannot reach that without a tunnel or a wider bind. Locally there
+# is nothing to cross. On BCLT the `ollama-forward` alias in zshrc.bclt puts
+# bcpc's ollama on BCLT's own 127.0.0.1:11434, so this file is correct on both
+# machines with no per-host variation at all.
+#
+# Network=host, which is the unusual choice here and deserves its reason.
+# Ollama listens on the host's loopback, and a rootless container in its own
+# network namespace has its own 127.0.0.1 that has nothing to do with the host's
+# -- reaching a loopback-bound host service from a bridged rootless container
+# means host.containers.internal plus pasta/slirp options that vary by podman
+# version and fail in confusing ways. Sharing the host's namespace makes
+# 127.0.0.1:11434 simply mean what it says. It also drops the need for pasta or
+# slirp4netns entirely.
+#
+# The cost is that the container binds host ports directly, so nothing but the
+# HOST variable below stops this from listening on 0.0.0.0 -- and bcpc runs no
+# firewall. That is why HOST is set explicitly rather than left at the image's
+# 0.0.0.0 default, and why roles/llm/tasks/config.yml reads the generated unit
+# back and asserts that HOST=127.0.0.1 actually survived into it. That check
+# needs no container start, so it runs on every playbook run. Confirm the live
+# listener once started with `ss -lnt | grep 8080` -- expect 127.0.0.1:8080 and
+# never 0.0.0.0:8080. A silently LAN-exposed chat UI holding your conversation
+# history is exactly the kind of thing that should fail loudly instead.
+
+[Unit]
+Description=Open WebUI (localhost only, backed by the local ollama)
+After=network-online.target
+
+[Container]
+Image=ghcr.io/open-webui/open-webui:main
+Network=host
+
+# Read by the image's start.sh, which passes them to uvicorn. The default is
+# 0.0.0.0:8080; with Network=host that would be every interface on the box.
+Environment=HOST=127.0.0.1
+Environment=PORT=8080
+
+# Same address on bcpc (ollama itself) and on BCLT (the ssh -L forward).
+Environment=OLLAMA_BASE_URL=http://127.0.0.1:11434
+
+# Conversations, accounts and settings. A host directory rather than a named
+# volume so it is visible, backup-able and greppable; rootless podman maps
+# container root to your uid, so the files land owned by you.
+Volume=%h/.local/share/open-webui:/app/backend/data
+
+# Deliberately NOT setting WEBUI_AUTH=False. It would drop the login on a UI
+# only reachable from this machine's loopback, which is tempting -- but Open
+# WebUI treats it as a one-way door: an instance created with auth disabled
+# cannot be switched back to multi-user without wiping the data directory.
+# Signing up once per machine is the cheaper side of that trade.
+
+# Update on the next start when the tag has moved. `podman auto-update` only
+# acts on this if you enable its timer, which nothing here does:
+#   systemctl --user enable --now podman-auto-update.timer
+AutoUpdate=registry
+
+[Service]
+Restart=on-failure
+# First start pulls ~1 GB if the image is not already local. The playbook
+# pre-pulls it, but a hand-started container on a fresh box should not be
+# killed halfway through the download.
+TimeoutStartSec=900
+
+[Install]
+WantedBy=default.target

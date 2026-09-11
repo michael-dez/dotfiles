@@ -1,0 +1,31 @@
+# BCLT -- per-host shell config. Linked to ~/.zshrc.local by install.yml when
+# the EndeavourOS mirrorlist is present, and sourced from the end of zshrc.
+# The counterpart to zshrc.bcpc; interactive-shell scope only.
+
+# Host-specific addresses intentionally live in an untracked file, not here --
+# this repo is published. Put them in ~/.zshrc.private and they are picked up
+# below. That is where BCPC_SSH_HOST belongs if `bcpc` is not already a Host
+# entry in ~/.ssh/config.
+[ -f ~/.zshrc.private ] && . ~/.zshrc.private
+
+# --- local inference ---
+# ollama runs on bcpc and binds 127.0.0.1 there, so it is not reachable across
+# the network by design (it has no authentication -- see system/ollama.socket in
+# this repo). This forward is the whole bridge: it puts bcpc's ollama on BCLT's
+# own 127.0.0.1:11434, which is the exact address the Open WebUI and Langflow
+# quadlets already point at. That is what lets containers/*.container be
+# identical on both machines instead of carrying a per-host URL.
+#
+# The remote side of -L is resolved *on bcpc*, so 127.0.0.1 there means bcpc's
+# own loopback, and the connection arrives at the socket unit the same as a
+# local one -- on-demand activation still works through the tunnel.
+#
+# Runs in the foreground: Ctrl-C ends it, and while it is up you can see it.
+# Add -f to background it if you would rather not spend a pane on it, at the
+# cost of having to hunt the pid down later.
+alias ollama-forward='ssh -N -L 11434:127.0.0.1:11434 ${BCPC_SSH_HOST:-bcpc}'
+
+# The UIs themselves are podman quadlets and identical on both machines:
+#   systemctl --user start open-webui   # http://127.0.0.1:8080
+#   systemctl --user start langflow     # http://127.0.0.1:7860
+# Both need the forward above to be up first on this machine.

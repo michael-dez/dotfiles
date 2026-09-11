@@ -1,0 +1,115 @@
+# --- quadlets --------------------------------------------------------------
+- name: "llm: Create the quadlet and data directories"
+  become: no
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  with_items:
+    # Where podman's systemd user generator looks for *.container files.
+    - "{{ ansible_env.HOME }}/.config/containers/systemd"
+    # Bind-mounted into the containers. Created here rather than left to podman
+    # because podman would create them owned by root's mapped uid on first
+    # start, which is recoverable but confusing.
+    - "{{ ansible_env.HOME }}/.local/share/open-webui"
+    - "{{ ansible_env.HOME }}/.local/share/langflow"
+
+# Symlinked like every other user config in this repo, so edits in the repo are
+# live after a daemon-reload rather than after a playbook run. The generator
+# reads these as ordinary files; the assertion below is what proves it followed
+# the symlinks rather than skipping them, since a quadlet the generator ignores
+# produces no unit and no error.
+- name: "llm: Symlink the container quadlets"
+  become: no
+  file:
+    src: "{{ playbook_dir }}/containers/{{ item }}"
+    dest: "{{ ansible_env.HOME }}/.config/containers/systemd/{{ item }}"
+    state: link
+    force: yes
+  with_items:
+    - open-webui.container
+    - langflow.container
+  register: quadlets
+
+# Generators run on daemon-reload; this is what turns the files above into
+# open-webui.service and langflow.service. Unconditional rather than gated on
+# `quadlets is changed`, because the quadlet *contents* can change without the
+# symlink changing at all -- editing containers/open-webui.container in this
+# repo is the normal way to work on it.
+- name: "llm: Re-run the user generators"
+  become: no
+  systemd:
+    scope: user
+    daemon_reload: yes
+
+# The check that makes the symlink question answerable instead of assumed. If
+# the generator ignored these files the units simply would not exist, and the
+# first sign would be `systemctl --user start open-webui` failing days later.
+# Reading the generated unit back also proves the bind address survived into it
+# -- which matters more than usual here, because these containers use
+# Network=host and the environment variable below is the only thing keeping the
+# UI off every interface of a machine with no firewall.
+- name: "llm: Read back the units the generator produced"
+  become: no
+  command: "systemctl --user show {{ item.unit }}.service --property=LoadState --property=Environment"
+  register: generated
+  changed_when: false
+  failed_when: false
+  with_items:
+    - { unit: "open-webui", bind: "HOST=127.0.0.1" }
+    - { unit: "langflow",   bind: "LANGFLOW_HOST=127.0.0.1" }
+
+- name: "llm: Assert the quadlets generated units bound to loopback"
+  assert:
+    that:
+      - "'LoadState=loaded' in item.stdout"
+      - "item.item.bind in item.stdout"
+    fail_msg: >-
+      {{ item.item.unit }}.service did not come out of the quadlet generator as
+      expected. Either podman is not installed (a config_only run on a fresh
+      box), or the generator skipped
+      ~/.config/containers/systemd/{{ item.item.unit }}.container, or the
+      {{ item.item.bind }} line was lost from it. Check with:
+      `systemctl --user list-unit-files | grep -E 'open-webui|langflow'` and
+      `journalctl --user -b | grep -i quadlet`
+    success_msg: "{{ item.item.unit }}.service generated, bound to {{ item.item.bind }}"
+  with_items: "{{ generated.results }}"
+  loop_control:
+    label: "{{ item.item.unit }}"
+
+# --- images ----------------------------------------------------------------
+# Pre-pulled so the first `systemctl --user start` is quick rather than a
+# multi-gigabyte download behind a unit start timeout. On the far side of the
+# config_only line for the same reason the ollama model pulls are.
+#
+# The image names are read out of the quadlets rather than restated here. They
+# are already declared in exactly one place, and a second copy in a defaults
+# file is a copy that goes stale the first time a tag changes.
+- name: "llm: Collect the images the quadlets reference"
+  become: no
+  when: not (config_only | bool)
+  command: >-
+    awk -F= '/^Image=/ { print $2 }'
+    {{ playbook_dir }}/containers/open-webui.container
+    {{ playbook_dir }}/containers/langflow.container
+  register: llm_images
+  changed_when: false
+
+- name: "llm: Check which images are already local"
+  become: no
+  when: not (config_only | bool)
+  command: "podman image exists {{ item }}"
+  register: image_present
+  changed_when: false
+  failed_when: false
+  with_items: "{{ llm_images.stdout_lines | default([]) }}"
+
+- name: "llm: Pull the container images"
+  become: no
+  when:
+    - not (config_only | bool)
+    - item.rc != 0
+  command: "podman pull {{ item.item }}"
+  with_items: "{{ image_present.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item | default('') }}"

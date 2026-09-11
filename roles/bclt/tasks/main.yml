@@ -1,0 +1,14 @@
+# EndeavourOS on BCLT -- the laptop. Gated as a whole by is_eos in install.yml.
+#
+# Thin on purpose: nearly everything BCLT needs is already in the common role,
+# which is where the shared-Arch package work lives. This role exists for the
+# things that are true of BCLT and of no other host -- starting with the
+# per-host shell file, which BCLT had no home for until the local-inference
+# work needed somewhere to put the ollama forward.
+- name: "BCLT: Symlink per-host shell config"
+  become: no
+  file:
+    src: "{{ playbook_dir }}/zshrc.bclt"
+    dest: "{{ ansible_env.HOME }}/.zshrc.local"
+    state: link
+    force: yes

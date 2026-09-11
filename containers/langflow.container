@@ -1,0 +1,45 @@
+# bcpc / BCLT -- Langflow, run locally alongside Open WebUI.
+#   ->  ~/.config/containers/systemd/langflow.container
+#
+# Same shape as open-webui.container, and the reasoning in that file's header
+# applies here unchanged: quadlet rather than a hand-written unit, started on
+# demand rather than enabled, Network=host so that 127.0.0.1:11434 means the
+# host's ollama, and an explicit bind address because host networking would
+# otherwise put this on every interface of a machine with no firewall.
+#
+# Worth knowing before the first start: this image is several times the size of
+# Open WebUI's and takes correspondingly longer to pull, and Langflow's first
+# run initialises a SQLite database under the volume below before the UI
+# answers. `systemctl --user start langflow` returning is not the same as the
+# UI being ready -- give it a minute and watch `podman logs -f langflow`.
+
+[Unit]
+Description=Langflow (localhost only, backed by the local ollama)
+After=network-online.target
+
+[Container]
+Image=docker.io/langflowai/langflow:latest
+Network=host
+
+# Langflow reads both of these directly; the defaults are 0.0.0.0:7860.
+Environment=LANGFLOW_HOST=127.0.0.1
+Environment=LANGFLOW_PORT=7860
+
+# Flows, the SQLite database and cached components. Pointed at the mount below
+# rather than the image's default ~/.langflow, so nothing of value lives in the
+# container's own writable layer where a `podman rm` would take it.
+Environment=LANGFLOW_CONFIG_DIR=/var/lib/langflow
+Volume=%h/.local/share/langflow:/var/lib/langflow
+
+# In a flow's Ollama component, the base URL to use is http://127.0.0.1:11434 --
+# the same address the UI on either machine uses, for the same reason.
+
+AutoUpdate=registry
+
+[Service]
+Restart=on-failure
+# Longer than Open WebUI's: this image is the larger pull of the two.
+TimeoutStartSec=1800
+
+[Install]
+WantedBy=default.target

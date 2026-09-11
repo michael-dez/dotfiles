@@ -1,0 +1,17 @@
+# The local LLM front ends -- Open WebUI and Langflow -- as rootless podman
+# quadlets. Gated on the Arch family in install.yml, so both bcpc and BCLT get
+# them and the WSL Ubuntu work box does not.
+#
+# The design argument, since it is the part that is easy to get wrong later:
+# ollama itself runs only on bcpc and only on loopback. Rather than exposing it
+# to the LAN or tunnelling it into the k3s cluster so that a single shared UI
+# can reach it, each machine runs its own UI against its own 127.0.0.1 -- and on
+# BCLT that address is an ssh -L forward to bcpc (see zshrc.bclt). The result is
+# that containers/*.container is byte-identical on both machines and nothing in
+# this stack is reachable from off-box.
+- name: "llm: Install packages"
+  import_tasks: packages.yml
+  when: not (config_only | bool)
+
+- name: "llm: Apply configuration"
+  import_tasks: config.yml
