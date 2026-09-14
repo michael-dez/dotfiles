@@ -52,6 +52,43 @@ hl.config({
     },
 })
 
+-- --- Mouse DPI ------------------------------------------------------------
+-- Starts the Solaar daemon, which is the only thing on this host that puts the
+-- PRO X 2 DEX on the 1200 DPI it is configured for.
+--
+-- The mouse powers on with its onboard profile active, and that profile is 800
+-- DPI. ~/.config/solaar/config.yaml already asks for the opposite --
+-- `onboard_profiles: 0` with `dpi_extended: 1200` -- but nothing on this host
+-- ever applied that file. Solaar ships no systemd unit, there is no
+-- ~/.config/autostart, and no exec_cmd here launched it, so it had only ever
+-- been running when it was started by hand. That is why the DPI was wrong after
+-- every reboot, and why it kept looking like a symptom of whatever else had
+-- been changed that week.
+--
+-- Measured, not assumed. `solaar show` reports the saved and the live value as
+-- separate lines, and on a fresh boot with no daemon they disagree:
+--
+--     Sensitivity (DPI) (saved): {X:1200, Y:1200, LOD:HIGH}
+--     Sensitivity (DPI)        : {X:800,  Y:800,  LOD:HIGH}
+--
+-- Starting the daemon flips the live value to 1200 with nothing else touched.
+--
+-- A resident daemon rather than a one-shot `solaar config ... dpi 1200`: this
+-- is a wireless mouse that sleeps and re-pairs, and re-applying settings when
+-- the device comes back is the job solaar stays resident for. A one-shot would
+-- hold only until the first sleep.
+--
+-- `--window=hide` keeps it out of the tray. Here it is a settings applier that
+-- runs at login, not something meant to be clicked.
+--
+-- A second handler for this event, which is fine: hyprland.lua already has one
+-- for the desktop-wide daemons, and window.open is registered in both
+-- gaming.lua and stream.lua. Host hardware belongs in this file rather than in
+-- that generic list.
+hl.on("hyprland.start", function()
+    hl.exec_cmd("solaar --window=hide")
+end)
+
 -- --- NVIDIA ---------------------------------------------------------------
 -- 4070 Ti (Ada) on the open kernel modules. Deliberately NOT setting
 -- WLR_NO_HARDWARE_CURSORS or GBM_BACKEND: those are pre-explicit-sync advice
