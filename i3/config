@@ -170,6 +170,40 @@ bindcode $mod+Shift+90 	 move container to workspace  $ws10
 
 #bindsym $mod+r mode "resize"
 
+##########################################
+# passthrough mode, for Moonlight streams #
+##########################################
+
+# The problem this solves: i3 places a passive X grab on every $mod binding,
+# and $mod here is Mod1 -- which is BOTH Alt keys. A passive grab fires before
+# the focused window ever sees the key, so while this machine is streaming bcpc
+# with Moonlight, every host binding is swallowed here instead: Alt+Return
+# opens a terminal on this laptop rather than on the host, and Alt+d runs this
+# laptop's launcher.
+#
+# Right Alt does not escape it either. Hyprland on bcpc uses Right Alt as its
+# mod (kb_options=lv3:ralt_switch makes it Mod5 there), but on this machine X
+# still reports Alt_R as Mod1, so i3 grabs it exactly like the left one.
+#
+# This mode has one binding: the one that leaves it. While it is active i3
+# grabs nothing at all, so every key reaches Moonlight and through it the host.
+# Super+Escape because Hyprland on bcpc binds nothing to Super, so the host can
+# never want this combination back -- unlike any Alt combination, which is the
+# whole problem.
+#
+# Try Moonlight's own setting first: Settings -> Input -> "Capture system
+# keyboard shortcuts", set to "In fullscreen" or "Always". That takes an active
+# X keyboard grab, which suspends i3's passive grabs for the length of the
+# stream and needs no mode switching at all. This mode is what still works when
+# that is set to Never, or when the stream is windowed rather than fullscreen.
+#
+# The bar shows "passthrough" while it is active, so there is no guessing about
+# which state the keyboard is in.
+mode "passthrough" {
+        bindsym Mod4+Escape mode "default"
+}
+bindsym Mod4+Escape mode "passthrough"
+
 ######################################
 # keybindings for different actions: #
 ######################################

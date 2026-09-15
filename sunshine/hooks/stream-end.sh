@@ -80,10 +80,24 @@ if [ -n "$restore_to" ]; then
         hook_log "no evacuation needed (target_ws='${target_ws:-}')"
     fi
 
-    # Then move the (now ideally empty) workspace off the virtual output before
-    # it disappears. Hyprland would relocate it on its own, but not predictably
-    # to the monitor wanted.
-    hyprctl_logged dispatch "hl.dsp.workspace.move({ workspace = $SUNSHINE_WORKSPACE, monitor = \"$restore_to\" })"
+    # Then move every workspace off the virtual output before it disappears.
+    # Hyprland would relocate them on its own, but not predictably to the
+    # monitor wanted.
+    #
+    # Every workspace, not just $SUNSHINE_WORKSPACE: a desktop stream can pull
+    # any workspace onto the virtual output with MOD5+CTRL+<number> (see
+    # pull_workspace() in hypr/stream.lua), so by the time a session ends there
+    # may be several sitting here, each holding the windows that were on it at
+    # the desk. Those need no evacuation -- unlike workspace 11 they are all
+    # reachable by keybind again the moment they are back on a real monitor.
+    on_stream=$(
+        hyprctl -j workspaces 2>/dev/null |
+            jq -r --arg m "$SUNSHINE_MONITOR" '.[] | select(.monitor == $m) | .id'
+    )
+    hook_log "workspaces on $SUNSHINE_MONITOR: $(printf '%s ' $on_stream)"
+    for ws in $on_stream; do
+        hyprctl_logged dispatch "hl.dsp.workspace.move({ workspace = $ws, monitor = \"$restore_to\" })"
+    done
 else
     # No physical monitor left to fall back to. Removing the virtual output is
     # still right -- Hyprland handles being left with none -- but skip the
@@ -113,5 +127,18 @@ hyprctl_logged output remove "$SUNSHINE_MONITOR"
 if [ -n "$restore_to" ]; then
     hyprctl_logged dispatch "hl.dsp.focus({ monitor = \"$restore_to\" })"
 fi
+
+# Back to game rules, and hand the default sink back if a desktop stream took
+# it. Run here rather than at the top of this script so that the window rules
+# are only re-armed once nothing is left on the virtual output to catch them.
+#
+# Safe to run after a game stream too: every step of it is idempotent, and
+# "restore the sink" is a no-op unless the capture sink is still the default.
+"$(dirname "$(readlink -f "$0")")/stream-mode.sh" game || true
+
+# No file means no stream, which is what stream.lua assumes on load. The mode
+# file stream-mode.sh just wrote goes with it -- leaving "game" behind would be
+# a statement about a stream that no longer exists.
+rm -f "$SUNSHINE_VIDEO_MODE" "$SUNSHINE_SESSION_MODE"
 
 hook_log "teardown complete: $(hyprctl -j monitors 2>/dev/null | jq -c '[.[].name]' 2>/dev/null || echo 'query failed')"

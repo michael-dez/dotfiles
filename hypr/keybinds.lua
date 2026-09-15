@@ -79,10 +79,24 @@ local workspaces = {
     { ws = 10, row = "0", kp_off = "KP_Insert", kp_on = "KP_0" },
 }
 
+-- CTRL is the stream's half of these: it brings workspace N *to* the virtual
+-- output rather than sending focus away to the monitor that holds it. Without
+-- it a desktop stream can only ever see workspace 11 -- focusing any other
+-- workspace moves focus to a physical monitor, so the client goes on showing
+-- workspace 11 while every keystroke lands in a window on the desk. See
+-- pull_workspace() in stream.lua; off-stream it is a plain focus, which is what
+-- these keys would otherwise have done.
+--
+-- `hl.bind` takes a Lua function, not only a dispatcher object, which is what
+-- lets one binding decide between two behaviours at press time instead of
+-- needing two keys.
+local stream = require("stream")
+
 for _, w in ipairs(workspaces) do
     for _, key in ipairs({ w.row, w.kp_off, w.kp_on }) do
         hl.bind(mod .. " + " .. key,         hl.dsp.focus({ workspace = w.ws }))
         hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = w.ws }))
+        hl.bind(mod .. " + CTRL + " .. key,  function() stream.pull_workspace(w.ws) end)
     end
 end
 

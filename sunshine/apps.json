@@ -6,6 +6,12 @@
   "apps": [
     {
       "name": "Desktop",
+      "prep-cmd": [
+        {
+          "do": "/home/mike/.config/sunshine/hooks/stream-mode.sh desktop",
+          "undo": "/home/mike/.config/sunshine/hooks/stream-mode.sh game"
+        }
+      ],
       "image-path": "desktop.png"
     },
     {

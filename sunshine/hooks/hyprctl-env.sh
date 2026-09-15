@@ -110,3 +110,16 @@ SUNSHINE_PREV_PRIMARY="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/sunshine-prev-prim
 # is per-boot state and should not outlive the session.
 SUNSHINE_PREV_FOCUS="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/sunshine-prev-focus"
 
+# The two files hypr/stream.lua reads on load, written here so the compositor
+# side and the hook side cannot disagree about where they live.
+#
+#   sunshine-video-mode     the client's negotiated mode, "1920x1080@60"
+#   sunshine-session-mode   "game" or "desktop"
+#
+# They exist because `hyprctl reload` re-runs the Hyprland config from scratch,
+# and a reload that happens mid-stream must not re-apply a hardcoded mode or
+# revert a desktop session to the game rules. Both are removed by stream-end.sh,
+# so their absence is the honest statement that no stream is running.
+SUNSHINE_VIDEO_MODE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/sunshine-video-mode"
+SUNSHINE_SESSION_MODE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/sunshine-session-mode"
+

@@ -80,6 +80,12 @@
     - { src: "sunshine/hooks/stream-start.sh", dest: "sunshine/hooks/stream-start.sh" }
     - { src: "sunshine/hooks/stream-end.sh", dest: "sunshine/hooks/stream-end.sh" }
     - { src: "sunshine/hooks/launch-bigpicture.sh", dest: "sunshine/hooks/launch-bigpicture.sh" }
+    # The game/desktop switch. stream-mode.sh is called by stream-start.sh and
+    # again by the "Desktop" app's own prep-cmd in apps.json, so it has to be
+    # linked whether or not the Hyprland hooks are in use; desktop-audio.sh is
+    # only ever called by it.
+    - { src: "sunshine/hooks/stream-mode.sh", dest: "sunshine/hooks/stream-mode.sh" }
+    - { src: "sunshine/hooks/desktop-audio.sh", dest: "sunshine/hooks/desktop-audio.sh" }
     # The second global_prep_cmd pair, which suspends ollama for the duration
     # of a stream. Separate scripts rather than lines appended to
     # stream-start.sh: that one bails out early when no Hyprland instance is

@@ -49,9 +49,27 @@
 # -- which matters more than usual here, because these containers use
 # Network=host and the environment variable below is the only thing keeping the
 # UI off every interface of a machine with no firewall.
+#
+# ExecStart, NOT Environment, and that distinction is the whole reason this task
+# once failed against a perfectly good setup. A quadlet's `Environment=` lines
+# are not copied into the generated unit's `Environment=`; quadlet turns each
+# one into a `--env` argument on the podman command line, and the only thing it
+# does put in the unit's own environment is PODMAN_SYSTEMD_UNIT:
+#
+#     $ systemctl --user show open-webui.service --property=Environment
+#     Environment=PODMAN_SYSTEMD_UNIT=open-webui.service
+#     $ systemctl --user show open-webui.service --property=ExecStart
+#     ExecStart={ ... argv[]=/usr/bin/podman run ... --env HOST=127.0.0.1 ... }
+#
+# `systemctl --user cat` is not the alternative it looks like either: quadlet
+# copies the source file's comments into the generated unit verbatim, and the
+# header of containers/open-webui.container contains the string HOST=127.0.0.1
+# while explaining this very check. Grepping that output would match the
+# comment and pass whatever the container was actually told to do. The parsed
+# ExecStart property is the only reading of this that cannot be fooled.
 - name: "llm: Read back the units the generator produced"
   become: no
-  command: "systemctl --user show {{ item.unit }}.service --property=LoadState --property=Environment"
+  command: "systemctl --user show {{ item.unit }}.service --property=LoadState --property=ExecStart"
   register: generated
   changed_when: false
   failed_when: false
@@ -63,15 +81,19 @@
   assert:
     that:
       - "'LoadState=loaded' in item.stdout"
-      - "item.item.bind in item.stdout"
+      # The "--env " prefix is load-bearing: without it this would also pass on
+      # a stray match elsewhere in the command line, and for open-webui the
+      # bare string is a substring of langflow's LANGFLOW_HOST=127.0.0.1.
+      - "('--env ' ~ item.item.bind) in item.stdout"
     fail_msg: >-
       {{ item.item.unit }}.service did not come out of the quadlet generator as
       expected. Either podman is not installed (a config_only run on a fresh
       box), or the generator skipped
       ~/.config/containers/systemd/{{ item.item.unit }}.container, or the
       {{ item.item.bind }} line was lost from it. Check with:
-      `systemctl --user list-unit-files | grep -E 'open-webui|langflow'` and
-      `journalctl --user -b | grep -i quadlet`
+      `systemctl --user list-unit-files | grep -E 'open-webui|langflow'`,
+      `systemctl --user show {{ item.item.unit }}.service --property=ExecStart`
+      and `journalctl --user -b | grep -i quadlet`
     success_msg: "{{ item.item.unit }}.service generated, bound to {{ item.item.bind }}"
   with_items: "{{ generated.results }}"
   loop_control:
