@@ -34,6 +34,13 @@ Volume=%h/.local/share/langflow:/var/lib/langflow
 # In a flow's Ollama component, the base URL to use is http://127.0.0.1:11434 --
 # the same address the UI on either machine uses, for the same reason.
 
+# Memory pressure ranking -- same value, same reason and deliberately the same
+# mechanism as containers/open-webui.container, even though this image does
+# rename its process to `langflow` and so could have been matched by earlyoom's
+# --prefer regex instead. AutoUpdate=registry on a :latest tag means that
+# process name is not a stable interface; oom_score_adj is.
+PodmanArgs=--oom-score-adj=450
+
 AutoUpdate=registry
 
 [Service]
@@ -41,5 +48,26 @@ Restart=on-failure
 # Longer than Open WebUI's: this image is the larger pull of the two.
 TimeoutStartSec=1800
 
-[Install]
-WantedBy=default.target
+# --- deliberately no [Install] section ---------------------------------------
+# The header above says this is "started on demand rather than enabled", and
+# until now that was simply untrue: `[Install] WantedBy=default.target` is
+# exactly what makes it not on-demand. The quadlet generator turns that line
+# into
+#
+#     /run/user/1000/systemd/generator/default.target.wants/langflow.service
+#
+# at every daemon-reload, so the unit started at login on both machines and
+# nothing in roles/llm/ had to call `systemctl --user enable` for it to happen.
+# Removing the section removes that symlink; `systemctl --user start langflow`
+# is unaffected, which is the whole intent.
+#
+# It was not harmless. Restart=on-failure above plus a container that exits
+# non-zero is a crash loop, and this one ran 217 restarts in a six-hour session
+# -- each one a registry check against docker.io, a container create and an
+# overlayfs mount, all while a game was running. The restart policy is still
+# right for a container you started on purpose; it is only dangerous on one
+# that starts itself at login and fails there unattended.
+#
+# Note that containers/open-webui.container carries the same contradiction and
+# is left alone on purpose: it is wanted at login on these hosts and it does
+# not fail there. If that ever changes, this is the fix.

@@ -295,6 +295,18 @@
       grep InitializeSystemMemoryAllocations /proc/driver/nvidia/params
       -- expect 0, not 1.
 
+# Kept out of mem_conf: a modules-load.d file needs no initramfs rebuild.
+# Copied for the same reason as above -- systemd-modules-load runs before
+# /home is mounted. See the file's header.
+- name: "bcpc: Load uinput at boot for Sunshine input"
+  become: yes
+  copy:
+    src: "{{ playbook_dir }}/system/uinput.conf"
+    dest: /etc/modules-load.d/uinput.conf
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: "bcpc: Apply sysctl settings without rebooting"
   become: yes
   when: mem_conf is changed

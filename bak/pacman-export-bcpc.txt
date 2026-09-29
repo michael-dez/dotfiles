@@ -15,9 +15,11 @@ cliphist
 ddcutil
 discord
 dosfstools
+downgrade
 earlyoom
 efibootmgr
 egl-wayland
+ffmpegthumbnailer
 firefox
 fzf
 gamemode
@@ -40,6 +42,7 @@ limine-snapper-sync
 linux-cachyos
 linux-cachyos-headers
 linux-firmware
+lutris
 man-db
 mangohud
 mkinitcpio
@@ -50,7 +53,9 @@ noctalia
 npm
 nvidia-open-dkms
 nvidia-utils
+obs-studio
 ollama-cuda
+openrgb
 openssh
 pass
 pipewire-alsa
@@ -65,6 +70,7 @@ qt6-wayland
 ripgrep
 rsync
 sddm
+shellcheck
 slurp
 snap-pac
 snapper
@@ -75,16 +81,19 @@ sunshine
 thunar
 tldr
 ttf-meslo-nerd
+tumbler
 uv
 vim
 vlc
 vlc-plugins-all
 wget
+wine-mono
 wireplumber
 wl-clipboard
 wlogout
 wlsunset
 xdg-desktop-portal-hyprland
 yay
+yt-dlp
 zram-generator
 zsh

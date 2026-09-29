@@ -60,6 +60,16 @@ Volume=%h/.local/share/open-webui:/app/backend/data
 # cannot be switched back to multi-user without wiping the data directory.
 # Signing up once per machine is the cheaper side of that trade.
 
+# Memory pressure ranking. earlyoom is meant to kill this before any Steam
+# title (see system/earlyoom-override.conf), but its --prefer regex cannot
+# reach it: that matches /proc/pid/comm, and this image execs
+# `python3 -m uvicorn open_webui.main:app` without renaming itself, so its comm
+# is the bare string python3 -- identical to the Proton launcher that starts
+# those titles. Raising oom_score_adj puts the container into the same ranking
+# by a route that needs no process name. 450 is the exact equivalent of an
+# earlyoom --prefer match; that file works through the arithmetic.
+PodmanArgs=--oom-score-adj=450
+
 # Update on the next start when the tag has moved. `podman auto-update` only
 # acts on this if you enable its timer, which nothing here does:
 #   systemctl --user enable --now podman-auto-update.timer
