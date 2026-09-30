@@ -89,6 +89,17 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("solaar --window=hide")
 end)
 
+-- --- RGB ------------------------------------------------------------------
+-- The terminal-palette gradient across the GPU, the board and the DIMMs
+-- (openrgb/iceberg-rgb.py). Started here rather than enabled: the OpenRGB
+-- server reaches the I2C and hidraw nodes through `uaccess` ACLs, which only
+-- exist once the login session is active, and this is the first point on
+-- this host that is guaranteed -- see openrgb/openrgb-server.service.
+-- BindsTo in iceberg-rgb.service pulls the server in, so one unit is enough.
+hl.on("hyprland.start", function()
+    hl.exec_cmd("systemctl --user start iceberg-rgb.service")
+end)
+
 -- --- NVIDIA ---------------------------------------------------------------
 -- 4070 Ti (Ada) on the open kernel modules. Deliberately NOT setting
 -- WLR_NO_HARDWARE_CURSORS or GBM_BACKEND: those are pre-explicit-sync advice

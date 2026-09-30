@@ -1,0 +1,168 @@
+# --- OpenRGB ----------------------------------------------------------------
+# The GPU, the board, the DIMMs and the DualSense lightbar in the terminal
+# palette, with a gradient drifting across them. Three moving parts, each
+# explained in its own file:
+#
+#   openrgb/openrgb-server.service   the SDK server, and why a user unit
+#   openrgb/iceberg-rgb.service      the animation, and how it is started
+#   openrgb/iceberg-rgb.py           layout, colour handling, measured cost
+#
+# Everything here is per-user and symlinked, like the rest of ~/.config: the
+# units only ever run inside a login session, well after /home is mounted.
+# The openrgb package itself is installed by packages.yml.
+
+- name: "bcpc: Create directories for OpenRGB"
+  become: no
+  file:
+    path: "{{ ansible_env.HOME }}/{{ item }}"
+    state: directory
+    mode: "0755"
+  with_items:
+    - .local/bin
+    - .config/systemd/user
+    - .config/OpenRGB
+
+- name: "bcpc: Symlink the OpenRGB units and the gradient daemon"
+  become: no
+  file:
+    src: "{{ playbook_dir }}/{{ item.src }}"
+    dest: "{{ ansible_env.HOME }}/{{ item.dest }}"
+    state: link
+    force: yes
+  with_items:
+    - { src: "openrgb/iceberg-rgb.py",         dest: ".local/bin/iceberg-rgb" }
+    - { src: "openrgb/openrgb-server.service", dest: ".config/systemd/user/openrgb-server.service" }
+    - { src: "openrgb/iceberg-rgb.service",    dest: ".config/systemd/user/iceberg-rgb.service" }
+  register: openrgb_units
+
+- name: "bcpc: Reload the user systemd manager for the OpenRGB units"
+  become: no
+  when: openrgb_units is changed
+  systemd:
+    scope: user
+    daemon_reload: yes
+
+# OpenRGB detectors turned off, one per device it must not drive. The list is
+# openrgb_detectors_off in roles/bcpc/defaults/main.yml; the reasons are here.
+#
+# "Logitech HID++ 2.0" claims the PRO X 2 DEX, which has no LEDs: it reports
+# 214 single-LED zones, every one of them named after bytes of the device's
+# own ID, and keeps a watcher open on the receiver. That is
+# the receiver solaar holds the mouse's DPI through (hypr/bcpc.lua), and the
+# same driver has a path that switches onboard profiles into host mode --
+# exactly the setting solaar is there to own. Measured: with it off, OpenRGB
+# never opens the receiver at all.
+#
+# "Wooting 60HE+" because the keyboard's switches have no LED window, so
+# there is nothing to light, and OpenRGB taking over the Wooting's RGB
+# interface is reported to clash with some of Wooting's own settings. Off
+# rather than merely left out of the gradient: a detected keyboard is still
+# put in Direct mode by the saved profile every time the server starts.
+#
+# OpenRGB.json is not symlinked from this repo. OpenRGB writes the whole file
+# back, with every one of its ~1900 detectors listed, so a linked copy would
+# churn `git status` on every GUI change. It merges a partial file on load
+# instead, which is what makes it safe to create one on a fresh box holding
+# only these keys -- also measured, against a scratch --config directory.
+#
+# A running OpenRGB overwrites the file from memory the next time it saves
+# settings, which would quietly put the detectors back. So: check first, stop
+# the units only if an edit is actually due, then edit.
+- name: "bcpc: Check whether any unwanted OpenRGB detector is still on"
+  become: no
+  command:
+    argv:
+      - python3
+      - -c
+      - |
+        import json, sys
+        try:
+            d = json.load(open(sys.argv[1]))
+        except FileNotFoundError:
+            d = {}
+        on = d.get("Detectors", {}).get("detectors", {})
+        print("on" if any(on.get(n, True) for n in json.loads(sys.argv[2])) else "off")
+      - "{{ ansible_env.HOME }}/.config/OpenRGB/OpenRGB.json"
+      - "{{ openrgb_detectors_off | to_json }}"
+  register: openrgb_detectors
+  changed_when: false
+
+- name: "bcpc: Stop OpenRGB so it cannot write its settings back over the edit"
+  become: no
+  when: openrgb_detectors.stdout == "on"
+  command: systemctl --user stop iceberg-rgb.service openrgb-server.service
+
+- name: "bcpc: Turn off the unwanted OpenRGB detectors"
+  become: no
+  when: openrgb_detectors.stdout == "on"
+  command:
+    argv:
+      - python3
+      - -c
+      - |
+        import json, sys
+        try:
+            d = json.load(open(sys.argv[1]))
+        except FileNotFoundError:
+            d = {}
+        detectors = d.setdefault("Detectors", {}).setdefault("detectors", {})
+        for name in json.loads(sys.argv[2]):
+            detectors[name] = False
+        json.dump(d, open(sys.argv[1], "w"), indent=4)
+      - "{{ ansible_env.HOME }}/.config/OpenRGB/OpenRGB.json"
+      - "{{ openrgb_detectors_off | to_json }}"
+
+# The static profile the server loads at startup. Made once, with the daemon
+# not yet running, because the save captures whatever the server is showing
+# at that instant and the daemon repaints 20 times a second. To remake it
+# after changing the palette or the layout:
+#
+#   systemctl --user stop iceberg-rgb
+#   rm ~/.config/OpenRGB/profiles/Iceberg.json && iceberg-rgb --save-profile Iceberg
+#   systemctl --user start iceberg-rgb
+#
+# Not in this repo: the file records each device's serial and location, the
+# DualSense's Bluetooth MAC among them, and this repo is published.
+- name: "bcpc: Check for the Iceberg OpenRGB profile"
+  become: no
+  stat:
+    path: "{{ ansible_env.HOME }}/.config/OpenRGB/profiles/Iceberg.json"
+  register: openrgb_profile
+
+- name: "bcpc: Start the OpenRGB server to save the profile against"
+  become: no
+  when: not openrgb_profile.stat.exists
+  systemd:
+    scope: user
+    name: openrgb-server.service
+    state: started
+
+- name: "bcpc: Save the Iceberg OpenRGB profile"
+  become: no
+  when: not openrgb_profile.stat.exists
+  command: "{{ ansible_env.HOME }}/.local/bin/iceberg-rgb --save-profile Iceberg"
+  args:
+    creates: "{{ ansible_env.HOME }}/.config/OpenRGB/profiles/Iceberg.json"
+
+# The server, not the daemon, is what has to restart for an edited unit to
+# take effect -- and on a first run, for it to come up with the profile just
+# saved. Restarting it takes the daemon down with it (BindsTo), which the
+# next task brings back. Restarting the daemon alone would not reach the
+# server: BindsTo propagates stops from the server, not restarts to it.
+- name: "bcpc: Restart the OpenRGB server after a unit change"
+  become: no
+  when: openrgb_units is changed
+  systemd:
+    scope: user
+    name: openrgb-server.service
+    state: restarted
+
+# A no-op when already running. This assumes the playbook is run from the
+# desktop session -- see openrgb-server.service for why device access needs
+# one. From the next login on, hypr/bcpc.lua starts it instead.
+- name: "bcpc: Start the gradient"
+  become: no
+  systemd:
+    scope: user
+    name: iceberg-rgb.service
+    state: started

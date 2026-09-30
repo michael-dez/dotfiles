@@ -1,0 +1,33 @@
+# bcpc -- OpenRGB's SDK server, as the logged-in user.
+#                          ->  ~/.config/systemd/user/openrgb-server.service
+#
+# Not the packaged /usr/lib/systemd/system/openrgb.service. That one runs as
+# root with its config in /etc/openrgb, so it would keep a second copy of the
+# settings the GUI edits in ~/.config/OpenRGB, and it would need nothing a
+# user unit does not already have: the openrgb package's udev rules tag the
+# I2C and hidraw nodes `uaccess`, which gives the active seat session an ACL
+# on them.
+#
+# That ACL is also why this has no [Install] section. It only exists once the
+# login session is active, and nothing on this host marks that for the user
+# manager -- Hyprland is not started through uwsm, so graphical-session.target
+# is never reached, and default.target comes up alongside the session rather
+# than after it. hypr/bcpc.lua starts iceberg-rgb.service on hyprland.start,
+# by which point the session is unambiguously active, and that pulls this in.
+#
+# --profile Iceberg paints the static gradient the moment detection finishes,
+# before any client connects. It is the snapshot `iceberg-rgb --save-profile`
+# makes, and it is what stays on the hardware whenever the daemon is stopped.
+# An absent profile is logged and skipped, not fatal.
+#
+# With this running, opening the OpenRGB GUI connects to it as a client
+# instead of detecting hardware itself. That matters: two processes both
+# driving the same SMBus devices is how ENE controllers end up confused.
+
+[Unit]
+Description=OpenRGB SDK server
+
+[Service]
+ExecStart=/usr/bin/openrgb --server --noautoconnect --profile Iceberg
+Restart=on-failure
+RestartSec=5

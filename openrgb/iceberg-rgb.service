@@ -1,0 +1,23 @@
+# bcpc -- the terminal-palette gradient across the OpenRGB devices.
+#                          ->  ~/.config/systemd/user/iceberg-rgb.service
+#
+# The daemon itself is openrgb/iceberg-rgb.py; its header has the layout,
+# the colour handling and the measured cost. Started from hypr/bcpc.lua on
+# hyprland.start, not enabled -- see openrgb-server.service for why this
+# host has no earlier point at which device access is guaranteed.
+#
+# BindsTo pulls the server in when this starts and takes this down if the
+# server goes away, so starting this one unit is the whole switch. The
+# daemon does not need the server to have finished detecting: it retries
+# the connection, and re-reads the device list whenever the server says it
+# changed.
+
+[Unit]
+Description=Terminal-palette gradient across OpenRGB devices
+BindsTo=openrgb-server.service
+After=openrgb-server.service
+
+[Service]
+ExecStart=%h/.local/bin/iceberg-rgb
+Restart=on-failure
+RestartSec=5

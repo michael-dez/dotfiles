@@ -15,3 +15,8 @@
 # hooks are not in place yet.
 - name: "bcpc: Set up ollama"
   import_tasks: ollama.yml
+
+# Last and independent: nothing above reads anything OpenRGB puts in place.
+# Its package is in packages.yml; the rest is user-level and in openrgb.yml.
+- name: "bcpc: Set up OpenRGB"
+  import_tasks: openrgb.yml

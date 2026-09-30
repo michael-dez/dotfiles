@@ -33,3 +33,15 @@
     name:
       - ollama-cuda
     state: present
+
+# The SDK server that roles/bcpc/tasks/openrgb.yml runs as a user unit. The
+# package also carries what makes that possible without root: udev rules
+# that tag the I2C and hidraw nodes `uaccess`, and a modules-load.d entry
+# for i2c-dev, without which the DIMMs and the GPU have no /dev/i2c-* node
+# to be reached through at all.
+- name: "bcpc: Install OpenRGB"
+  become: yes
+  package:
+    name:
+      - openrgb
+    state: present

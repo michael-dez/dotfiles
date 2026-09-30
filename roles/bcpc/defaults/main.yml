@@ -27,3 +27,10 @@ ollama_models:
   # ~4.7 GB. Fill-in-the-middle completion for editor plugins, which want a
   # model that answers in milliseconds far more than they want a clever one.
   - qwen2.5-coder:7b
+
+# OpenRGB detectors roles/bcpc/tasks/openrgb.yml turns off, by the exact name
+# OpenRGB.json lists them under. Why each one is there is written up beside
+# the task. Adding a name here and re-running is the whole procedure.
+openrgb_detectors_off:
+  - Logitech HID++ 2.0
+  - Wooting 60HE+
