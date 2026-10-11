@@ -43,10 +43,22 @@
 # NVIDIA driver's I2C adapter, where each of the 29 LEDs costs ~1.8 ms of
 # busy kernel time per write. OpenRGB 1.0 queues writes on per-device
 # threads, so the SDK gives no back-pressure and a round-trip cannot see
-# any of this -- /proc/<pid>/stat is the only honest meter. Hence the GPU
-# gets its own low frame rate (--gpu-fps), unchanged frames are never sent,
-# and the whole thing freezes while gamemode has a client, so nothing
-# touches the GPU's I2C bus while a game is running.
+# any of this -- /proc/<pid>/stat is the only honest meter.
+#
+# So the GPU is not given frames at all. It gets a budget of single-LED
+# writes per second (--gpu-writes), and each 20 fps tick spends its share
+# on whichever LEDs are furthest from where the wave says they should be.
+# Measured, a single-LED write costs the same as one LED's share of a full
+# frame (58 writes/s: 12.2% of a core as singles, 11.0% as two 29-LED
+# frames), so this is the same money spent better. The first version gave
+# the GPU 2 full frames a second, and with a brightness dip on (--dim) the
+# whole card visibly ticked in unison; simulated over a minute of the wave,
+# worst-case lag behind the target fell from 0.28 to 0.08 (perceptual units,
+# --dim 0.6 --dim-at 0.85), and the LEDs no longer all move at once.
+#
+# Unchanged frames are never sent, and the whole thing freezes while
+# gamemode has a client, so nothing touches the GPU's I2C bus while a game
+# is running.
 #
 # gamemode is polled over D-Bus (ClientCount, ~6 ms a read, every 5 s)
 # rather than driven by [custom] hooks in gamemode.ini. A hook only fires on
@@ -117,6 +129,7 @@ REQUEST_PROTOCOL_VERSION = 40
 SET_CLIENT_NAME = 50
 DEVICE_LIST_UPDATED = 100
 UPDATELEDS = 1050
+UPDATESINGLELED = 1052
 SETCUSTOMMODE = 1100
 
 # The newest wire format this parser understands. The server answers with
@@ -243,6 +256,9 @@ class Client:
         body = struct.pack("<H", len(colors)) + b"".join(bytes((r, g, b, 0)) for r, g, b in colors)
         self.send(UPDATELEDS, struct.pack("<I", len(body) + 4) + body, device=ctrl.index)
 
+    def update_one(self, ctrl, led, color):
+        self.send(UPDATESINGLELED, struct.pack("<iBBBx", led, *color), device=ctrl.index)
+
     def sync(self):
         # A request/response pair proves the server has *read* everything
         # sent before it, and so updated its copy of each controller's
@@ -287,6 +303,26 @@ def led_bytes(lab, brightness, saturation):
     return tuple(round(255 * brightness * c / peak) for c in rgb)
 
 
+def dip(t, depth, at):
+    """Brightness multiplier at t in [0, 1] between two stops.
+
+    Full at both stops, darkest at `at`, easing in and out along a half
+    cosine on each side so there is no visible corner. at=0.5 dims the blend
+    between two colours; toward 1 each colour fades as it runs out, and the
+    next one comes up quickly behind it.
+
+    `depth` is in perceived brightness, not LED duty: OKLab lightness is
+    roughly the cube root of light output, so the duty factor is cubed.
+    Linear would barely register -- half duty reads as ~80% as bright.
+    """
+    if depth <= 0:
+        return 1.0
+    # Kept off the stops themselves: a trough at 0 or 1 is a hard edge.
+    at = min(0.95, max(0.05, at))
+    u = t / at if t < at else (1 - t) / (1 - at)
+    return (1 - depth * (1 - math.cos(math.pi * u)) / 2) ** 3
+
+
 def read_palette():
     for path in KITTY_THEMES:
         path = os.path.expanduser(path)
@@ -301,7 +337,11 @@ def read_palette():
     return None, [FALLBACK[i] for i in PALETTE]
 
 
-def build_lut(hexes, brightness, saturation, size=512):
+# 4096, not the 512 this started with: a 30 s cycle at 20 fps is 600
+# frames, so 512 entries left a quarter of frames repeating the one before
+# and the rest stepping on -- an uneven stutter, worst where --dim makes
+# brightness change fastest. Now every frame moves by about 7 entries.
+def build_lut(hexes, brightness, saturation, dim=0.0, dim_at=0.5, size=4096):
     labs = [linear_to_oklab(*(srgb_to_linear(int(h[i:i + 2], 16) / 255) for i in (1, 3, 5))) for h in hexes]
     lut = []
     for i in range(size):
@@ -310,8 +350,9 @@ def build_lut(hexes, brightness, saturation, size=512):
         # Smoothstep rather than linear: the eye reads a linear blend as
         # lingering on the midpoints and snapping through the stops.
         t = pos - int(pos)
-        t = t * t * (3 - 2 * t)
-        lut.append(led_bytes(tuple(x + (y - x) * t for x, y in zip(a, b)), brightness, saturation))
+        blend = t * t * (3 - 2 * t)
+        lut.append(led_bytes(tuple(x + (y - x) * blend for x, y in zip(a, b)),
+                             brightness * dip(t, dim, dim_at), saturation))
     return lut
 
 
@@ -342,6 +383,15 @@ def place(ctrls):
 
 
 # --- main loop ------------------------------------------------------------------
+# Roughly perceptual per channel: OKLab lightness goes as the cube root of
+# light output, so a step from 4 to 8 counts for far more than 200 to 204.
+PERCEIVED = [(v / 255) ** (1 / 3) for v in range(256)]
+
+
+def lag(shown, target):
+    return max(abs(PERCEIVED[a] - PERCEIVED[b]) for a, b in zip(shown, target))
+
+
 def gaming():
     try:
         out = subprocess.run(
@@ -365,7 +415,7 @@ class Wave:
         path, hexes = read_palette()
         self.palette_path = path
         self.palette_mtime = os.stat(path).st_mtime if path else None
-        self.lut = build_lut(hexes, self.args.brightness, self.args.saturation)
+        self.lut = build_lut(hexes, self.args.brightness, self.args.saturation, self.args.dim, self.args.dim_at)
         print("palette %s from %s" % (" ".join(hexes), path or "built-in fallback"), flush=True)
 
     def palette_changed(self):
@@ -478,25 +528,35 @@ def run(args):
                 print("saved profile %s: %s, %d devices" % ((args.save_profile,) + check_profile(args.save_profile)),
                       flush=True)
                 return
-            last, due = {}, {}
-            interval = {i: 1 / (args.gpu_fps if by_index[i].type == "gpu" else args.fps) for i in phases}
+            last = {}
+            gpus = {i for i in phases if by_index[i].type == "gpu"}
+            credit = 0.0
             # Check gamemode on the first pass, not 5 s in: restarted
             # mid-game, this must not light the GPU bus up even briefly.
             next_check = 0
             while True:
                 now = time.monotonic()
                 if not (wave.paused or wave.gaming):
+                    # Whole writes only; the fraction carries to the next
+                    # tick. Capped so a stall cannot bank a burst.
+                    credit = min(credit + args.gpu_writes / args.fps, args.gpu_writes)
                     for i, ph in phases.items():
-                        if now < due.get(i, 0):
-                            continue
-                        due[i] = now + interval[i]
-                        # Sampled from the one wall clock, so a device on a
-                        # lower frame rate steps along the same wave rather
-                        # than lagging behind it.
                         frame = wave.colors(ph, now)
-                        if frame != last.get(i):
-                            client.update(by_index[i], frame)
-                            last[i] = frame
+                        if i not in gpus or i not in last:
+                            # Everything else, and each GPU's first frame
+                            # (nothing is known to be on it yet), in full.
+                            if frame != last.get(i):
+                                client.update(by_index[i], frame)
+                                last[i] = frame
+                            continue
+                        shown = last[i]
+                        behind = sorted(((lag(shown[k], frame[k]), k) for k in range(len(frame))), reverse=True)
+                        for gap, k in behind[:int(credit)]:
+                            if gap == 0:
+                                break
+                            client.update_one(by_index[i], k, frame[k])
+                            shown[k] = frame[k]
+                            credit -= 1
                 client.poll()
                 if client.list_changed:
                     print("device list changed, re-reading", flush=True)
@@ -524,12 +584,17 @@ def main():
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--port", type=int, default=6742)
     p.add_argument("--fps", type=float, default=20, help="frame rate for everything but the GPU")
-    p.add_argument("--gpu-fps", type=float, default=2, help="GPU frame rate; ~5%% of a core each, see header")
+    p.add_argument("--gpu-writes", type=float, default=58,
+                   help="GPU single-LED writes per second; 58 is ~12%% of a core, see header")
     p.add_argument("--period", type=float, default=30, help="seconds for the gradient to move one wavelength")
     p.add_argument("--wavelength", type=float, default=40, help="layout units per full palette cycle")
     p.add_argument("--angle", type=float, default=-20, help="travel direction in degrees; negative is upward")
     p.add_argument("--brightness", type=float, default=1.0, help="0-1")
     p.add_argument("--saturation", type=float, default=1.6, help="OKLab chroma multiplier")
+    p.add_argument("--dim", type=float, default=0.0,
+                   help="how far brightness dips between colours, 0 (off) to 1 (black)")
+    p.add_argument("--dim-at", type=float, default=0.5,
+                   help="where the dip bottoms out between two colours: 0.5 midway, toward 1 the end of each")
     p.add_argument("--save-profile", metavar="NAME", help="paint frame zero, save it as an OpenRGB profile, exit")
     run(p.parse_args())
 

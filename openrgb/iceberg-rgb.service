@@ -18,6 +18,11 @@ BindsTo=openrgb-server.service
 After=openrgb-server.service
 
 [Service]
-ExecStart=%h/.local/bin/iceberg-rgb
+# The look is tuned here rather than in the script's defaults, so trying a
+# variant is: stop this unit, run `iceberg-rgb --dim ... --dim-at ...` in a
+# terminal until it looks right, then copy the flags onto this line and
+# `systemctl --user daemon-reload && systemctl --user restart iceberg-rgb`.
+# See `iceberg-rgb --help` for the rest (speed, spread, direction, colour).
+ExecStart=%h/.local/bin/iceberg-rgb --dim 0.6 --dim-at 0.5
 Restart=on-failure
 RestartSec=5
