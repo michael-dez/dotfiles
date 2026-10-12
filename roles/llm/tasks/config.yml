@@ -14,7 +14,7 @@
 - name: "llm: Symlink the container quadlets"
   become: no
   file:
-    src: "{{ playbook_dir }}/containers/{{ item }}"
+    src: "{{ dotfiles_dir }}/containers/{{ item }}"
     dest: "{{ ansible_env.HOME }}/.config/containers/systemd/{{ item }}"
     state: link
     force: yes
@@ -63,8 +63,8 @@
   when: not (config_only | bool)
   command: >-
     awk -F= '/^Image=/ { print $2 }'
-    {{ playbook_dir }}/containers/open-webui.container
-    {{ playbook_dir }}/containers/langflow.container
+    {{ dotfiles_dir }}/containers/open-webui.container
+    {{ dotfiles_dir }}/containers/langflow.container
   register: llm_images
   changed_when: false
 

@@ -1,8 +1,8 @@
-# Dotfile symlinks via playbook_dir (not PWD). docs/ansible.md#rolescommon
+# Dotfile symlinks via dotfiles_dir (not PWD or playbook_dir). docs/ansible.md#rolescommon
 - name: "Create symlinks for home directory dotfiles"
   become: no
   file:
-    src: "{{ playbook_dir }}/{{ item }}"
+    src: "{{ dotfiles_dir }}/{{ item }}"
     dest: "{{ ansible_env.HOME }}/.{{ item }}"
     state: link
     force: yes
@@ -29,12 +29,11 @@
 - name: "Create symlinks for XDG config files"
   become: no
   file:
-    src: "{{ playbook_dir }}/{{ item.src }}"
+    src: "{{ dotfiles_dir }}/{{ item.src }}"
     dest: "{{ ansible_env.HOME }}/.config/{{ item.dest }}"
     state: link
     force: yes
   with_items:
-    - { src: "gamemode/gamemode.ini", dest: "gamemode.ini" }
     - { src: "nvim/init.lua", dest: "nvim/init.lua" }
     - { src: "nvim/lua", dest: "nvim/lua" }
     - { src: "picom/picom.conf", dest: "picom/picom.conf" }
@@ -43,6 +42,19 @@
     - { src: "xfce4/terminal/terminalrc", dest: "xfce4/terminal/terminalrc" }
     - { src: "xfce4/terminal/accels.scm", dest: "xfce4/terminal/accels.scm" }
     - { src: "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml", dest: "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml" }
+
+- name: "Check for a gamemode.ini link left by older runs"
+  become: no
+  stat:
+    path: "{{ ansible_env.HOME }}/.config/gamemode.ini"
+  register: stale_gamemode
+
+- name: "Remove it if it points into this repo (bcpc's link points into iac)"
+  become: no
+  when: (stale_gamemode.stat.lnk_target | default('')).startswith(dotfiles_dir ~ '/')
+  file:
+    path: "{{ ansible_env.HOME }}/.config/gamemode.ini"
+    state: absent
 
 - name: "Read the user's current login shell"
   become: no

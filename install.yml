@@ -1,4 +1,4 @@
-# WSL Ubuntu, EndeavourOS (BCLT), CachyOS (bcpc). Needs: ansible-galaxy collection install community.general
+# WSL Ubuntu, EndeavourOS (BCLT), CachyOS (bcpc; its host role is in the iac repo). Needs: ansible-galaxy collection install community.general
 # Run: ansible-playbook -K install.yml [-e config_only=true]
 # Host markers (not os-release), role order, config_only: docs/ansible.md#installyml
 - hosts: localhost
@@ -7,14 +7,11 @@
   gather_facts: yes
   vars:
     username: "{{ ansible_user_id }}"
-    is_cachyos: "{{ '/etc/pacman.d/cachyos-mirrorlist' is exists }}"
     is_eos: "{{ '/etc/pacman.d/endeavouros-mirrorlist' is exists }}"
     config_only: false
   roles:
     - role: ubuntu
       when: ansible_facts['distribution'] == 'Ubuntu'
-    - role: bcpc
-      when: is_cachyos | bool
     - role: bclt
       when: is_eos | bool
     - role: common

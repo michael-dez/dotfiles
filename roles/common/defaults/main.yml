@@ -1,0 +1,2 @@
+# Repo root from the role, so iac's bcpc playbook can reuse this role. docs/ansible.md#rolescommon
+dotfiles_dir: "{{ role_path | realpath | dirname | dirname }}"
