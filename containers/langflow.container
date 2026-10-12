@@ -68,6 +68,12 @@ TimeoutStartSec=1800
 # right for a container you started on purpose; it is only dangerous on one
 # that starts itself at login and fails there unattended.
 #
-# Note that containers/open-webui.container carries the same contradiction and
-# is left alone on purpose: it is wanted at login on these hosts and it does
-# not fail there. If that ever changes, this is the fix.
+# containers/open-webui.container carried the same contradiction and has since
+# had the same section removed, so neither UI starts itself at login now.
+#
+# ollama is the exception, and deliberately so: ollama.socket stays enabled at
+# boot. It starts no process and loads no model, and with neither UI coming up
+# at login there is nothing to trigger it -- so the saving that disarming it
+# would buy is zero, while the cost would be a manual start before every
+# `ollama` command. What keeps ollama itself off the boot path is
+# ollama.service being disabled, not the socket. See system/ollama.socket.

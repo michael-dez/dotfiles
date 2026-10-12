@@ -82,5 +82,23 @@ Restart=on-failure
 # killed halfway through the download.
 TimeoutStartSec=900
 
-[Install]
-WantedBy=default.target
+# --- deliberately no [Install] section ---------------------------------------
+# The header says this is "meant to be up while you are using it and gone the
+# rest of the time". `[Install] WantedBy=default.target` is what made that
+# untrue: the quadlet generator turns it into
+#
+#     /run/user/1000/systemd/generator/default.target.wants/open-webui.service
+#
+# at every daemon-reload, so the container came up at login and stayed up --
+# this one had been running 19 hours, holding ~230 MB resident and 517 MB of
+# swap, on a machine whose binding constraint is memory while a game is up.
+# Nothing in roles/llm/ ever called `systemctl --user enable`; this line was
+# the whole mechanism.
+#
+# `systemctl --user start open-webui` is unaffected, which is the intent. Same
+# change and same reasoning as containers/langflow.container.
+#
+# Note that Restart=on-failure above is kept. It is correct for a container you
+# started deliberately; it was only hazardous combined with starting itself at
+# login, where langflow's repeated failures became a 217-restart loop nobody
+# was watching.

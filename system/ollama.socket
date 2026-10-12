@@ -52,5 +52,13 @@ ListenStream=[::1]:11434
 # process that cannot use it.
 Service=ollama-proxy.service
 
+# Deliberately still enabled at boot, while both UIs that use it are not. The
+# socket is the cheap half of this stack: it holds a loopback port and starts
+# nothing, so with no client running at login there is nothing to connect to it
+# and ollama stays down -- the "nothing is listening, and no model can be
+# loaded, until something actually asks" argument above is satisfied by leaving
+# ollama.service disabled (roles/bcpc/tasks/ollama.yml) rather than by
+# disarming the socket. Keeping it armed is also what lets the `ollama` CLI and
+# the playbook's model tasks reach 127.0.0.1:11434 without a manual start.
 [Install]
 WantedBy=sockets.target
