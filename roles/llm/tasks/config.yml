@@ -1,4 +1,5 @@
-# --- quadlets --------------------------------------------------------------
+# Quadlet symlinks, generator read-back assertion (ExecStart, not Environment), image pre-pull.
+# Why: docs/llm.md#rolesllm-ansible
 - name: "llm: Create the quadlet and data directories"
   become: no
   file:
@@ -6,19 +7,10 @@
     state: directory
     mode: "0755"
   with_items:
-    # Where podman's systemd user generator looks for *.container files.
     - "{{ ansible_env.HOME }}/.config/containers/systemd"
-    # Bind-mounted into the containers. Created here rather than left to podman
-    # because podman would create them owned by root's mapped uid on first
-    # start, which is recoverable but confusing.
     - "{{ ansible_env.HOME }}/.local/share/open-webui"
     - "{{ ansible_env.HOME }}/.local/share/langflow"
 
-# Symlinked like every other user config in this repo, so edits in the repo are
-# live after a daemon-reload rather than after a playbook run. The generator
-# reads these as ordinary files; the assertion below is what proves it followed
-# the symlinks rather than skipping them, since a quadlet the generator ignores
-# produces no unit and no error.
 - name: "llm: Symlink the container quadlets"
   become: no
   file:
@@ -31,42 +23,12 @@
     - langflow.container
   register: quadlets
 
-# Generators run on daemon-reload; this is what turns the files above into
-# open-webui.service and langflow.service. Unconditional rather than gated on
-# `quadlets is changed`, because the quadlet *contents* can change without the
-# symlink changing at all -- editing containers/open-webui.container in this
-# repo is the normal way to work on it.
 - name: "llm: Re-run the user generators"
   become: no
   systemd:
     scope: user
     daemon_reload: yes
 
-# The check that makes the symlink question answerable instead of assumed. If
-# the generator ignored these files the units simply would not exist, and the
-# first sign would be `systemctl --user start open-webui` failing days later.
-# Reading the generated unit back also proves the bind address survived into it
-# -- which matters more than usual here, because these containers use
-# Network=host and the environment variable below is the only thing keeping the
-# UI off every interface of a machine with no firewall.
-#
-# ExecStart, NOT Environment, and that distinction is the whole reason this task
-# once failed against a perfectly good setup. A quadlet's `Environment=` lines
-# are not copied into the generated unit's `Environment=`; quadlet turns each
-# one into a `--env` argument on the podman command line, and the only thing it
-# does put in the unit's own environment is PODMAN_SYSTEMD_UNIT:
-#
-#     $ systemctl --user show open-webui.service --property=Environment
-#     Environment=PODMAN_SYSTEMD_UNIT=open-webui.service
-#     $ systemctl --user show open-webui.service --property=ExecStart
-#     ExecStart={ ... argv[]=/usr/bin/podman run ... --env HOST=127.0.0.1 ... }
-#
-# `systemctl --user cat` is not the alternative it looks like either: quadlet
-# copies the source file's comments into the generated unit verbatim, and the
-# header of containers/open-webui.container contains the string HOST=127.0.0.1
-# while explaining this very check. Grepping that output would match the
-# comment and pass whatever the container was actually told to do. The parsed
-# ExecStart property is the only reading of this that cannot be fooled.
 - name: "llm: Read back the units the generator produced"
   become: no
   command: "systemctl --user show {{ item.unit }}.service --property=LoadState --property=ExecStart"
@@ -81,9 +43,6 @@
   assert:
     that:
       - "'LoadState=loaded' in item.stdout"
-      # The "--env " prefix is load-bearing: without it this would also pass on
-      # a stray match elsewhere in the command line, and for open-webui the
-      # bare string is a substring of langflow's LANGFLOW_HOST=127.0.0.1.
       - "('--env ' ~ item.item.bind) in item.stdout"
     fail_msg: >-
       {{ item.item.unit }}.service did not come out of the quadlet generator as
@@ -99,14 +58,6 @@
   loop_control:
     label: "{{ item.item.unit }}"
 
-# --- images ----------------------------------------------------------------
-# Pre-pulled so the first `systemctl --user start` is quick rather than a
-# multi-gigabyte download behind a unit start timeout. On the far side of the
-# config_only line for the same reason the ollama model pulls are.
-#
-# The image names are read out of the quadlets rather than restated here. They
-# are already declared in exactly one place, and a second copy in a defaults
-# file is a copy that goes stale the first time a tag changes.
 - name: "llm: Collect the images the quadlets reference"
   become: no
   when: not (config_only | bool)

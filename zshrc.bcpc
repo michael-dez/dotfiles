@@ -1,30 +1,13 @@
-# bcpc -- per-host shell config. Linked to ~/.zshrc.local by install.yml when
-# os-release ID is cachyos, and sourced from the end of zshrc.
-# Interactive-shell scope only. Session-wide env (Wayland/NVIDIA/toolkit) lives
-# in hypr/bcpc.conf, because GUI apps launched from the Noctalia launcher never
-# source ~/.zshrc.
+# bcpc -- per-host shell config, linked to ~/.zshrc.local by install.yml. Interactive shells only;
+# session-wide env lives in hypr/bcpc.lua. docs/shell.md#zshrcbcpc
 
 # --- CUDA / local inference ---
 export CUDA_HOME=/opt/cuda
 export PATH="$CUDA_HOME/bin:$PATH"
 
-# Host-specific addresses and mount points intentionally live in an untracked
-# file, not here -- this repo is published. Put them in ~/.zshrc.private and
-# they will be picked up below.
+# Host-specific addresses go in untracked ~/.zshrc.private (published repo).
 [ -f ~/.zshrc.private ] && . ~/.zshrc.private
 
-# NOTE: gs is already `git status` in zshrc, so these are gs-*, not gs.
-# Modes confirmed from a live session via `hyprctl monitors`:
-#   DP-3  BenQ ZOWIE XL2586X   1920x1080@539.56   (left)
-#   DP-1  Alienware AW3425DWM  3440x1440@179.99   (right)
-#
-# -O/--prefer-output only takes effect on the DRM backend (a standalone
-# gamescope session). Running NESTED inside Hyprland, gamescope is just another
-# window and Hyprland decides where it lands -- workspace 1 is bound to DP-3, so
-# launching from workspace 1 puts it on the fast panel. -O is harmless either
-# way and correct if you ever use gamescope-session.
+# gs-*, not gs (gs is `git status`). -O only applies on the DRM backend. docs/shell.md#zshrcbcpc
 alias gs-fast='gamescope -W 1920 -H 1080 -r 540 -O DP-3,DP-1 -f --'
 alias gs-wide='gamescope -W 3440 -H 1440 -r 180 -O DP-1,DP-3 -f --'
-
-# Steam per-game launch options for the 540Hz panel:
-#   gamescope -W 1920 -H 1080 -r 540 -O DP-3,DP-1 -f -- %command%

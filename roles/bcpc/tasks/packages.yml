@@ -1,32 +1,14 @@
-# The system config files these packages back are installed by config.yml, and
-# the reasoning for each of them lives there. This file is only the part that
-# config_only is meant to skip.
+# cachyos-settings is required (supplies NVreg_InitializeSystemMemoryAllocations=0); ollama-cuda, not ollama.
+# Why: docs/ansible.md#packagesyml
 - name: "bcpc: Install memory-pressure tooling"
   become: yes
   package:
     name:
       - earlyoom
       - zram-generator
-      # Not optional, despite reading like a nicety. system/nvidia-bcpc.conf
-      # deliberately does not set NVreg_InitializeSystemMemoryAllocations so
-      # that this package's /usr/lib/modprobe.d/nvidia.conf can supply 0.
-      # Without it installed nothing sets the parameter at all and the
-      # driver default of 1 applies -- the opposite of what was asked for,
-      # arrived at silently. It also carries the 30-zram.rules udev rule
-      # that disables zswap (zswap in front of zram double-compresses into
-      # RAM) and the swappiness=150 that 99-zram.conf otherwise duplicates.
       - cachyos-settings
     state: present
 
-# ollama-cuda rather than plain ollama: same version, same binary, plus the
-# CUDA runtime libraries under /usr/lib/ollama that let it use the 4070 Ti.
-# Without it ollama runs models on the CPU and never says why -- it falls back
-# silently, and the only visible symptom is generation an order of magnitude
-# slower than it should be. It depends on `ollama` (the binary, the systemd
-# unit and the ollama system user) and on `cuda`, which is a few GB by itself.
-#
-# The units that turn this into a service, and the reasoning behind each of
-# them, are in ollama.yml.
 - name: "bcpc: Install ollama with CUDA support"
   become: yes
   package:
@@ -34,11 +16,6 @@
       - ollama-cuda
     state: present
 
-# The SDK server that roles/bcpc/tasks/openrgb.yml runs as a user unit. The
-# package also carries what makes that possible without root: udev rules
-# that tag the I2C and hidraw nodes `uaccess`, and a modules-load.d entry
-# for i2c-dev, without which the DIMMs and the GPU have no /dev/i2c-* node
-# to be reached through at all.
 - name: "bcpc: Install OpenRGB"
   become: yes
   package:

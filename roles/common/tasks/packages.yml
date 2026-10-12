@@ -1,6 +1,4 @@
-# The Arch tasks here are the ones shared by every Arch derivative -- bcpc and
-# EndeavourOS (BCLT) alike -- so they stay in common rather than moving into
-# the bcpc role, which would silently stop upgrading BCLT.
+# Arch tasks stay here (shared by bcpc and BCLT); per-host manifest only. docs/ansible.md#rolescommon
 - name: "Arch: Upgrade all installed packages"
   when: ansible_facts['distribution'] == 'Archlinux'
   become: yes
@@ -8,10 +6,6 @@
     update_cache: yes
     upgrade: yes
 
-# Per-host manifest. The unsuffixed bak/pacman-export.txt is an
-# EndeavourOS X11/i3/LightDM list; installing it on bcpc would drag a
-# second display manager onto a Hyprland box. zshrc writes
-# pacman-export-<hostname>.txt, and this only restores a matching one.
 - name: "Arch: Look for this host's package manifest"
   when: ansible_facts['os_family'] == 'Archlinux'
   stat:
