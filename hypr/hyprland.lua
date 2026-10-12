@@ -1,28 +1,13 @@
--- bcpc -- Hyprland main config.
---
--- CachyOS has no cachyos-hyprland-settings package, so this file is ours rather
--- than an override on a shipped one. Host-specific fragments are require()d at
--- the bottom so they win over anything above.
---
--- Lua rather than hyprlang because upstream deprecated hyprlang in 0.55; every
--- wiki page now leads with that notice. Each require() is its own error scope,
--- so a mistake in one file does not take the whole config down with it.
-
--- --- monitors -------------------------------------------------------------
--- ZOWIE (540Hz, 1080p) on the LEFT, Alienware ultrawide on the RIGHT.
+-- bcpc -- Hyprland main config (Lua; fragments below are required last-wins).
+-- Why allow_tearing, monitor fallback rule: docs/hyprland.md#hyprlandlua
 hl.monitor({ output = "DP-3", mode = "1920x1080@539.56", position = "0x0",    scale = 1 })
 hl.monitor({ output = "DP-1", mode = "3440x1440@179.99", position = "1920x0", scale = 1 })
 
--- Empty output = the fallback, used only when no other rule matches. It does
--- not race the `sunshine` rule in stream.lua the way the equivalent hyprlang
--- line did, because matching is by specificity rather than by file order.
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })
 
--- Bind a workspace to each panel so windows have somewhere predictable to land.
 hl.workspace_rule({ workspace = "1", monitor = "DP-3", default = true })
 hl.workspace_rule({ workspace = "2", monitor = "DP-1", default = true })
 
--- --- session --------------------------------------------------------------
 hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
 hl.env("XDG_SESSION_TYPE", "wayland")
 
@@ -38,34 +23,16 @@ hl.config({
         border_size = 2,
         layout      = "dwindle",
 
-        -- Master switch only. Nothing tears because of this line; it just
-        -- stops Hyprland refusing a client that asks to, which it otherwise
-        -- announces in `hyprctl rollinglog` as
-        --
-        --     Tearing commit requested but the master switch
-        --     general:allow_tearing is off, ignoring
-        --
-        -- The per-window opt-in is the `immediate` rule in gaming.lua, so this
-        -- costs the desktop nothing. Paired with vrr = 0 above on purpose:
-        -- tearing and VRR are two answers to the same question, and a 540Hz
-        -- panel is already the "just show me the newest frame" answer.
         allow_tearing = true,
     },
 })
 
--- --- autostart ------------------------------------------------------------
--- The Lua equivalent of exec-once. hl.exec_cmd spawns asynchronously, so no
--- trailing `& disown` is needed.
 hl.on("hyprland.start", function()
     hl.exec_cmd("/usr/lib/polkit-kde-authentication-agent-1")
     hl.exec_cmd("wl-paste --watch cliphist store")
     hl.exec_cmd("noctalia -d")
 end)
 
--- --- fragments ------------------------------------------------------------
--- Last wins, so these override the defaults above. Paths resolve relative to
--- this file's directory (~/.config/hypr), and Lua's module lookup follows the
--- symlinks install.yml creates.
 require("decoration")   -- blur, dim, shadow, border colour, steam opt-out
 require("animations")   -- curves and timings
 require("bcpc")         -- host input + environment

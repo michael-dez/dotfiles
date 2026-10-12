@@ -79,9 +79,7 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 plugins=(git vi-mode fzf aws kubectl zsh-syntax-highlighting)
 source $ZSH/oh-my-zsh.sh
 
-# Set keymap on X11 only. Under Wayland the compositor owns keyboard layout
-# (Hyprland: input { kb_options = ctrl:nocaps } -- see hypr/hyprland.conf).
-# xorg-xwayland pulls in setxkbmap, so the command test alone is not enough.
+# Keymap on X11 only; the compositor owns it under Wayland. docs/shell.md#zshrc
 [ -z "$WAYLAND_DISPLAY" ] && command -v setxkbmap >/dev/null 2>&1 && \
 setxkbmap -layout us  -option ctrl:nocaps
 
@@ -93,15 +91,11 @@ else
   export DISTRO="unknown"
 fi
 
-# Export package lists on Arch-family distros.
-# Keyed on ID/ID_LIKE rather than NAME: this box reports NAME="EndeavourOS"
-# (not "EndeavourOS Linux"), so the old NAME test never matched and these
-# exports had not run since 2025-08. ID_LIKE=arch also covers CachyOS.
+# Export package lists on Arch-family distros (ID/ID_LIKE, not NAME). docs/shell.md#zshrc
 if [[ "${ID:-}" == "arch" || "${ID_LIKE:-}" == *arch* ]]; then
   pkgs="${DOTFILES:-$HOME/repos/dotfiles}/bak"
-  # Per-host filenames: bcpc and BCLT must not overwrite each other's manifest.
   host="$(uname -n)"
-  # Refresh at most once a day rather than on every single shell startup.
+  # at most once a day
   if [ ! -f "${pkgs}/pacman-export-${host}.txt" ] || \
      [ -n "$(find "${pkgs}/pacman-export-${host}.txt" -mtime +1 2>/dev/null)" ]; then
     pacman -Qqe | grep -Fvx "$(pacman -Qqm)" > "${pkgs}/pacman-export-${host}.txt"
@@ -176,9 +170,5 @@ autoload -Uz bashcompinit && bashcompinit
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# Per-host overrides. The installer decides which per-host file to link here
-# based on os-release ID, so this is a fixed name rather than $(uname -n):
-# WSL-on-bcpc reports uname -n as "BCPC" and CachyOS-on-bcpc as "bcpc", which
-# would differ only by case and collide on a case-insensitive checkout.
-# No-op until the installer links something.
+# Per-host overrides, linked by the installer under a fixed name. docs/shell.md
 [[ ! -f ~/.zshrc.local ]] || source ~/.zshrc.local

@@ -1,44 +1,15 @@
-# Configures WSL Ubuntu, EndeavourOS (BCLT) and CachyOS (bcpc) environments.
-# Install requirements: ansible-galaxy collection install community.general
-#
-# Run with:
-#   ansible-playbook -K install.yml
-#
-# Config only -- skip every package install and verification:
-#   ansible-playbook -K install.yml -e config_only=true
-#
-# config_only drops the package-manager tasks, the brew bootstrap and the root
-# certificate import, leaving the symlinking and the system configuration that
-# depends on it. Nothing left in that path talks to a package manager, so it is
-# the fast way to re-apply dotfiles after editing them. It assumes the packages
-# are already installed: the tasks that enable earlyoom or zram still run, and
-# they will fail on a box that has never had a full run.
+# WSL Ubuntu, EndeavourOS (BCLT), CachyOS (bcpc). Needs: ansible-galaxy collection install community.general
+# Run: ansible-playbook -K install.yml [-e config_only=true]
+# Host markers (not os-release), role order, config_only: docs/ansible.md#installyml
 - hosts: localhost
   connection: local
   become: no
   gather_facts: yes
   vars:
     username: "{{ ansible_user_id }}"
-    # ansible_distribution reports "Archlinux" on every Arch derivative that
-    # ships /etc/arch-release, so it cannot tell the hosts apart. Reading ID
-    # from /etc/os-release does not help either: CachyOS ships Arch's own
-    # os-release verbatim, ID=arch and all, so that check silently skipped
-    # every bcpc task it guarded. The mirrorlist dropped in by the
-    # cachyos-mirrorlist package is present on any CachyOS install and on no
-    # plain Arch or EndeavourOS one, which makes it the honest marker.
     is_cachyos: "{{ '/etc/pacman.d/cachyos-mirrorlist' is exists }}"
-    # BCLT, by the same logic and for the same reason: EndeavourOS also reports
-    # ansible_distribution "Archlinux" and ships Arch's os-release, so the
-    # mirrorlist its own endeavouros-mirrorlist package drops in is the marker
-    # that is present on every EndeavourOS install and on no plain Arch,
-    # CachyOS or WSL one.
     is_eos: "{{ '/etc/pacman.d/endeavouros-mirrorlist' is exists }}"
-    # Overridden with -e config_only=true; extra vars outrank play vars.
     config_only: false
-  # The host roles run before common, not after, because they own their package
-  # managers and common's npm task needs the npm that apt installs on Ubuntu.
-  # Each role's when: applies to every task inside it, which is what retires the
-  # per-task is_cachyos and distribution guards the flat playbook needed.
   roles:
     - role: ubuntu
       when: ansible_facts['distribution'] == 'Ubuntu'
@@ -47,10 +18,5 @@
     - role: bclt
       when: is_eos | bool
     - role: common
-    # Last, and gated on the family rather than on a host: the local LLM front
-    # ends are wanted on both Arch desktops and on neither WSL Ubuntu. It sits
-    # after common because nothing in it is needed by the shared package work,
-    # and because common's full pacman upgrade is the right thing to have run
-    # before podman is installed.
     - role: llm
       when: ansible_facts['os_family'] == 'Archlinux'

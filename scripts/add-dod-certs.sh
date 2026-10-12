@@ -6,32 +6,8 @@
 # For issues or updated versions of this script, browse to the following URL:
 # https://gist.github.com/AfroThundr3007730/ba99753dda66fc4abaf30fb5c0e5d012
 
-# Local changes, which need carrying forward if this is ever refreshed from
-# upstream:
-#
-#   * Idempotent. Upstream unconditionally rewrote every certificate and ran
-#     the trust-store update command on each invocation, which is the slow part
-#     and which made the Ansible task that calls this report a change forever.
-#     Certificates are now staged in the temp directory, normalised, and
-#     compared against what is already installed; only the ones that differ are
-#     written, and the update command runs only if at least one did.
-#
-#     One consequence worth expecting: the first run after this change rewrites
-#     every certificate, because upstream left the "subject=" header line that
-#     `openssl pkcs7 -print_certs` emits inside each .crt and this does not.
-#     The run after that is a no-op.
-#
-#   * Exit status distinguishes the two outcomes, following diff(1):
-#         0  trust store already matched the bundle, nothing written
-#         2  certificates were written and the trust store was updated
-#         1  error
-#
-#   * gawk is invoked by name and checked for up front. The rename step uses
-#     gensub(), which is a gawk extension: on Ubuntu, where the default awk is
-#     mawk, it failed at runtime with the download and the split already done.
-#
-#   * Runs as root and the trust store's writability are checked before the
-#     download rather than discovered after it.
+# Locally modified: idempotent, exit status 0/2/1, gawk and root checks up front.
+# Changes to carry forward on a refresh from upstream: docs/ansible.md#scriptsadd-dod-certssh-local-changes
 
 # Dependencies: cmp gawk openssl unzip wget
 

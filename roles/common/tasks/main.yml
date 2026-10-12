@@ -1,5 +1,4 @@
-# Everything that is not specific to one host: the distro-agnostic package
-# work, and the dotfile symlinking that is the point of this repo.
+# Distro-agnostic packages and dotfile symlinks. docs/ansible.md#rolescommon
 - name: "common: Install packages"
   import_tasks: packages.yml
   when: not (config_only | bool)
