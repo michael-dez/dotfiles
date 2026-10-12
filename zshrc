@@ -151,11 +151,9 @@ alias arec="asciinema rec"
 alias a2gif='sudo docker run --rm -v "${PWD}":/data asciinema/asciicast2gif'
 ## run Microsoft Teams flatpak
 alias teams='flatpak run com.microsoft.Teams'
-## screen brightness, arg=0-1.0 on X11 / 0-100 on Wayland
+## screen brightness, arg=0-1.0 (bcpc overrides with DDC/CI in zshrc.bcpc)
 ## ThinkPad T14 gen1 internal panel via xrandr (X11 only)
 [ -z "$WAYLAND_DISPLAY" ] && alias light='xrandr --output eDP --brightness'
-## desktop monitor over DDC/CI (bcpc)
-[ -n "$WAYLAND_DISPLAY" ] && alias light='ddcutil setvcp 10'
 ## search notes to edit
 alias ze='zk edit -i'
 alias zi='zk index'

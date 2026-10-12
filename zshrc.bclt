@@ -1,4 +1,4 @@
-# BCLT -- per-host shell config, linked to ~/.zshrc.local by install.yml. Counterpart to zshrc.bcpc.
+# BCLT -- per-host shell config, linked to ~/.zshrc.local by install.yml. Counterpart to zshrc.bcpc (iac repo).
 # Host-specific addresses go in untracked ~/.zshrc.private (this repo is published).
 [ -f ~/.zshrc.private ] && . ~/.zshrc.private
 

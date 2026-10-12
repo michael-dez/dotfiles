@@ -1,4 +1,4 @@
-# Arch tasks stay here (shared by bcpc and BCLT); per-host manifest only. docs/ansible.md#rolescommon
+# Arch tasks stay here (shared by bcpc and BCLT; bcpc's own role is in iac); per-host manifest only. docs/ansible.md#rolescommon
 - name: "Arch: Upgrade all installed packages"
   when: ansible_facts['distribution'] == 'Archlinux'
   become: yes
@@ -9,7 +9,7 @@
 - name: "Arch: Look for this host's package manifest"
   when: ansible_facts['os_family'] == 'Archlinux'
   stat:
-    path: "{{ playbook_dir }}/bak/pacman-export-{{ ansible_hostname }}.txt"
+    path: "{{ dotfiles_dir }}/bak/pacman-export-{{ ansible_hostname }}.txt"
   register: pkglist
 
 - name: "Arch: Install from this host's package list"
