@@ -24,6 +24,7 @@ firefox
 fzf
 gamemode
 gamescope
+ghidra
 git
 grim
 hyprland
@@ -93,6 +94,7 @@ wl-clipboard
 wlogout
 wlsunset
 xdg-desktop-portal-hyprland
+xorg-server-xvfb
 yay
 yt-dlp
 zram-generator
