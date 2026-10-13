@@ -1,0 +1,8 @@
+# Portable bash config; source from ~/.bashrc. Why: docs/bash.md
+[[ $- == *i* ]] || return 0
+
+_rc_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+for _rc_f in "$_rc_dir"/bashrc.d/*.sh; do
+  [[ -r $_rc_f ]] && . "$_rc_f"
+done
+unset _rc_dir _rc_f

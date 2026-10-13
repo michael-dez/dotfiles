@@ -13,7 +13,12 @@ map("n", "<leader>x", ":silent !chmod +x %<CR>", silent)
 map("n", "<leader>su", ":SuWrite<CR>", silent)
 map("n", "<leader>xp", ":put =system(getline('.'))<CR>", silent)
 map("n", "<leader>do", ":DiffOrig<CR>", silent)
+
+-- JSON (vim-jsonpath). Paths are dot notation, arrays by index: items.0.name
+-- <leader>jp: show path under cursor and copy it to the clipboard
+-- <leader>jg: prompt for a path and jump to it (or :JsonPath items.0.name)
 map("n", "<leader>jp", ":JsonPath<CR>", silent)
+map("n", "<leader>jg", ":call jsonpath#goto()<CR>", silent)
 
 -- Telescope
 map("n", "<leader>/", ":Telescope<CR>", silent)

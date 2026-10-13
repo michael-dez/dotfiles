@@ -24,6 +24,7 @@ or tooling to the repo; keep diagnostics in the scratchpad.
 | [docs/ansible.md](docs/ansible.md) | `install.yml`, roles, cert script |
 | [docs/shell.md](docs/shell.md) | zshrc and per-host files |
 | [docs/i3.md](docs/i3.md) | i3 passthrough mode (BCLT) |
+| [docs/bash.md](docs/bash.md) | portable `bash/` config (az, terraform, packer, git-bash) |
 
 Upstream-derived files (`i3/config`, `i3/scripts/`, `picom/picom.conf`, `p10k.zsh`,
 `xfce4/terminal/accels.scm`) keep their original comments.
