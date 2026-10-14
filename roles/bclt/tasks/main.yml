@@ -6,3 +6,25 @@
     dest: "{{ ansible_env.HOME }}/.zshrc.local"
     state: link
     force: yes
+
+# kitty is BCLT's default terminal, bound in i3/config. kitty.conf and
+# colors.conf are the same files bcpc links; host.conf is the per-host override
+# kitty.conf includes, which on BCLT fixes the font family name.
+- name: "BCLT: Create kitty config directory"
+  become: no
+  file:
+    path: "{{ ansible_env.HOME }}/.config/kitty"
+    state: directory
+    mode: '0755'
+
+- name: "BCLT: Symlink kitty config"
+  become: no
+  file:
+    src: "{{ playbook_dir }}/{{ item.src }}"
+    dest: "{{ ansible_env.HOME }}/.config/{{ item.dest }}"
+    state: link
+    force: yes
+  with_items:
+    - { src: "kitty/kitty.conf", dest: "kitty/kitty.conf" }
+    - { src: "kitty/colors.conf", dest: "kitty/colors.conf" }
+    - { src: "kitty/bclt.conf", dest: "kitty/host.conf" }

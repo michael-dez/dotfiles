@@ -159,6 +159,18 @@ alias ze='zk edit -i'
 alias zi='zk index'
 alias cdz='cd ~/repos/slipbox'
 
+# functions
+## ssh port forward: pf <host> <remote_port> [local_port], Ctrl-C to stop.
+## Remote side is the remote's own localhost; pass host:port to reach a third
+## host from there, e.g. pf jump db.internal:5432 5432
+pf() {
+  [[ $# -ge 2 ]] || { print -u2 "usage: pf <host> <remote_port|remote_host:port> [local_port]"; return 1; }
+  local remote=$2 lport=$3
+  [[ $remote == *:* ]] || remote="localhost:$remote"
+  ssh -N -o ExitOnForwardFailure=yes -L "${lport:-${remote##*:}}:${remote}" "$1"
+}
+compdef pf=ssh  # host completion on the first arg
+
 # completion
 ## qmk completion if qmk_firmware repo exists
 [ -d /home/mike/repos/qmk_firmware ] && \
