@@ -18,11 +18,15 @@ _pick() {
   fi
 }
 
+# History kept for turning into scripts: deduped, timestamped, written every prompt. Why: docs/bash.md#history
 HISTCONTROL=ignoreboth
 HISTSIZE=50000
 HISTFILESIZE=100000
-HISTTIMEFORMAT='%F %T '
-shopt -s histappend checkwinsize cmdhist globstar
+HISTTIMEFORMAT='%FT%TZ '
+shopt -s histappend checkwinsize cmdhist lithist globstar
+[[ $PROMPT_COMMAND == *'history -a'* ]] || PROMPT_COMMAND="history -a${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+history() { TZ=UTC builtin history "$@"; }
+set -o vi
 
 : "${EDITOR:=vi}"
 export EDITOR
@@ -32,3 +36,4 @@ alias ll='ls -lh'
 alias la='ls -lah'
 alias ..='cd ..'
 alias grep='grep --color=auto'
+alias sbashrc='. ~/.bashrc'

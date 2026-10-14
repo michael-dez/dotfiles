@@ -18,6 +18,21 @@ tool isn't on `PATH`, so the same directory works on every machine.
 it returns a lone line directly, uses fzf when present, and falls back to a numbered
 `select` menu.
 
+Vi line editing (`set -o vi`; `v` in command mode opens `$EDITOR`). `sbashrc` re-sources
+`~/.bashrc`, like `szshrc`.
+
+## history
+
+Set up for turning sessions into scripts later.
+
+- `ignoreboth`: drops consecutive duplicates only, so the order of commands survives.
+  `erasedups` would delete earlier copies and break the sequence. A command with a
+  leading space isn't saved, which keeps secrets out.
+- `history -a` runs at every prompt, so a dropped SSH session doesn't lose its history.
+- `lithist` keeps multi-line commands as written.
+- The file stores epoch timestamps. The `history` wrapper shows them in UTC
+  (`%FT%TZ`), whatever the machine's timezone is.
+
 ## az
 
 | command | does |
