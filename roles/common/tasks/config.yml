@@ -26,6 +26,22 @@
     - xfce4/terminal
     - xfce4/xfconf/xfce-perchannel-xml
 
+# The when: skips any item whose destination directory already resolves to
+# the source's directory -- which happens when an ancestor of dest is itself a
+# symlink into this repo. BCLT has exactly that: ~/.config/xfce4 is a directory
+# link to the repo's xfce4/, left by the retired install.sh. Through it, dest
+# and src are the same path, and force: yes replaced each repo file with a
+# symlink to itself, destroying the working-tree copy. Skipping is the correct
+# outcome, not a silent failure: the file at dest already IS the repo file.
+#
+# The directory link is also worth keeping where it exists. xfconf and GTK
+# save by writing a temp file and renaming it over the target, which replaces
+# a per-file symlink with a regular file and silently detaches it from the
+# repo. A rename inside a linked directory lands in the repo, so edits made
+# from the xfce4-terminal and Thunar settings dialogs show up in git status.
+#
+# realpath is a filter, evaluated where the playbook runs; with a local
+# connection that is the host being configured.
 - name: "Create symlinks for XDG config files"
   become: no
   file:
@@ -33,6 +49,9 @@
     dest: "{{ ansible_env.HOME }}/.config/{{ item.dest }}"
     state: link
     force: yes
+  when: >-
+    (ansible_facts['env']['HOME'] ~ '/.config/' ~ item.dest) | dirname | realpath
+    != (playbook_dir ~ '/' ~ item.src) | dirname | realpath
   with_items:
     - { src: "nvim/init.lua", dest: "nvim/init.lua" }
     - { src: "nvim/lua", dest: "nvim/lua" }

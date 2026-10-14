@@ -20,12 +20,16 @@ gtk-engine-murrine-debug
 gtk2
 gtkmm
 http-parser
+jupyter-nbclassic
 kind-debug
 libsidplay
 libtermkey
 libvisual
 libvisual-debug
+libwpe
 litehtml0.9
+litehtml0.9-debug
+mathjax2
 mkinitcpio-openswap
 neofetch
 nitrogen
@@ -33,6 +37,8 @@ openvpn-update-resolv-conf-git
 python-async_generator
 python-backcall
 python-ipython-genutils
+python-pkg_resources
+python-pyotherside
 python-pyrsistent-debug
 python-y-py
 python-ypy-websocket
@@ -44,6 +50,7 @@ t1lib
 unetbootin
 vagrant
 vagrant-debug
+wpebackend-fdo
 xf86-video-vmware
 xf86-video-vmware-debug
 yubikey-manager-qt
