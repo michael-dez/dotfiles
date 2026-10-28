@@ -26,12 +26,14 @@ gamemode
 gamescope
 ghidra
 git
+github-cli
 grim
 hyprland
 hyprlock
 hyprpaper
 intel-ucode
 jq
+k9s
 kitty
 kubectl
 lib32-gamemode
@@ -50,6 +52,7 @@ mkinitcpio
 nano
 neovim
 networkmanager
+nfs-utils
 noctalia
 npm
 nvidia-open-dkms
@@ -73,6 +76,7 @@ rsync
 sddm
 shellcheck
 slurp
+smartmontools
 snap-pac
 snapper
 solaar

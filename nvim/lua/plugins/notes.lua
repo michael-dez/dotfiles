@@ -1,7 +1,7 @@
 return {
   {
     "iamcco/markdown-preview.nvim",
-    build = "cd app && yarn install",
+    build = "cd app && ./install.sh",
     ft = { "markdown" },
     init = function() require("pluginconfig.markdown-preview") end,
   },
