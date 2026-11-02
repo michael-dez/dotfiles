@@ -64,7 +64,7 @@ is case-sensitive.
 
 ## git
 
-Same alias names as `zshrc` (`gs`, `ga`, `gc`, `ghm`) plus `gd`, `gco`, `gl`.
+Same alias names as `zshrc` (`gs`, `ga`, `gc`, `ghm`) plus `gd`, `gco`, `gsw`, `gswc`, `gl`.
 
 ## terraform
 
