@@ -21,6 +21,13 @@ it returns a lone line directly, uses fzf when present, and falls back to a numb
 Vi line editing (`set -o vi`; `v` in command mode opens `$EDITOR`). `sbashrc` re-sources
 `~/.bashrc`, like `szshrc`.
 
+## prompt
+
+`PS1` is set here, after `/etc/bashrc`, so it replaces the system prompt (RHEL's
+`[user@host dir]$`). It shows the working directory with `PROMPT_DIRTRIM=3`
+(`~/.../a/b/c`) and the git branch, or the short commit hash when HEAD is detached.
+Outside a repo, or without git, the branch part is empty.
+
 ## history
 
 Set up for turning sessions into scripts later.
@@ -31,9 +38,6 @@ Set up for turning sessions into scripts later.
 - `history -a` runs at every prompt, so a dropped SSH session doesn't lose its history.
   It is appended to `PROMPT_COMMAND` (a new element if the system made it an array), so
   the system's prompt code runs first with the real `$?` and is never replaced.
-- RHEL's `/etc/bashrc` sets `PROMPT_COMMAND` to a `printf` that writes `user@host:dir` to
-  the terminal title at every prompt, which overwrites any title you set. It is
-  cleared before `history -a` is added.
 - `lithist` keeps multi-line commands as written.
 - The file stores epoch timestamps. The `history` wrapper shows them in UTC
   (`%FT%TZ`), whatever the machine's timezone is.
