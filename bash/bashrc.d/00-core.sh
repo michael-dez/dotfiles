@@ -24,8 +24,6 @@ HISTSIZE=50000
 HISTFILESIZE=100000
 HISTTIMEFORMAT='%FT%TZ '
 shopt -s histappend checkwinsize cmdhist lithist globstar
-# Drop the RHEL /etc/bashrc title printf. Why: docs/bash.md#history
-[[ $PROMPT_COMMAND == *'%s@%s:%s'* ]] && PROMPT_COMMAND=
 case $(declare -p PROMPT_COMMAND 2>/dev/null) in
   *'history -a'*) ;;
   'declare -a'*) PROMPT_COMMAND+=('history -a') ;;
@@ -33,6 +31,15 @@ case $(declare -p PROMPT_COMMAND 2>/dev/null) in
 esac
 history() { TZ=UTC builtin history "$@"; }
 set -o vi
+
+# Prompt: last 3 dirs of pwd, git branch. Why: docs/bash.md#prompt
+PROMPT_DIRTRIM=3
+_ps1_branch() {
+  local b
+  b=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null) || return 0
+  printf ' (%s)' "$b"
+}
+PS1='\[\e[36m\]\w\[\e[35m\]$(_ps1_branch)\[\e[0m\]\$ '
 
 : "${EDITOR:=vi}"
 export EDITOR
