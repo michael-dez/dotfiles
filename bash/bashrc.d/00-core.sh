@@ -24,6 +24,8 @@ HISTSIZE=50000
 HISTFILESIZE=100000
 HISTTIMEFORMAT='%FT%TZ '
 shopt -s histappend checkwinsize cmdhist lithist globstar
+# Drop the RHEL /etc/bashrc title printf. Why: docs/bash.md#history
+[[ $PROMPT_COMMAND == *'%s@%s:%s'* ]] && PROMPT_COMMAND=
 case $(declare -p PROMPT_COMMAND 2>/dev/null) in
   *'history -a'*) ;;
   'declare -a'*) PROMPT_COMMAND+=('history -a') ;;

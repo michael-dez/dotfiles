@@ -31,6 +31,9 @@ Set up for turning sessions into scripts later.
 - `history -a` runs at every prompt, so a dropped SSH session doesn't lose its history.
   It is appended to `PROMPT_COMMAND` (a new element if the system made it an array), so
   the system's prompt code runs first with the real `$?` and is never replaced.
+- RHEL's `/etc/bashrc` sets `PROMPT_COMMAND` to a `printf` that writes `user@host:dir` to
+  the terminal title at every prompt, which overwrites any title you set. It is
+  cleared before `history -a` is added.
 - `lithist` keeps multi-line commands as written.
 - The file stores epoch timestamps. The `history` wrapper shows them in UTC
   (`%FT%TZ`), whatever the machine's timezone is.
