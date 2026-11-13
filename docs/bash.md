@@ -29,6 +29,8 @@ Set up for turning sessions into scripts later.
   `erasedups` would delete earlier copies and break the sequence. A command with a
   leading space isn't saved, which keeps secrets out.
 - `history -a` runs at every prompt, so a dropped SSH session doesn't lose its history.
+  It is appended to `PROMPT_COMMAND` (a new element if the system made it an array), so
+  the system's prompt code runs first with the real `$?` and is never replaced.
 - `lithist` keeps multi-line commands as written.
 - The file stores epoch timestamps. The `history` wrapper shows them in UTC
   (`%FT%TZ`), whatever the machine's timezone is.
