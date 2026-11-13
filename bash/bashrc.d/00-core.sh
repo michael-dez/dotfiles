@@ -24,7 +24,11 @@ HISTSIZE=50000
 HISTFILESIZE=100000
 HISTTIMEFORMAT='%FT%TZ '
 shopt -s histappend checkwinsize cmdhist lithist globstar
-[[ $PROMPT_COMMAND == *'history -a'* ]] || PROMPT_COMMAND="history -a${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+case $(declare -p PROMPT_COMMAND 2>/dev/null) in
+  *'history -a'*) ;;
+  'declare -a'*) PROMPT_COMMAND+=('history -a') ;;
+  *) PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND; }history -a" ;;
+esac
 history() { TZ=UTC builtin history "$@"; }
 set -o vi
 
