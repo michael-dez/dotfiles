@@ -1,0 +1,48 @@
+" No plugins, no network. Vim 7.4+.
+" Why: docs/bash.md#vim
+
+set nocompatible
+syntax on
+filetype plugin indent on
+
+set number relativenumber
+set autoindent expandtab smarttab shiftround
+set tabstop=4 shiftwidth=4 softtabstop=4
+set linebreak scrolloff=10
+set backspace=indent,eol,start
+set incsearch hlsearch ignorecase smartcase
+set wildmenu path+=**
+set hidden laststatus=2 ruler showcmd
+set encoding=utf-8
+
+if has('persistent_undo')
+  let s:undo = expand('~/.vim/undodir')
+  if !isdirectory(s:undo) | call mkdir(s:undo, 'p', 0700) | endif
+  let &undodir = s:undo
+  set undofile
+endif
+
+let g:netrw_banner = 0
+
+augroup vimrc
+  autocmd!
+  autocmd FileType yaml setlocal ts=2 sts=2 sw=2 foldmethod=indent foldlevel=99
+  autocmd FileType markdown setlocal textwidth=0 wrap
+augroup END
+
+let mapleader = " "
+nnoremap <leader>f :find<Space>
+nnoremap <leader>e :Explore<CR>
+nnoremap <leader><CR> :source $MYVIMRC<CR>
+nnoremap <leader>x :silent !chmod +x %<CR>:redraw!<CR>
+nnoremap <leader>h :wincmd h<CR>
+nnoremap <leader>j :wincmd j<CR>
+nnoremap <leader>k :wincmd k<CR>
+nnoremap <leader>l :wincmd l<CR>
+nnoremap <leader>p :wincmd p<CR>
+nnoremap <leader>wk :split<CR>
+nnoremap <leader>wl :vsplit<CR>
+nnoremap <leader>/ :nohlsearch<CR>
+if has('terminal')
+  nnoremap <leader>t :terminal ++rows=10<CR>
+endif

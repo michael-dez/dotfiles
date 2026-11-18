@@ -87,3 +87,13 @@ one. `TF_PLUGIN_CACHE_DIR` defaults to `~/.terraform.d/plugin-cache`.
 
 `pk` alias with completion. `pki`, `pkv` (fmt + validate), `pkb` (build with
 timestamps) act on the current directory; arguments are passed before the `.`.
+
+## vim
+
+`vimrc` is the main `vimrc` minus plugins, for machines that can't reach GitHub. It needs
+nothing outside a stock vim 7.4+ (RHEL 7 and later): no vim-plug, curl or python.
+Install with `ln -s ~/bash/vimrc ~/.vimrc`.
+
+Plugin replacements: `<leader>f` is `:find` with `path+=**` in place of ctrlp, `<leader>e`
+opens netrw. Undo history persists in `~/.vim/undodir`, created on first start.
+`:terminal` is mapped only when vim was built with it.
