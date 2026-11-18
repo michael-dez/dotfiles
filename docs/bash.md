@@ -18,7 +18,9 @@ tool isn't on `PATH`, so the same directory works on every machine.
 it returns a lone line directly, uses fzf when present, and falls back to a numbered
 `select` menu.
 
-Vi line editing (`set -o vi`; `v` in command mode opens `$EDITOR`). `sbashrc` re-sources
+Vi line editing (`set -o vi`; `v` in command mode opens `$EDITOR`). Insert mode also binds
+^A, ^E, ^K and ^L as in emacs mode; vi insert leaves them unbound (they insert the literal
+character), so nothing is shadowed. `sbashrc` re-sources
 `~/.bashrc`, like `szshrc`.
 
 ## prompt
