@@ -31,6 +31,11 @@ case $(declare -p PROMPT_COMMAND 2>/dev/null) in
 esac
 history() { TZ=UTC builtin history "$@"; }
 set -o vi
+# Emacs keys in vi insert mode. Why: docs/bash.md#core
+bind -m vi-insert '"\C-a": beginning-of-line'
+bind -m vi-insert '"\C-e": end-of-line'
+bind -m vi-insert '"\C-k": kill-line'
+bind -m vi-insert '"\C-l": clear-screen'
 
 # Prompt: last 3 dirs of pwd, git branch. Why: docs/bash.md#prompt
 PROMPT_DIRTRIM=3
