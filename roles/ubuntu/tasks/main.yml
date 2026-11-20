@@ -1,4 +1,4 @@
-# WSL Ubuntu work box. Certs are behind config_only. docs/ansible.md#rolesubuntu
+# WSL Ubuntu work box. Certs are behind config_only.
 - name: "Ubuntu: Install packages"
   import_tasks: packages.yml
   when: not (config_only | bool)

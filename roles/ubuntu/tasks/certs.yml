@@ -1,4 +1,4 @@
-# DoD roots. add-dod-certs.sh is idempotent: rc 0 unchanged, 2 rebuilt. docs/ansible.md#rolesubuntu
+# DoD roots. add-dod-certs.sh is idempotent: rc 0 unchanged, 2 rebuilt.
 - name: "Ubuntu: Import DoD root certificates into the system trust store"
   become: yes
   command: "{{ playbook_dir }}/scripts/add-dod-certs.sh"

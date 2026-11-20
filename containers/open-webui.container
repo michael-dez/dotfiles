@@ -1,6 +1,6 @@
 # bcpc / BCLT -- Open WebUI, local, loopback only.  ->  ~/.config/containers/systemd/open-webui.container
 # Start on demand: systemctl --user start open-webui. No [Install] on purpose.
-# Why (Network=host, HOST, oom-score-adj, no WEBUI_AUTH=False): docs/llm.md#containers
+# Network=host with HOST pinned to loopback; oom-score-adj for earlyoom; never WEBUI_AUTH=False.
 
 [Unit]
 Description=Open WebUI (localhost only, backed by the local ollama)

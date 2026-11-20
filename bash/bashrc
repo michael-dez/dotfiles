@@ -1,4 +1,4 @@
-# Portable bash config; source from ~/.bashrc. Why: docs/bash.md
+# Portable bash config; source from ~/.bashrc.
 [[ $- == *i* ]] || return 0
 
 _rc_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)

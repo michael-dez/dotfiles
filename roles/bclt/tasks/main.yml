@@ -1,4 +1,4 @@
-# BCLT (EndeavourOS): host-only things. docs/ansible.md#rolesbclt
+# BCLT (EndeavourOS): host-only things.
 - name: "BCLT: Symlink per-host shell config"
   become: no
   file:

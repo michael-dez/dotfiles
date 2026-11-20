@@ -1,6 +1,5 @@
 # WSL Ubuntu, EndeavourOS (BCLT), CachyOS (bcpc; its host role is in the iac repo). Needs: ansible-galaxy collection install community.general
 # Run: ansible-playbook -K install.yml [-e config_only=true]
-# Host markers (not os-release), role order, config_only: docs/ansible.md#installyml
 - hosts: localhost
   connection: local
   become: no

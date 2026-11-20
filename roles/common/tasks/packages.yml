@@ -1,4 +1,4 @@
-# Arch tasks stay here (shared by bcpc and BCLT; bcpc's own role is in iac); per-host manifest only. docs/ansible.md#rolescommon
+# Arch tasks stay here (shared by bcpc and BCLT; bcpc's own role is in iac); per-host manifest only.
 - name: "Arch: Upgrade all installed packages"
   when: ansible_facts['distribution'] == 'Archlinux'
   become: yes

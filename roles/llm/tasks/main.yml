@@ -1,5 +1,4 @@
 # Open WebUI + Langflow as rootless podman quadlets (Arch family only).
-# Design: docs/llm.md#design
 - name: "llm: Install packages"
   import_tasks: packages.yml
   when: not (config_only | bool)

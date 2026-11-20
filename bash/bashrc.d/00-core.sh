@@ -1,4 +1,4 @@
-# Shared helpers and defaults. Why: docs/bash.md#core
+# Shared helpers and defaults.
 _have() { command -v "$1" >/dev/null 2>&1; }
 
 # Pick one line from stdin: fzf if present, else a numbered menu.
@@ -18,7 +18,7 @@ _pick() {
   fi
 }
 
-# History kept for turning into scripts: deduped, timestamped, written every prompt. Why: docs/bash.md#history
+# History kept for turning into scripts: deduped, timestamped, written every prompt.
 HISTCONTROL=ignoreboth
 HISTSIZE=50000
 HISTFILESIZE=100000
@@ -31,13 +31,13 @@ case $(declare -p PROMPT_COMMAND 2>/dev/null) in
 esac
 history() { TZ=UTC builtin history "$@"; }
 set -o vi
-# Emacs keys in vi insert mode. Why: docs/bash.md#core
+# Emacs keys in vi insert mode.
 bind -m vi-insert '"\C-a": beginning-of-line'
 bind -m vi-insert '"\C-e": end-of-line'
 bind -m vi-insert '"\C-k": kill-line'
 bind -m vi-insert '"\C-l": clear-screen'
 
-# Prompt: last 3 dirs of pwd, git branch. Why: docs/bash.md#prompt
+# Prompt: last 3 dirs of pwd, git branch.
 PROMPT_DIRTRIM=3
 _ps1_branch() {
   local b

@@ -1,4 +1,4 @@
-# Dotfile symlinks via dotfiles_dir (not PWD or playbook_dir). docs/ansible.md#rolescommon
+# Dotfile symlinks via dotfiles_dir (not PWD or playbook_dir).
 - name: "Create symlinks for home directory dotfiles"
   become: no
   file:

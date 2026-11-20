@@ -1,12 +1,12 @@
-# az helpers; skipped without az. Why: docs/bash.md#az
+# az helpers; skipped without az.
 _have az || return 0
 
-# git-bash rewrites /subscriptions/... args into Windows paths. Why: docs/bash.md#git-bash
+# git-bash rewrites /subscriptions/... args into Windows paths.
 if [[ $OSTYPE == msys* || $OSTYPE == cygwin* ]]; then
   az() { MSYS_NO_PATHCONV=1 command az "$@"; }
 fi
 
-# tsv for capture; strips the CR that az emits on Windows. Why: docs/bash.md#git-bash
+# tsv for capture; strips the CR that az emits on Windows.
 _az_tsv() { az "$@" -o tsv | tr -d '\r'; }
 
 # Keep the header rows, filter the rest by case-insensitive regex.

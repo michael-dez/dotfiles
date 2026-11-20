@@ -174,7 +174,7 @@ bindcode $mod+Shift+90 	 move container to workspace  $ws10
 # passthrough mode, for Moonlight streams #
 ##########################################
 
-# Leave with Mod4+Escape; i3 grabs nothing in this mode, so keys reach Moonlight. Why: docs/i3.md
+# Leave with Mod4+Escape; i3 grabs nothing in this mode, so keys reach Moonlight.
 mode "passthrough" {
         bindsym Mod4+Escape mode "default"
 }

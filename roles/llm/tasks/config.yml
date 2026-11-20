@@ -1,5 +1,4 @@
 # Quadlet symlinks, generator read-back assertion (ExecStart, not Environment), image pre-pull.
-# Why: docs/llm.md#rolesllm-ansible
 - name: "llm: Create the quadlet and data directories"
   become: no
   file:

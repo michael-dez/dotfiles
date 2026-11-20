@@ -1,6 +1,6 @@
 # bcpc / BCLT -- Langflow, local, loopback only.  ->  ~/.config/containers/systemd/langflow.container
 # Start on demand: systemctl --user start langflow. No [Install] on purpose.
-# Same shape as open-webui.container. Why: docs/llm.md#containers
+# Same shape as open-webui.container.
 
 [Unit]
 Description=Langflow (localhost only, backed by the local ollama)

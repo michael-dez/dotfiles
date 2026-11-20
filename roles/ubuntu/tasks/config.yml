@@ -1,4 +1,4 @@
-# brew on bash PATH only; no zshrc task (it would write through the symlink). docs/ansible.md#rolesubuntu
+# brew on bash PATH only; no zshrc task (it would write through the symlink).
 - name: "Ubuntu: Add brew to PATH for bash"
   become: no
   lineinfile:

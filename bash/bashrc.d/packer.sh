@@ -1,4 +1,4 @@
-# packer shortcuts; all act on the current directory. Why: docs/bash.md#packer
+# packer shortcuts; all act on the current directory.
 _have packer || return 0
 
 alias pk=packer

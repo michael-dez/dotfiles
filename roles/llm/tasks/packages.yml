@@ -1,4 +1,4 @@
-# Rootless podman; subuid/subgid delegation. Why: docs/llm.md#rolesllm-ansible
+# Rootless podman; subuid/subgid delegation.
 - name: "llm: Install podman"
   become: yes
   package:

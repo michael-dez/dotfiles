@@ -7,7 +7,6 @@
 # https://gist.github.com/AfroThundr3007730/ba99753dda66fc4abaf30fb5c0e5d012
 
 # Locally modified: idempotent, exit status 0/2/1, gawk and root checks up front.
-# Changes to carry forward on a refresh from upstream: docs/ansible.md#scriptsadd-dod-certssh-local-changes
 
 # Dependencies: cmp gawk openssl unzip wget
 

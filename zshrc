@@ -79,7 +79,7 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 plugins=(git vi-mode fzf aws kubectl zsh-syntax-highlighting)
 source $ZSH/oh-my-zsh.sh
 
-# Keymap on X11 only; the compositor owns it under Wayland. docs/shell.md#zshrc
+# Keymap on X11 only; the compositor owns it under Wayland.
 [ -z "$WAYLAND_DISPLAY" ] && command -v setxkbmap >/dev/null 2>&1 && \
 setxkbmap -layout us  -option ctrl:nocaps
 
@@ -91,7 +91,7 @@ else
   export DISTRO="unknown"
 fi
 
-# Export package lists on Arch-family distros (ID/ID_LIKE, not NAME). docs/shell.md#zshrc
+# Export package lists on Arch-family distros (ID/ID_LIKE, not NAME).
 if [[ "${ID:-}" == "arch" || "${ID_LIKE:-}" == *arch* ]]; then
   pkgs="${DOTFILES:-$HOME/repos/dotfiles}/bak"
   host="$(uname -n)"
@@ -180,5 +180,5 @@ autoload -Uz bashcompinit && bashcompinit
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# Per-host overrides, linked by the installer under a fixed name. docs/shell.md
+# Per-host overrides, linked by the installer under a fixed name.
 [[ ! -f ~/.zshrc.local ]] || source ~/.zshrc.local

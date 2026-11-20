@@ -1,4 +1,4 @@
-# terraform shortcuts. Why: docs/bash.md#terraform
+# terraform shortcuts.
 _have terraform || return 0
 
 alias tf=terraform

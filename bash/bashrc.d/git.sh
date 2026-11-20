@@ -1,4 +1,4 @@
-# git aliases, same names as zshrc. Why: docs/bash.md#git
+# git aliases, same names as zshrc.
 _have git || return 0
 
 alias gs='git status'

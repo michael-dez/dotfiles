@@ -1,4 +1,4 @@
-# Distro-agnostic packages and dotfile symlinks. docs/ansible.md#rolescommon
+# Distro-agnostic packages and dotfile symlinks.
 - name: "common: Install packages"
   import_tasks: packages.yml
   when: not (config_only | bool)

@@ -2,5 +2,5 @@
 # Host-specific addresses go in untracked ~/.zshrc.private (this repo is published).
 [ -f ~/.zshrc.private ] && . ~/.zshrc.private
 
-# Put bcpc's ollama on this host's 127.0.0.1:11434. Why: docs/llm.md#bclt-forward
+# Put bcpc's ollama on this host's 127.0.0.1:11434.
 alias ollama-forward='ssh -N -L 11434:127.0.0.1:11434 ${BCPC_SSH_HOST:-bcpc}'
